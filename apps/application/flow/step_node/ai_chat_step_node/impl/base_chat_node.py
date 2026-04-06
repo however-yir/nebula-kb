@@ -1,0 +1,520 @@
+# coding=utf-8
+"""
+    @project: lzkb
+    @Author：虎
+    @file： base_question_node.py
+    @date：2024/6/4 14:30
+    @desc:
+"""
+import json
+import re
+import time
+import uuid
+from functools import reduce
+from typing import List, Dict
+
+import uuid_utils.compat as uuid
+from django.db.models import QuerySet, OuterRef, Subquery
+from django.utils.translation import gettext as _
+from langchain_core.messages import BaseMessage, AIMessage, HumanMessage, SystemMessage
+from langchain_core.tools import StructuredTool
+from pydantic import Field, create_model
+
+from application.flow.common import Workflow, WorkflowMode
+from application.flow.i_step_node import NodeResult, INode, ToolWorkflowPostHandler
+from application.flow.step_node.ai_chat_step_node.i_chat_node import IChatNode
+from application.flow.tools import Reasoning, mcp_response_generator
+from application.models import Application, ApplicationApiKey, ApplicationAccessToken
+from application.serializers.common import ToolExecute
+from common.exception.app_exception import AppApiException
+from common.utils.rsa_util import rsa_long_decrypt
+from common.utils.shared_resource_auth import filter_authorized_ids
+from common.utils.tool_code import ToolExecutor
+from models_provider.models import Model
+from models_provider.tools import get_model_credential, get_model_instance_by_model_workspace_id
+from tools.models import Tool, ToolWorkflowVersion, ToolType
+
+
+def build_schema(fields: dict):
+    return create_model("dynamicSchema", **fields)
+
+
+def get_type(_type: str):
+    if _type == 'float':
+        return float
+    if _type == 'string':
+        return str
+    if _type == 'int':
+        return int
+    if _type == 'dict':
+        return dict
+    if _type == 'array':
+        return list
+    if _type == 'boolean':
+        return bool
+    return object
+
+
+def get_workflow_args(tool, qv):
+    for node in qv.work_flow.get('nodes'):
+        if node.get('type') == 'tool-base-node':
+            input_field_list = node.get('properties').get('user_input_field_list')
+            return build_schema(
+                {field.get('field'): (get_type(field.get('type')), Field(..., description=field.get('desc')))
+                 for field in input_field_list})
+
+    return build_schema({})
+
+
+def get_workflow_func(node, tool, qv, workspace_id):
+    tool_id = tool.id
+    tool_record_id = str(uuid.uuid7())
+    took_execute = ToolExecute(tool_id, tool_record_id,
+                               workspace_id,
+                               node.workflow_manage.get_source_type(),
+                               node.workflow_manage.get_source_id(),
+                               False)
+
+    def inner(**kwargs):
+        from application.flow.tool_workflow_manage import ToolWorkflowManage
+        work_flow_manage = ToolWorkflowManage(
+            Workflow.new_instance(qv.work_flow, WorkflowMode.TOOL),
+            {
+                'chat_record_id': tool_record_id,
+                'tool_id': tool_id,
+                'stream': True,
+                'workspace_id': workspace_id,
+                **kwargs},
+
+            ToolWorkflowPostHandler(took_execute, tool_id),
+            is_the_task_interrupted=lambda: False,
+            child_node=None,
+            start_node_id=None,
+            start_node_data=None,
+            chat_record=None
+        )
+        res = work_flow_manage.run()
+        for r in res:
+            pass
+        return work_flow_manage.out_context
+
+    return inner
+
+
+def get_tools(node, tool_workflow_ids, workspace_id):
+    tools = QuerySet(Tool).filter(id__in=tool_workflow_ids, tool_type=ToolType.WORKFLOW, workspace_id=workspace_id)
+    latest_subquery = ToolWorkflowVersion.objects.filter(
+        tool_id=OuterRef('tool_id')
+    ).order_by('-create_time')
+
+    qs = ToolWorkflowVersion.objects.filter(
+        tool_id__in=[t.id for t in tools],
+        id=Subquery(latest_subquery.values('id')[:1])
+    )
+    qd = {q.tool_id: q for q in qs}
+    results = []
+    for tool in tools:
+        qv = qd.get(tool.id)
+        func = get_workflow_func(node, tool, qv, workspace_id)
+        args = get_workflow_args(tool, qv)
+        tool = StructuredTool.from_function(
+            func=func,
+            name=tool.name,
+            description=tool.desc,
+            args_schema=args,
+        )
+        results.append(tool)
+
+    return results
+
+
+def _write_context(node_variable: Dict, workflow_variable: Dict, node: INode, workflow, answer: str,
+                   reasoning_content: str):
+    chat_model = node_variable.get('chat_model')
+    message_tokens = chat_model.get_num_tokens_from_messages(node_variable.get('message_list'))
+    answer_tokens = chat_model.get_num_tokens(answer)
+    node.context['message_tokens'] = message_tokens
+    node.context['answer_tokens'] = answer_tokens
+    node.context['answer'] = answer
+    node.context['question'] = node_variable['question']
+    node.context['run_time'] = time.time() - node.context['start_time']
+    node.context['reasoning_content'] = reasoning_content
+    if workflow.is_result(node, NodeResult(node_variable, workflow_variable)):
+        node.answer_text = answer
+
+
+def write_context_stream(node_variable: Dict, workflow_variable: Dict, node: INode, workflow):
+    """
+    写入上下文数据 (流式)
+    @param node_variable:      节点数据
+    @param workflow_variable:  全局数据
+    @param node:               节点
+    @param workflow:           工作流管理器
+    """
+    response = node_variable.get('result')
+    answer = ''
+    reasoning_content = ''
+    model_setting = node.context.get('model_setting',
+                                     {'reasoning_content_enable': False, 'reasoning_content_end': '</think>',
+                                      'reasoning_content_start': '<think>'})
+    reasoning = Reasoning(model_setting.get('reasoning_content_start', '<think>'),
+                          model_setting.get('reasoning_content_end', '</think>'))
+    response_reasoning_content = False
+
+    for chunk in response:
+        if workflow.is_the_task_interrupted():
+            break
+        reasoning_chunk = reasoning.get_reasoning_content(chunk)
+        content_chunk = reasoning_chunk.get('content')
+        if 'reasoning_content' in chunk.additional_kwargs:
+            response_reasoning_content = True
+            reasoning_content_chunk = chunk.additional_kwargs.get('reasoning_content', '')
+        else:
+            reasoning_content_chunk = reasoning_chunk.get('reasoning_content')
+        answer += content_chunk
+        if reasoning_content_chunk is None:
+            reasoning_content_chunk = ''
+        reasoning_content += reasoning_content_chunk
+        yield {'content': content_chunk,
+               'reasoning_content': reasoning_content_chunk if model_setting.get('reasoning_content_enable',
+                                                                                 False) else ''}
+
+    reasoning_chunk = reasoning.get_end_reasoning_content()
+    answer += reasoning_chunk.get('content')
+    reasoning_content_chunk = ""
+    if not response_reasoning_content:
+        reasoning_content_chunk = reasoning_chunk.get(
+            'reasoning_content')
+    yield {'content': reasoning_chunk.get('content'),
+           'reasoning_content': reasoning_content_chunk if model_setting.get('reasoning_content_enable',
+                                                                             False) else ''}
+    _write_context(node_variable, workflow_variable, node, workflow, answer, reasoning_content)
+
+
+def write_context(node_variable: Dict, workflow_variable: Dict, node: INode, workflow):
+    """
+    写入上下文数据
+    @param node_variable:      节点数据
+    @param workflow_variable:  全局数据
+    @param node:               节点实例对象
+    @param workflow:           工作流管理器
+    """
+    response = node_variable.get('result')
+    model_setting = node.context.get('model_setting',
+                                     {'reasoning_content_enable': False, 'reasoning_content_end': '</think>',
+                                      'reasoning_content_start': '<think>'})
+    reasoning = Reasoning(model_setting.get('reasoning_content_start'), model_setting.get('reasoning_content_end'))
+    reasoning_result = reasoning.get_reasoning_content(response)
+    reasoning_result_end = reasoning.get_end_reasoning_content()
+    content = reasoning_result.get('content') + reasoning_result_end.get('content')
+    meta = {**response.response_metadata, **response.additional_kwargs}
+    if 'reasoning_content' in meta:
+        reasoning_content = (meta.get('reasoning_content', '') or '')
+    else:
+        reasoning_content = (reasoning_result.get('reasoning_content') or '') + (
+                reasoning_result_end.get('reasoning_content') or '')
+    _write_context(node_variable, workflow_variable, node, workflow, content, reasoning_content)
+
+
+def get_default_model_params_setting(model_id):
+    model = QuerySet(Model).filter(id=model_id).first()
+    credential = get_model_credential(model.provider, model.model_type, model.model_name)
+    model_params_setting = credential.get_model_params_setting_form(
+        model.model_name).get_default_form_data()
+    return model_params_setting
+
+
+def get_node_message(chat_record, runtime_node_id):
+    node_details = chat_record.get_node_details_runtime_node_id(runtime_node_id)
+    if node_details is None:
+        return []
+    return [HumanMessage(node_details.get('question')), AIMessage(node_details.get('answer'))]
+
+
+def get_workflow_message(chat_record):
+    return [chat_record.get_human_message(), chat_record.get_ai_message()]
+
+
+def get_message(chat_record, dialogue_type, runtime_node_id):
+    return get_node_message(chat_record, runtime_node_id) if dialogue_type == 'NODE' else get_workflow_message(
+        chat_record)
+
+
+class BaseChatNode(IChatNode):
+    def save_context(self, details, workflow_manage):
+        self.context['answer'] = details.get('answer')
+        self.context['question'] = details.get('question')
+        self.context['reasoning_content'] = details.get('reasoning_content')
+        self.context['exception_message'] = details.get('err_message')
+        if self.node_params.get('is_result', False):
+            self.answer_text = details.get('answer')
+
+    def execute(self, model_id, system, prompt, dialogue_number, history_chat_record, stream, chat_id, chat_record_id,
+                model_params_setting=None,
+                model_id_type=None,
+                model_id_reference=None,
+                dialogue_type=None,
+                model_setting=None,
+                mcp_servers=None,
+                mcp_tool_id=None,
+                mcp_tool_ids=None,
+                mcp_source=None,
+                tool_ids=None,
+                application_ids=None,
+                skill_tool_ids=None,
+                mcp_output_enable=True,
+                **kwargs) -> NodeResult:
+        if dialogue_type is None:
+            dialogue_type = 'WORKFLOW'
+
+        if model_id_type == 'reference' and model_id_reference:
+
+            reference_data = self.workflow_manage.get_reference_field(
+                model_id_reference[0],
+                model_id_reference[1:],
+            )
+
+            if reference_data and isinstance(reference_data, dict):
+                model_id = reference_data.get('model_id', model_id)
+                model_params_setting = reference_data.get('model_params_setting')
+        if model_id is None or model_id == '':
+            raise Exception(_('Model is not allowed to be empty'))
+
+        if model_params_setting is None and model_id:
+            model_params_setting = get_default_model_params_setting(model_id)
+
+        if model_setting is None:
+            model_setting = {'reasoning_content_enable': False, 'reasoning_content_end': '</think>',
+                             'reasoning_content_start': '<think>'}
+        self.context['model_setting'] = model_setting
+        workspace_id = self.workflow_manage.get_body().get('workspace_id')
+        chat_model = get_model_instance_by_model_workspace_id(model_id, workspace_id,
+                                                              **(model_params_setting or {}))
+        history_message = self.get_history_message(history_chat_record, dialogue_number, dialogue_type,
+                                                   self.runtime_node_id)
+        self.context['history_message'] = [{'content': message.content, 'role': message.type} for message in
+                                           (history_message if history_message is not None else [])]
+        question = self.generate_prompt_question(prompt)
+        self.context['question'] = question.content
+        system = self.workflow_manage.generate_prompt(system)
+        self.context['system'] = system
+        message_list = self.generate_message_list(system, prompt, history_message)
+        self.context['message_list'] = message_list
+
+        # 过滤tool_id
+        all_tool_ids = list(set(
+            (mcp_tool_ids or []) +
+            (tool_ids or []) +
+            (skill_tool_ids or []) +
+            ([mcp_tool_id] if mcp_tool_id else [])
+        ))
+        authorized_set = set(filter_authorized_ids('tool', all_tool_ids, workspace_id))
+
+        mcp_tool_ids = [i for i in (mcp_tool_ids or []) if i in authorized_set]
+        tool_ids = [i for i in (tool_ids or []) if i in authorized_set]
+        skill_tool_ids = [i for i in (skill_tool_ids or []) if i in authorized_set]
+        mcp_tool_id = mcp_tool_id if (mcp_tool_id and mcp_tool_id in authorized_set) else None
+        # 处理 MCP 请求
+        mcp_result = self._handle_mcp_request(
+            mcp_source, mcp_servers, mcp_tool_id, mcp_tool_ids, tool_ids,
+            application_ids, skill_tool_ids, mcp_output_enable,
+            chat_model, message_list, history_message, question, chat_id, workspace_id
+        )
+        if mcp_result:
+            return mcp_result
+
+        if stream:
+            r = chat_model.stream(message_list)
+            return NodeResult({'result': r, 'chat_model': chat_model, 'message_list': message_list,
+                               'question': question.content}, {},
+                              _write_context=write_context_stream)
+        else:
+            r = chat_model.invoke(message_list)
+            return NodeResult({'result': r, 'chat_model': chat_model, 'message_list': message_list,
+                               'history_message': [{'content': message.content, 'role': message.type} for message in
+                                                   (history_message if history_message is not None else [])],
+                               'question': question.content}, {},
+                              _write_context=write_context)
+
+    def _handle_mcp_request(self, mcp_source, mcp_servers, mcp_tool_id, mcp_tool_ids, tool_ids,
+                            application_ids, skill_tool_ids,
+                            mcp_output_enable, chat_model, message_list, history_message, question, chat_id,
+                            workspace_id):
+
+        mcp_servers_config = {}
+
+        # 迁移过来mcp_source是None
+        if mcp_source is None:
+            mcp_source = 'custom'
+        # 兼容老数据
+        if not mcp_tool_ids:
+            mcp_tool_ids = []
+        if mcp_tool_id:
+            mcp_tool_ids = list(set(mcp_tool_ids + [mcp_tool_id]))
+        if mcp_source == 'custom' and mcp_servers:
+            ToolExecutor().validate_mcp_transport(mcp_servers)
+            mcp_servers_config = json.loads(mcp_servers)
+            mcp_servers_config = self.handle_variables(mcp_servers_config)
+        elif mcp_tool_ids:
+            mcp_tools = QuerySet(Tool).filter(id__in=mcp_tool_ids).values()
+            for mcp_tool in mcp_tools:
+                if mcp_tool and mcp_tool['is_active']:
+                    mcp_servers_config = {**mcp_servers_config, **json.loads(mcp_tool['code'])}
+                    mcp_servers_config = self.handle_variables(mcp_servers_config)
+        tool_init_params = {}
+        tools = get_tools(self, tool_ids, workspace_id)
+        if tool_ids and len(tool_ids) > 0:  # 如果有工具ID，则将其转换为MCP
+            self.context['tool_ids'] = tool_ids
+            for tool_id in tool_ids:
+                tool = QuerySet(Tool).filter(id=tool_id, tool_type=ToolType.CUSTOM).first()
+                if tool is None or not tool.is_active:
+                    continue
+                executor = ToolExecutor()
+                if tool.init_params is not None:
+                    params = json.loads(rsa_long_decrypt(tool.init_params))
+                    tool_init_params = json.loads(rsa_long_decrypt(tool.init_params))
+                else:
+                    params = {}
+                tool_config = executor.get_tool_mcp_config(tool, params)
+
+                mcp_servers_config[str(tool.id)] = tool_config
+
+        if application_ids and len(application_ids) > 0:
+            self.context['application_ids'] = application_ids
+            for application_id in application_ids:
+                app = QuerySet(Application).filter(id=application_id, is_publish=True).first()
+                if app is None:
+                    continue
+                app_key = QuerySet(ApplicationApiKey).filter(application_id=application_id, is_active=True).first()
+                if app_key is not None:
+                    api_key = app_key.secret_key
+                    application_access_token = QuerySet(ApplicationAccessToken).filter(
+                        application_id=app_key.application_id
+                    ).first()
+                    if application_access_token is not None and application_access_token.authentication:
+                        raise AppApiException(
+                            500,
+                            _('Agent 【{name}】 access token authentication is not supported for agent tool').format(
+                                name=app.name)
+                        )
+                else:
+                    raise AppApiException(
+                        500,
+                        _('Agent Key is required for agent tool 【{name}】').format(name=app.name)
+                    )
+                executor = ToolExecutor()
+                app_config = executor.get_app_mcp_config(api_key)
+                mcp_servers_config[app.name] = app_config
+
+        if skill_tool_ids and len(skill_tool_ids) > 0:
+            self.context['skill_tool_ids'] = skill_tool_ids
+            skill_file_items = []
+
+            for tool_id in skill_tool_ids:
+                tool = QuerySet(Tool).filter(id=tool_id, is_active=True).first()
+                if tool is None or tool.is_active is False:
+                    continue
+                init_params_default_value = {i["field"]: i.get('default_value') for i in tool.init_field_list}
+                if tool.init_params is not None:
+                    params = init_params_default_value | json.loads(rsa_long_decrypt(tool.init_params))
+                else:
+                    params = init_params_default_value
+
+                skill_file_items.append({
+                    'tool_id': str(tool.id),
+                    'file_id': tool.code,
+                    'params': params
+                })
+            mcp_servers_config['skills'] = skill_file_items
+
+        if len(mcp_servers_config) > 0 or len(tools) > 0:
+            # 安全获取 application
+            application_id = None
+            tool_id = None
+            knowledge_id = None
+            if [WorkflowMode.KNOWLEDGE, WorkflowMode.KNOWLEDGE_LOOP].__contains__(
+                    self.workflow_manage.flow.workflow_mode):
+                knowledge_id = self.workflow_params.get('knowledge_id')
+            elif [WorkflowMode.APPLICATION, WorkflowMode.APPLICATION_LOOP].__contains__(
+                    self.workflow_manage.flow.workflow_mode):
+                application_id = self.workflow_manage.work_flow_post_handler.chat_info.application.id
+            elif [WorkflowMode.TOOL, WorkflowMode.TOOL_LOOP].__contains__(self.workflow_manage.flow.workflow_mode):
+                tool_id = self.workflow_params.get('tool_id')
+
+            source_id = application_id or knowledge_id or tool_id
+            source_type = 'APPLICATION' if application_id else 'KNOWLEDGE' if knowledge_id else 'TOOL'
+            r = mcp_response_generator(chat_model, message_list, json.dumps(mcp_servers_config), mcp_output_enable,
+                                       tool_init_params, source_id, source_type, chat_id, tools)
+            return NodeResult(
+                {'result': r, 'chat_model': chat_model, 'message_list': message_list,
+                 'history_message': [{'content': message.content, 'role': message.type} for message in
+                                     (history_message if history_message is not None else [])],
+                 'question': question.content}, {},
+                _write_context=write_context_stream)
+
+        return None
+
+    def handle_variables(self, tool_params):
+        # 处理参数中的变量
+        for k, v in tool_params.items():
+            if type(v) == str:
+                tool_params[k] = self.workflow_manage.generate_prompt(tool_params[k])
+            if type(v) == dict:
+                self.handle_variables(v)
+            if (type(v) == list) and (type(v[0]) == str):
+                tool_params[k] = self.get_reference_content(v)
+        return tool_params
+
+    def get_reference_content(self, fields: List[str]):
+        return str(self.workflow_manage.get_reference_field(
+            fields[0],
+            fields[1:]))
+
+    @staticmethod
+    def get_history_message(history_chat_record, dialogue_number, dialogue_type, runtime_node_id):
+        start_index = len(history_chat_record) - dialogue_number
+        history_message = reduce(lambda x, y: [*x, *y], [
+            get_message(history_chat_record[index], dialogue_type, runtime_node_id)
+            for index in
+            range(start_index if start_index > 0 else 0, len(history_chat_record))], [])
+        for message in history_message:
+            if isinstance(message.content, str):
+                message.content = re.sub('<form_rander>[\d\D]*?<\/form_rander>', '', message.content)
+        return history_message
+
+    def generate_prompt_question(self, prompt):
+        return HumanMessage(self.workflow_manage.generate_prompt(prompt))
+
+    def generate_message_list(self, system: str, prompt: str, history_message):
+        if system is not None and len(system) > 0:
+            return [SystemMessage(self.workflow_manage.generate_prompt(system)), *history_message,
+                    HumanMessage(self.workflow_manage.generate_prompt(prompt))]
+        else:
+            return [*history_message, HumanMessage(self.workflow_manage.generate_prompt(prompt))]
+
+    @staticmethod
+    def reset_message_list(message_list: List[BaseMessage], answer_text):
+        result = [{'role': 'user' if isinstance(message, HumanMessage) else 'ai', 'content': message.content} for
+                  message
+                  in
+                  message_list]
+        result.append({'role': 'ai', 'content': answer_text})
+        return result
+
+    def get_details(self, index: int, **kwargs):
+        return {
+            'name': self.node.properties.get('stepName'),
+            "index": index,
+            'run_time': self.context.get('run_time'),
+            'system': self.context.get('system'),
+            'history_message': self.context.get('history_message'),
+            'question': self.context.get('question'),
+            'answer': self.context.get('answer'),
+            'reasoning_content': self.context.get('reasoning_content'),
+            'enableException': self.node.properties.get('enableException'),
+            'type': self.node.type,
+            'message_tokens': self.context.get('message_tokens'),
+            'answer_tokens': self.context.get('answer_tokens'),
+            'status': self.status,
+            'err_message': self.err_message
+        }
