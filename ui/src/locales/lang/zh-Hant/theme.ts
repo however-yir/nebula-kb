@@ -25,9 +25,9 @@ export default {
   websiteSlogan: '歡迎語',
   websiteSloganPlaceholder: '請輸入歡迎語',
   websiteSloganTip: '產品 Logo 下的歡迎語',
-  logoDefaultTip: '默认为 MaxKB 登錄界面，支持自定义设置',
+  logoDefaultTip: '默认为 LZKB 登錄界面，支持自定义设置',
 
-  defaultTip: '默認為 MaxKB 平台界面，支持自定義設置',
+  defaultTip: '默認為 LZKB 平台界面，支持自定義設置',
   platformSetting: '平台設置',
   showUserManual: '顯示用戶手冊',
   showForum: '顯示論壇求助',

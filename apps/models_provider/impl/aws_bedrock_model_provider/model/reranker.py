@@ -8,11 +8,11 @@ from langchain_core.callbacks import Callbacks
 from langchain_core.documents import BaseDocumentCompressor, Document
 from pydantic import ConfigDict
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.aws_bedrock_model_provider.model.llm import _update_aws_credentials
 
 
-class BedrockRerankerModel(MaxKBBaseModel, BaseDocumentCompressor):
+class BedrockRerankerModel(LZKBBaseModel, BaseDocumentCompressor):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     model_id: Optional[str] = None

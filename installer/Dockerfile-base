@@ -1,7 +1,8 @@
 FROM python:3.11-slim-trixie AS python-stage
 RUN python3 -m venv /opt/py3
 
-FROM ghcr.io/1panel-dev/maxkb-vector-model:v2.0.3 AS vector-model
+ARG LZKB_VECTOR_MODEL_IMAGE=ghcr.io/1panel-dev/maxkb-vector-model:v2.0.3
+FROM ${LZKB_VECTOR_MODEL_IMAGE} AS vector-model
 
 FROM postgres:17.9-trixie
 COPY --from=python-stage /usr/local /usr/local
@@ -17,6 +18,7 @@ ARG DEPENDENCIES="                    \
         redis-server                  \
         postgresql-17-pgvector        \
         postgresql-17-age"
+ARG FFMPEG_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/however-yir/LZKB/main/installer/get-ffmpeg-linux"
 
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone && \
@@ -24,7 +26,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     printf "Package: redis-server\nPin: release a=testing\nPin-Priority: 501\n" > /etc/apt/preferences.d/redis && \
     apt-get update && apt-get install -y --no-install-recommends $DEPENDENCIES && \
     find /etc/ -type f ! -path '/etc/resolv.conf' ! -path '/etc/hosts' | xargs chmod g-rx && \
-    curl -L --connect-timeout 120 -m 1800 https://resource.fit2cloud.com/maxkb/ffmpeg/get-ffmpeg-linux | sh && \
+    curl -L --connect-timeout 120 -m 1800 ${FFMPEG_INSTALL_SCRIPT_URL} | sh && \
     mkdir -p /opt/maxkb-app/sandbox/lib && chmod -R 550 /opt/maxkb-app/sandbox && \
     useradd --no-create-home --home /opt/maxkb-app/sandbox -s /usr/sbin/nologin sandbox -g root && \
     chmod g-rwx /usr/local/bin/* /usr/bin/* /bin/* /usr/sbin/* /sbin/* /usr/lib/postgresql/17/bin/* && \
@@ -44,6 +46,12 @@ ENV PATH=/opt/py3/bin:$PATH \
     LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
     LZKB_CONFIG_TYPE=ENV \
+    LZKB_LOG_LEVEL=INFO \
+    LZKB_SANDBOX=1 \
+    LZKB_SANDBOX_HOME=/opt/maxkb-app/sandbox \
+    LZKB_SANDBOX_PYTHON_PACKAGE_PATHS="/opt/py3/lib/python3.11/site-packages,/opt/maxkb-app/sandbox/python-packages,/opt/maxkb/python-packages" \
+    LZKB_SANDBOX_PYTHON_BANNED_HOSTS="127.0.0.0/8,localhost,host.docker.internal,172.17.0.0/16,lzkb,pgsql,redis,172.31.250.192/26,0.0.0.0/32,::/0" \
+    LZKB_ADMIN_PATH=/admin \
     MAXKB_CONFIG_TYPE=ENV \
     MAXKB_LOG_LEVEL=INFO \
     MAXKB_SANDBOX=1 \

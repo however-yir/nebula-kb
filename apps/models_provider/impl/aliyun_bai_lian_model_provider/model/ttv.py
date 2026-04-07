@@ -6,11 +6,11 @@ import requests
 from dashscope import VideoSynthesis
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.base_ttv import BaseGenerationVideo
 
 
-class GenerationVideoModel(MaxKBBaseModel, BaseGenerationVideo):
+class GenerationVideoModel(LZKBBaseModel, BaseGenerationVideo):
     api_key: str
     model_name: str
     params: dict

@@ -3,7 +3,8 @@ from logging.handlers import TimedRotatingFileHandler
 import os
 import logging
 
-maxkb_logger = logging.getLogger('max_kb')
+lzkb_logger = logging.getLogger('lzkb')
+maxkb_logger = lzkb_logger
 
 
 class DailyTimedRotatingFileHandler(TimedRotatingFileHandler):

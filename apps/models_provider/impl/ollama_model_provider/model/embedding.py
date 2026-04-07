@@ -11,10 +11,10 @@ from typing import Dict, List
 from langchain_ollama import OllamaEmbeddings
 
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class OllamaEmbedding(MaxKBBaseModel, OllamaEmbeddings):
+class OllamaEmbedding(LZKBBaseModel, OllamaEmbeddings):
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
         return OllamaEmbedding(

@@ -9,10 +9,10 @@
 from typing import Dict, List
 from langchain_community.embeddings import QianfanEmbeddingsEndpoint
 import openai
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class QianfanV1Embeddings(MaxKBBaseModel, QianfanEmbeddingsEndpoint):
+class QianfanV1Embeddings(LZKBBaseModel, QianfanEmbeddingsEndpoint):
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
         return QianfanV1Embeddings(
@@ -22,7 +22,7 @@ class QianfanV1Embeddings(MaxKBBaseModel, QianfanEmbeddingsEndpoint):
         )
 
 
-class QianfanV2EmbeddingModel(MaxKBBaseModel):
+class QianfanV2EmbeddingModel(LZKBBaseModel):
     model_name: str
 
     @staticmethod
@@ -52,7 +52,7 @@ class QianfanV2EmbeddingModel(MaxKBBaseModel):
         return [e.embedding for e in res.data]
 
 
-class QianfanEmbeddings(MaxKBBaseModel):
+class QianfanEmbeddings(LZKBBaseModel):
 
 
     @staticmethod

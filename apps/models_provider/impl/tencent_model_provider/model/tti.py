@@ -12,12 +12,12 @@ from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.hunyuan.v20230901 import hunyuan_client, models
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tti import BaseTextToImage
 from models_provider.impl.tencent_model_provider.model.hunyuan import ChatHunyuan
 
 
-class TencentTextToImageModel(MaxKBBaseModel, BaseTextToImage):
+class TencentTextToImageModel(LZKBBaseModel, BaseTextToImage):
     hunyuan_secret_id: str
     hunyuan_secret_key: str
     model: str

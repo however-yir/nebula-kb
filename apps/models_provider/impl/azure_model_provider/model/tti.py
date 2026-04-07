@@ -3,7 +3,7 @@ from typing import Dict
 from openai import AzureOpenAI
 
 from common.config.tokenizer_manage_config import TokenizerManage
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tti import BaseTextToImage
 
 
@@ -12,7 +12,7 @@ def custom_get_token_ids(text: str):
     return tokenizer.encode(text)
 
 
-class AzureOpenAITextToImage(MaxKBBaseModel, BaseTextToImage):
+class AzureOpenAITextToImage(LZKBBaseModel, BaseTextToImage):
     api_base: str
     api_key: str
     api_version: str

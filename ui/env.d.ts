@@ -5,10 +5,10 @@ interface Window {
   chatUserProfile: ?(() => any)
   LZKB: {
     prefix: string
-    chatPrefix: string
-  }
-  MaxKB?: {
-    prefix: string
-    chatPrefix: string
+    chatPrefix?: string
+    projectUrl?: string
+    helpUrl?: string
+    contactUrl?: string
+    pricingUrl?: string
   }
 }

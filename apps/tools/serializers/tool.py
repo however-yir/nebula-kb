@@ -6,8 +6,6 @@ import json
 import os
 import pickle
 import re
-import tempfile
-import zipfile
 from functools import reduce
 from typing import Dict
 
@@ -33,6 +31,7 @@ from common.db.search import page_search, native_page_search, native_search
 from common.exception.app_exception import AppApiException
 from common.field.common import UploadedImageField
 from common.result import result
+from common.utils.appstore import fetch_filtered_appstore_apps
 from common.utils.common import get_file_content, generate_uuid, bytes_to_uploaded_file
 from common.utils.logger import maxkb_logger
 from common.utils.rsa_util import rsa_long_decrypt, rsa_long_encrypt
@@ -1064,49 +1063,10 @@ class ToolSerializer(serializers.Serializer):
 
         def get_appstore_tools(self):
             self.is_valid(raise_exception=True)
-            # 下载zip文件
-            try:
-                appstore_url = CONFIG.get('APPSTORE_URL', 'https://apps-assets.fit2cloud.com/stable/maxkb.json.zip')
-                res = requests.get(appstore_url, timeout=5)
-                res.raise_for_status()
-                # 创建临时文件保存zip
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as temp_zip:
-                    temp_zip.write(res.content)
-                    temp_zip_path = temp_zip.name
-
-                try:
-                    # 解压zip文件
-                    with zipfile.ZipFile(temp_zip_path, 'r') as zip_ref:
-                        # 获取zip中的第一个文件（假设只有一个json文件）
-                        json_filename = zip_ref.namelist()[0]
-                        json_content = zip_ref.read(json_filename)
-
-                    # 将json转换为字典
-                    tool_store = json.loads(json_content.decode('utf-8'))
-                    tag_dict = {tag['name']: tag['key'] for tag in tool_store['additionalProperties']['tags']}
-                    filter_apps = []
-                    for tool in tool_store['apps']:
-                        if self.data.get('name', '') != '':
-                            if self.data.get('name').lower() not in tool.get('name', '').lower():
-                                continue
-                        if not tool['downloadUrl'].endswith('.tool'):
-                            continue
-                        versions = tool.get('versions', [])
-                        tool['label'] = tag_dict[tool.get('tags')[0]] if tool.get('tags') else ''
-                        tool['version'] = next(
-                            (version.get('name') for version in versions if
-                             version.get('downloadUrl') == tool['downloadUrl']),
-                        )
-                        filter_apps.append(tool)
-
-                    tool_store['apps'] = filter_apps
-                    return tool_store
-                finally:
-                    # 清理临时文件
-                    os.unlink(temp_zip_path)
-            except Exception as e:
-                maxkb_logger.error(f"fetch appstore tools error: {e}")
-                return {'apps': [], 'additionalProperties': {'tags': []}}
+            return fetch_filtered_appstore_apps(
+                keyword=self.data.get('name', ''),
+                suffix='.tool',
+            )
 
     class AddStoreTool(serializers.Serializer):
         user_id = serializers.UUIDField(required=True, label=_("User ID"))

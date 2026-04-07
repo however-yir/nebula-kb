@@ -24,7 +24,7 @@ from urllib.parse import urlparse
 import websockets
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_stt import BaseSpeechToText
 
 audio_format = "mp3"  # wav 或者 mp3，根据实际音频格式设置
@@ -169,7 +169,7 @@ def read_wav_info(data: bytes = None) -> (int, int, int, int, int):
     return nchannels, sampwidth, framerate, nframes, len(wave_bytes)
 
 
-class VolcanicEngineSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class VolcanicEngineSpeechToText(LZKBBaseModel, BaseSpeechToText):
     workflow: str = "audio_in,resample,partition,vad,fe,decode,itn,nlu_punctuate"
     show_language: bool = False
     show_utterances: bool = False

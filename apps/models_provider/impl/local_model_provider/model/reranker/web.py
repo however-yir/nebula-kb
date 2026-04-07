@@ -14,10 +14,10 @@ from langchain_core.callbacks import Callbacks
 from langchain_core.documents import Document, BaseDocumentCompressor
 
 from lzkb.const import CONFIG
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class LocalReranker(MaxKBBaseModel, BaseModel, BaseDocumentCompressor):
+class LocalReranker(LZKBBaseModel, BaseModel, BaseDocumentCompressor):
 
     @staticmethod
     def is_cache_model():

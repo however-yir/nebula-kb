@@ -13,11 +13,11 @@ import requests
 from langchain_core.callbacks import Callbacks
 from langchain_core.documents import BaseDocumentCompressor, Document
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from django.utils.translation import gettext as _
 
 
-class SiliconCloudReranker(MaxKBBaseModel, BaseDocumentCompressor):
+class SiliconCloudReranker(LZKBBaseModel, BaseDocumentCompressor):
     api_base: Optional[str]
     """SiliconCloud API URL"""
     model: Optional[str]

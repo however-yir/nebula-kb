@@ -6,11 +6,11 @@ from dashscope import ImageSynthesis, MultiModalConversation
 from dashscope.aigc.image_generation import ImageGeneration
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tti import BaseTextToImage
 
 
-class QwenTextToImageModel(MaxKBBaseModel, BaseTextToImage):
+class QwenTextToImageModel(LZKBBaseModel, BaseTextToImage):
     api_key: str
     model_name: str
     params: dict

@@ -4,11 +4,11 @@ from typing import List, Dict, Optional, Any
 
 from langchain_core.messages import BaseMessage
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.tencent_model_provider.model.hunyuan import ChatHunyuan
 
 
-class TencentModel(MaxKBBaseModel, ChatHunyuan):
+class TencentModel(LZKBBaseModel, ChatHunyuan):
     @staticmethod
     def is_cache_model():
         return False
@@ -18,7 +18,7 @@ class TencentModel(MaxKBBaseModel, ChatHunyuan):
         hunyuan_secret_id = credentials.get('hunyuan_secret_id')
         hunyuan_secret_key = credentials.get('hunyuan_secret_key')
 
-        optional_params = MaxKBBaseModel.filter_optional_params(kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(kwargs)
 
         if not all([hunyuan_app_id, hunyuan_secret_id, hunyuan_secret_key]):
             raise ValueError(

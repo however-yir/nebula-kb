@@ -9,7 +9,7 @@ from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.messages import BaseMessage, ChatMessage, HumanMessage, AIMessage, AIMessageChunk
 from langchain_core.outputs import ChatGenerationChunk
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
 class ImageMessage(HumanMessage):
@@ -44,7 +44,7 @@ def convert_message_to_dict(message: BaseMessage) -> dict:
     return message_dict
 
 
-class XFSparkImage(MaxKBBaseModel, ChatSparkLLM):
+class XFSparkImage(LZKBBaseModel, ChatSparkLLM):
     spark_app_id: str
     spark_api_key: str
     spark_api_secret: str
@@ -52,7 +52,7 @@ class XFSparkImage(MaxKBBaseModel, ChatSparkLLM):
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
         return XFSparkImage(
             spark_app_id=model_credential.get('spark_app_id'),
             spark_api_key=model_credential.get('spark_api_key'),

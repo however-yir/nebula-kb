@@ -1,5 +1,5 @@
 """
-ASGI config for maxkb project.
+ASGI config for lzkb project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

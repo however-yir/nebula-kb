@@ -14,10 +14,10 @@ from langchain_core.callbacks import Callbacks
 from langchain_core.documents import BaseDocumentCompressor, Document
 from langchain_core.documents import BaseDocumentCompressor
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class AliyunBaiLianReranker(MaxKBBaseModel, BaseDocumentCompressor):
+class AliyunBaiLianReranker(LZKBBaseModel, BaseDocumentCompressor):
     model: Optional[str]
     api_key: Optional[str]
 

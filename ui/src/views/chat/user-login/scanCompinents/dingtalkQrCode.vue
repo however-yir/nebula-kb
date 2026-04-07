@@ -104,7 +104,7 @@ const initActive = async () => {
         client_id: data.appKey,
         scope: 'openid corpid',
         response_type: 'code',
-        state: 'fit2cloud-ding-chat-qr',
+        state: 'lzkb-ding-chat-qr',
         prompt: 'consent',
         corpId: data.corp_id
       },

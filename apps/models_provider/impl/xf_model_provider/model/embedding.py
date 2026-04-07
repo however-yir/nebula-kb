@@ -13,7 +13,7 @@ from typing import Dict, Optional
 from langchain_community.embeddings import SparkLLMTextEmbeddings
 from numpy import ndarray
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 import time
 import json
 import base64
@@ -67,7 +67,7 @@ def _worker():
 threading.Thread(target=_worker, daemon=True).start()
 
 
-class XFEmbedding(MaxKBBaseModel, SparkLLMTextEmbeddings):
+class XFEmbedding(LZKBBaseModel, SparkLLMTextEmbeddings):
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
         return XFEmbedding(

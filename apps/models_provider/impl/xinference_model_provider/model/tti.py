@@ -7,7 +7,7 @@ from common.config.tokenizer_manage_config import TokenizerManage
 from common.utils.common import bytes_to_uploaded_file
 from knowledge.models import FileSourceType
 # from dataset.serializers.file_serializers import FileSerializer
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tti import BaseTextToImage
 from oss.serializers.file import FileSerializer
 
@@ -17,7 +17,7 @@ def custom_get_token_ids(text: str):
     return tokenizer.encode(text)
 
 
-class XinferenceTextToImage(MaxKBBaseModel, BaseTextToImage):
+class XinferenceTextToImage(LZKBBaseModel, BaseTextToImage):
     api_base: str
     api_key: str
     model: str

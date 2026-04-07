@@ -92,15 +92,15 @@ npm run dev
 - 完善模型提供商抽象与插件治理；
 - 补齐测试、质量门禁、依赖锁定和 CI 稳定性。
 
-## 仓库描述与 Topics（建议）
+## 仓库描述与 Topics（已应用）
 
-建议仓库描述：
+当前仓库描述：
 
 > LZKB - 面向私有化部署的企业级智能体与知识库平台。
 
-建议 Topics：
+当前 Topics：
 
-`rag`, `agent`, `knowledge-base`, `django`, `vue`, `langchain`, `llm`, `self-hosted`, `enterprise-ai`, `workflow`
+`lzkb`, `ai`, `rag`, `knowledge-base`, `llm`, `django`, `vue3`, `ollama`, `redis`, `postgresql`
 
 ## 许可证
 

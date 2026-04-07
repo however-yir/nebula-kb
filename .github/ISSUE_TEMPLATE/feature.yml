@@ -1,29 +1,30 @@
 name: 'Feature Request'
-description: 'Suggest an idea'
+description: 'Suggest a new feature for LZKB'
 title: '[Feature] '
-assignees: baixin513
 body:
   - type: markdown
     attributes:
-      value: "## Environment Information"
+      value: '## Environment Information'
   - type: input
     validations:
       required: true
     attributes:
-      label: "MaxKB Version"
-      description: "Log in to the MaxKB Web Console and check the current version on the `About` page in the top right corner."
+      label: 'LZKB Version'
+      description: 'Open About dialog in the top-right corner and copy the version string.'
   - type: markdown
     attributes:
-      value: "## Detailed information"
+      value: '## Feature Details'
   - type: textarea
     attributes:
-      label: "Please describe your needs or suggestions for improvements"
+      label: 'Problem to solve'
+      description: 'What problem does this feature address?'
     validations:
       required: true
   - type: textarea
     attributes:
-      label: "Please describe the solution you suggest"
+      label: 'Proposed solution'
+      description: 'How should this feature work?'
   - type: textarea
     attributes:
-      label: "Additional Information"
-      description: "If you have any additional information to provide, you can include it here (screenshots, videos, etc., are welcome)."
+      label: 'Additional context'
+      description: 'References, screenshots, links, or alternatives considered.'

@@ -39,7 +39,10 @@ class ChatEmbedSerializer(serializers.Serializer):
             access_token=self.data.get('token')).first()
         is_draggable = 'false'
         show_guide = 'true'
-        float_icon = f"{self.data.get('protocol')}://{self.data.get('host')}{CONFIG.get_chat_path()}/MaxKB.gif"
+        float_icon = (
+            f"{self.data.get('protocol')}://{self.data.get('host')}{CONFIG.get_chat_path()}/"
+            f"{CONFIG.get_chat_float_icon()}"
+        )
         is_license_valid = DatabaseModelManage.get_model('license_is_valid')
         X_PACK_LICENSE_IS_VALID = is_license_valid() if is_license_valid is not None else False
         # 获取接入的query参数

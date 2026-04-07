@@ -12,10 +12,10 @@ from typing import Sequence, Optional, Dict, Any
 from langchain_core.callbacks import Callbacks
 from langchain_core.documents import Document, BaseDocumentCompressor
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class LocalReranker(MaxKBBaseModel, BaseDocumentCompressor):
+class LocalReranker(LZKBBaseModel, BaseDocumentCompressor):
     client: Any = None
     tokenizer: Any = None
     model: Optional[str] = None

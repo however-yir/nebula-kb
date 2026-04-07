@@ -1,7 +1,7 @@
 from typing import Dict
 from urllib.parse import urlparse, ParseResult
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_chat_open_ai import BaseChatOpenAI
 
 
@@ -13,7 +13,7 @@ def get_base_url(url: str):
     return result_url[:-1] if result_url.endswith("/") else result_url
 
 
-class OllamaImage(MaxKBBaseModel, BaseChatOpenAI):
+class OllamaImage(LZKBBaseModel, BaseChatOpenAI):
 
     @staticmethod
     def is_cache_model():
@@ -24,7 +24,7 @@ class OllamaImage(MaxKBBaseModel, BaseChatOpenAI):
         api_base = model_credential.get('api_base', '')
         base_url = get_base_url(api_base)
         base_url = base_url if base_url.endswith('/v1') else (base_url + '/v1')
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
         return OllamaImage(
             model_name=model_name,
             openai_api_base=base_url,

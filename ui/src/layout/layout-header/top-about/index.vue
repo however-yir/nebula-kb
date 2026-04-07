@@ -2,7 +2,7 @@
   <div class="flex align-center top-about">
     <el-button
       round
-      @click="toUrl('https://maxkb.cn/pricing.html')"
+      @click="openPricingPage"
       class="pricing-button mr-8"
       v-hasPermission="EditionConst.IS_CE"
     >
@@ -83,6 +83,7 @@
 import useStore from '@/stores'
 import { hasPermission } from '@/utils/permission'
 import { EditionConst, PermissionConst, RoleConst } from '@/utils/permission/data'
+import { openPricingPage } from '@/utils/external-links'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()

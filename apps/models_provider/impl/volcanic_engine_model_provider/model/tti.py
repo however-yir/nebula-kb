@@ -8,13 +8,13 @@ pip install websockets
 
 '''
 from typing import Dict
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tti import BaseTextToImage
 
 from volcenginesdkarkruntime import Ark
 
 
-class VolcanicEngineTextToImage(MaxKBBaseModel, BaseTextToImage):
+class VolcanicEngineTextToImage(LZKBBaseModel, BaseTextToImage):
     api_key: str
     api_base: str
     model_version: str

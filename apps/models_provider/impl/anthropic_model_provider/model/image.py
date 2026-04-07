@@ -3,7 +3,7 @@ from typing import Dict
 from langchain_anthropic import ChatAnthropic
 
 from common.config.tokenizer_manage_config import TokenizerManage
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
 def custom_get_token_ids(text: str):
@@ -11,7 +11,7 @@ def custom_get_token_ids(text: str):
     return tokenizer.encode(text)
 
 
-class AnthropicImage(MaxKBBaseModel, ChatAnthropic):
+class AnthropicImage(LZKBBaseModel, ChatAnthropic):
 
     @staticmethod
     def is_cache_model():
@@ -19,7 +19,7 @@ class AnthropicImage(MaxKBBaseModel, ChatAnthropic):
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
         return AnthropicImage(
             model=model_name,
             anthropic_api_url=model_credential.get('api_base'),

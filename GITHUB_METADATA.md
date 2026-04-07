@@ -10,17 +10,17 @@ LZKB - Self-hosted enterprise agent and knowledge base platform for private depl
 
 ## Suggested Topics
 
+- lzkb
+- ai
 - rag
-- agent
 - knowledge-base
-- django
-- vue
-- langchain
 - llm
-- self-hosted
-- enterprise-ai
-- workflow
+- django
+- vue3
+- ollama
+- redis
+- postgresql
 
 ## Short Website (optional)
 
-https://github.com/liuzhuoran/LZKB
+https://github.com/however-yir/LZKB

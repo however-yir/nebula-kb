@@ -8,11 +8,11 @@
 """
 from typing import Dict
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_chat_open_ai import BaseChatOpenAI
 
 
-class KimiChatModel(MaxKBBaseModel, BaseChatOpenAI):
+class KimiChatModel(LZKBBaseModel, BaseChatOpenAI):
 
     @staticmethod
     def is_cache_model():
@@ -20,7 +20,7 @@ class KimiChatModel(MaxKBBaseModel, BaseChatOpenAI):
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
 
         kimi_chat_open_ai = KimiChatModel(
             openai_api_base=model_credential['api_base'],

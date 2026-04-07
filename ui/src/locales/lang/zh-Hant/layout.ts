@@ -39,6 +39,6 @@ export default {
     daysValid: '天有效',
   },
   copyright: '版權所有 © 2026 LZKB Contributors',
-  userManualUrl: 'https://docs.lzkb.dev/',
-  forumUrl: 'https://github.com/liuzhuoran/LZKB/discussions',
+  userManualUrl: 'https://github.com/however-yir/LZKB/wiki',
+  forumUrl: 'https://github.com/however-yir/LZKB/discussions',
 }

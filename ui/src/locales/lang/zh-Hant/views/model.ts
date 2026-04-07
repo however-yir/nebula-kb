@@ -44,7 +44,7 @@ export default {
     modeName: {
       label: '模型名稱',
       placeholder: '請給基礎模型設定一個名稱',
-      tooltip: 'MaxKB 中自訂的模型名稱',
+      tooltip: 'LZKB 中自訂的模型名稱',
       requiredMessage: '模型名稱不能為空',
     },
     permissionType: {

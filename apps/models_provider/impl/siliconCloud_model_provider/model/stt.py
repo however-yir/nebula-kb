@@ -5,7 +5,7 @@ from typing import Dict
 from openai import OpenAI
 
 from common.config.tokenizer_manage_config import TokenizerManage
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_stt import BaseSpeechToText
 
 
@@ -14,7 +14,7 @@ def custom_get_token_ids(text: str):
     return tokenizer.encode(text)
 
 
-class SiliconCloudSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class SiliconCloudSpeechToText(LZKBBaseModel, BaseSpeechToText):
     api_base: str
     api_key: str
     model: str

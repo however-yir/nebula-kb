@@ -999,9 +999,9 @@ msgstr "工作空間ID"
 #: apps/application/serializers/application.py:459
 msgid ""
 "The community version supports up to 5 applications. If you need more "
-"applications, please contact us (https://fit2cloud.com/)."
+"applications, please contact us (https://github.com/however-yir/LZKB/issues)."
 msgstr ""
-"社區版支持最多5個智能體，如需更多智能體，請聯繫我們（https://fit2cloud.com/）。"
+"社區版支持最多5個智能體，如需更多智能體，請聯繫我們（https://github.com/however-yir/LZKB/issues）。"
 
 #: apps/application/serializers/application.py:471
 #: apps/common/handle/impl/qa/zip_parse_qa_handle.py:56
@@ -2195,8 +2195,8 @@ msgstr "文本轉語音節點，文本內容不能為空"
 
 #: apps/common/utils/common.py:246
 #, python-brace-format
-msgid "Limit {count} exceeded, please contact us (https://fit2cloud.com/)."
-msgstr "超過限制 {count}，請聯繫我們 (https://fit2cloud.com/)."
+msgid "Limit {count} exceeded, please contact us (https://github.com/however-yir/LZKB/issues)."
+msgstr "超過限制 {count}，請聯繫我們 (https://github.com/however-yir/LZKB/issues)."
 
 #: apps/folders/models/folder.py:6 apps/folders/models/folder.py:17
 #: apps/folders/serializers/folder.py:98
@@ -2681,10 +2681,10 @@ msgstr "範圍"
 #: apps/knowledge/serializers/knowledge.py:460
 msgid ""
 "The community version supports up to 50 knowledge bases. If you need more "
-"knowledge bases, please contact us (https://fit2cloud.com/)."
+"knowledge bases, please contact us (https://github.com/however-yir/LZKB/issues)."
 msgstr ""
 "社區版支持最多50個知識庫，如需更多知識庫，請聯繫我們 (https://"
-"fit2cloud.com/)."
+"github.com/however-yir/LZKB/issues)."
 
 #: apps/knowledge/serializers/knowledge.py:560
 msgid "sync type"
@@ -6606,8 +6606,8 @@ msgstr "獲取郵箱設置"
 
 #: apps/system_manage/views/system_profile.py:22
 #: apps/system_manage/views/system_profile.py:23
-msgid "Get MaxKB related information"
-msgstr "獲取 MaxKB 相關信息"
+msgid "Get LZKB related information"
+msgstr "獲取 LZKB 相關信息"
 
 #: apps/system_manage/views/system_profile.py:25
 msgid "System parameters"
@@ -6814,9 +6814,9 @@ msgstr "郵箱或用戶名"
 #: apps/users/serializers/user.py:226
 msgid ""
 "The community version supports up to 2 users. If you need more users, please "
-"contact us (https://fit2cloud.com/)."
+"contact us (https://github.com/however-yir/LZKB/issues)."
 msgstr ""
-"社區版支持最多2個用戶，如需更多用戶，請聯繫我們（https://fit2cloud.com/）。"
+"社區版支持最多2個用戶，如需更多用戶，請聯繫我們（https://github.com/however-yir/LZKB/issues）。"
 
 #: apps/users/serializers/user.py:270 apps/xpack/api/auth_config.py:31
 #: apps/xpack/api/chat_user.py:109 apps/xpack/serializers/chat_user.py:247

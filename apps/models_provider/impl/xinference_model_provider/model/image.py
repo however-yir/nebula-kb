@@ -3,11 +3,11 @@ from typing import Dict, List
 from langchain_core.messages import BaseMessage, get_buffer_string
 
 from common.config.tokenizer_manage_config import TokenizerManage
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_chat_open_ai import BaseChatOpenAI
 
 
-class XinferenceImage(MaxKBBaseModel, BaseChatOpenAI):
+class XinferenceImage(LZKBBaseModel, BaseChatOpenAI):
 
     @staticmethod
     def is_cache_model():
@@ -15,7 +15,7 @@ class XinferenceImage(MaxKBBaseModel, BaseChatOpenAI):
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
         return XinferenceImage(
             model_name=model_name,
             openai_api_base=model_credential.get('api_base'),

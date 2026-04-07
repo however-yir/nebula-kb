@@ -18,7 +18,7 @@ import websockets
 from django.utils.translation import gettext as _
 
 from common.utils.common import _remove_empty_lines
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tts import BaseTextToSpeech
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -26,7 +26,7 @@ ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
 
-class XFSparkSuperHumanoidTextToSpeech(MaxKBBaseModel, BaseTextToSpeech):
+class XFSparkSuperHumanoidTextToSpeech(LZKBBaseModel, BaseTextToSpeech):
     """讯飞超拟人语音合成 (Super Humanoid TTS)"""
     spark_app_id: str
     spark_api_key: str

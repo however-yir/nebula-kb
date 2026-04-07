@@ -1,13 +1,13 @@
 import base64
 import time
 from typing import Dict, Optional
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.base_ttv import BaseGenerationVideo
 from common.utils.logger import maxkb_logger
 from volcenginesdkarkruntime import Ark
 
 
-class GenerationVideoModel(MaxKBBaseModel, BaseGenerationVideo):
+class GenerationVideoModel(LZKBBaseModel, BaseGenerationVideo):
     api_key: str
     model_name: str
     params: dict

@@ -28,3 +28,16 @@ LOG_LEVEL: INFO
 ADMIN_PATH: /admin
 CHAT_PATH: /chat
 DEFAULT_PASSWORD: ChangeMe@1234!
+
+# Brand & links
+APP_NAME: LZKB
+APPSTORE_URL: https://raw.githubusercontent.com/however-yir/LZKB/main/appstore/lzkb.json
+PROJECT_URL: https://github.com/however-yir/LZKB
+HELP_URL: https://github.com/however-yir/LZKB/wiki
+PRICING_URL: https://github.com/however-yir/LZKB#readme
+CONTACT_URL: https://github.com/however-yir/LZKB/issues
+OFFICIAL_SITE_URL: https://github.com/however-yir/LZKB
+CHAT_FLOAT_ICON: LZKB.gif
+
+# Ollama
+OLLAMA_BASE_URL: http://127.0.0.1:11434

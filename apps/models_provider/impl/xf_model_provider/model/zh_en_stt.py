@@ -14,7 +14,7 @@ import os
 from future.backports.urllib.parse import urlparse
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_stt import BaseSpeechToText
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -35,7 +35,7 @@ def deep_merge_dict(target_dict, source_dict):
     return result
 
 
-class XFZhEnSparkSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class XFZhEnSparkSpeechToText(LZKBBaseModel, BaseSpeechToText):
     spark_app_id: str
     spark_api_key: str
     spark_api_secret: str

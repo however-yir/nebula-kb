@@ -1,4 +1,4 @@
-name: LLM Code Review
+name: PR Reminder
 
 permissions:
   contents: read
@@ -6,23 +6,27 @@ permissions:
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened]
 
 jobs:
-  llm-code-review:
+  pr-reminder:
     runs-on: ubuntu-latest
     steps:
-      - uses: fit2cloud/LLM-CodeReview-Action@main
-        env:
-          GITHUB_TOKEN: ${{ secrets.FIT2CLOUDRD_LLM_CODE_REVIEW_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.ALIYUN_LLM_API_KEY }}
-          LANGUAGE: English
-          OPENAI_API_ENDPOINT: https://dashscope.aliyuncs.com/compatible-mode/v1
-          MODEL: qwen2.5-coder-3b-instruct
-          PROMPT: "Please check the following code for any irregularities, potential issues, or optimization suggestions, and provide your answers in English."
-          top_p: 1
-          temperature: 1
-          # max_tokens: 10000
-          MAX_PATCH_LENGTH: 10000
-          IGNORE_PATTERNS: "/node_modules,*.md,/dist,/.github"
-          FILE_PATTERNS: "*.java,*.go,*.py,*.vue,*.ts,*.js,*.css,*.scss,*.html"
+      - name: Leave reminder comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              'Thanks for opening this PR to LZKB.',
+              '',
+              'Please make sure to:',
+              '- include test/verification notes;',
+              '- avoid committing secrets;',
+              '- document any config key changes in `.env.example` and `config_example.yml`.'
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });

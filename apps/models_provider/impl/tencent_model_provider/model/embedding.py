@@ -6,10 +6,10 @@ from tencentcloud.common import credential
 from tencentcloud.hunyuan.v20230901.hunyuan_client import HunyuanClient
 from tencentcloud.hunyuan.v20230901.models import GetEmbeddingRequest
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class TencentEmbeddingModel(MaxKBBaseModel, Embeddings):
+class TencentEmbeddingModel(LZKBBaseModel, Embeddings):
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         return [self.embed_query(text) for text in texts]
 

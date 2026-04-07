@@ -32,7 +32,7 @@ const initActive = async () => {
   }
 
   const redirectUrl = encodeURIComponent(`${window.location.origin}${window.LZKB.prefix}/api/lark`)
-  const url = `https://passport.feishu.cn/suite/passport/oauth/authorize?client_id=${data.agentId}&redirect_uri=${redirectUrl}&response_type=code&state=fit2cloud-lark-qr`
+  const url = `https://passport.feishu.cn/suite/passport/oauth/authorize?client_id=${data.agentId}&redirect_uri=${redirectUrl}&response_type=code&state=lzkb-lark-qr`
   const QRLoginObj = window.QRLogin({
     id: 'lark-qr',
     goto: url,

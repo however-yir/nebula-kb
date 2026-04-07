@@ -28,8 +28,8 @@ export default {
   websiteSloganPlaceholder: 'Please enter the welcome slogan',
   websiteSloganTip: 'The welcome slogan below the product logo',
 
-  defaultTip: 'The default is the MaxKB platform interface, supports custom settings',
-  logoDefaultTip: 'The default is the MaxKB login interface, supports custom settings',
+  defaultTip: 'The default is the LZKB platform interface, supports custom settings',
+  logoDefaultTip: 'The default is the LZKB login interface, supports custom settings',
   platformSetting: 'Platform Settings',
   showUserManual: 'Show User Manual',
   showForum: 'Show Forum Support',

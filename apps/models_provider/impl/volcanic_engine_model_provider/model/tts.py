@@ -23,7 +23,7 @@ import websockets
 from django.utils.translation import gettext as _
 
 from common.utils.common import _remove_empty_lines
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tts import BaseTextToSpeech
 
 MESSAGE_TYPES = {11: "audio-only server response", 12: "frontend server response", 15: "error message from server"}
@@ -46,7 +46,7 @@ ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
 
-class VolcanicEngineTextToSpeech(MaxKBBaseModel, BaseTextToSpeech):
+class VolcanicEngineTextToSpeech(LZKBBaseModel, BaseTextToSpeech):
     volcanic_app_id: str
     volcanic_cluster: str
     volcanic_api_url: str

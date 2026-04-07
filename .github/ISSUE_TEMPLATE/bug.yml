@@ -1,50 +1,49 @@
 name: 'Bug Report'
-description: 'Report an Bug'
-title: "[Bug] "
-assignees: zyyfit
+description: 'Report a bug in LZKB'
+title: '[Bug] '
 body:
   - type: markdown
     attributes:
-      value: "## Contact Information"
+      value: '## Contact Information'
   - type: input
     validations:
       required: false
     attributes:
-      label: "Contact Information"
-      description: "The ways to quickly contact you: WeChat group number and nickname, email, etc."
+      label: 'Contact Information'
+      description: 'How we can reach you for follow-up.'
   - type: markdown
     attributes:
-      value: "## Environment Information"
+      value: '## Environment Information'
   - type: input
     validations:
       required: true
     attributes:
-      label: "MaxKB Version"
-      description: "Log in to the MaxKB Web Console and check the current version on the `About` page in the top right corner."
+      label: 'LZKB Version'
+      description: 'Open About dialog in the top-right corner and copy the version string.'
   - type: markdown
     attributes:
-      value: "## Detailed information"
+      value: '## Detailed Information'
   - type: textarea
     attributes:
-      label: "Problem Description"
-      description: "Briefly describe the issue you’ve encountered."
+      label: 'Problem Description'
+      description: 'Describe the issue clearly.'
     validations:
       required: true
   - type: textarea
     attributes:
-      label: "Steps to Reproduce"
-      description: "How can this issue be reproduced."
+      label: 'Steps to Reproduce'
+      description: 'List exact steps to reproduce.'
     validations:
       required: true
   - type: textarea
     attributes:
-      label: "The expected correct result"
+      label: 'Expected Result'
   - type: textarea
     attributes:
-      label: "Related log output"
-      description: "Please paste any relevant log output here. It will automatically be formatted as code, so no backticks are necessary."
+      label: 'Related Logs'
+      description: 'Paste relevant logs with sensitive data removed.'
       render: shell
   - type: textarea
     attributes:
-      label: "Additional Information"
-      description: "If you have any additional information to provide, you can include it here (screenshots, videos, etc., are welcome)."
+      label: 'Additional Information'
+      description: 'Screenshots/videos/extra context.'

@@ -11,12 +11,12 @@ from typing import Dict
 from langchain_huggingface import HuggingFaceEmbeddings
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 max_retries = 3
 
 
-class LocalEmbedding(MaxKBBaseModel, HuggingFaceEmbeddings):
+class LocalEmbedding(LZKBBaseModel, HuggingFaceEmbeddings):
     @staticmethod
     def is_cache_model():
         return True

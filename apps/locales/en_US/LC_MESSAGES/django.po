@@ -992,7 +992,7 @@ msgstr ""
 #: apps/application/serializers/application.py:459
 msgid ""
 "The community version supports up to 5 applications. If you need more "
-"applications, please contact us (https://fit2cloud.com/)."
+"applications, please contact us (https://github.com/however-yir/LZKB/issues)."
 msgstr ""
 
 #: apps/application/serializers/application.py:471
@@ -2188,7 +2188,7 @@ msgstr ""
 
 #: apps/common/utils/common.py:246
 #, python-brace-format
-msgid "Limit {count} exceeded, please contact us (https://fit2cloud.com/)."
+msgid "Limit {count} exceeded, please contact us (https://github.com/however-yir/LZKB/issues)."
 msgstr ""
 
 #: apps/folders/models/folder.py:6 apps/folders/models/folder.py:17
@@ -2674,7 +2674,7 @@ msgstr ""
 #: apps/knowledge/serializers/knowledge.py:460
 msgid ""
 "The community version supports up to 50 knowledge bases. If you need more "
-"knowledge bases, please contact us (https://fit2cloud.com/)."
+"knowledge bases, please contact us (https://github.com/however-yir/LZKB/issues)."
 msgstr ""
 
 #: apps/knowledge/serializers/knowledge.py:560
@@ -6487,7 +6487,7 @@ msgstr ""
 
 #: apps/system_manage/views/system_profile.py:22
 #: apps/system_manage/views/system_profile.py:23
-msgid "Get MaxKB related information"
+msgid "Get LZKB related information"
 msgstr ""
 
 #: apps/system_manage/views/system_profile.py:25
@@ -6695,7 +6695,7 @@ msgstr ""
 #: apps/users/serializers/user.py:226
 msgid ""
 "The community version supports up to 2 users. If you need more users, please "
-"contact us (https://fit2cloud.com/)."
+"contact us (https://github.com/however-yir/LZKB/issues)."
 msgstr ""
 
 #: apps/users/serializers/user.py:270 apps/xpack/api/auth_config.py:31

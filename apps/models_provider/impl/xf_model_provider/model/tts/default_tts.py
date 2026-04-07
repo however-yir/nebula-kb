@@ -8,11 +8,11 @@
 """
 from typing import Dict
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tts import BaseTextToSpeech
 
 
-class XFSparkDefaultTextToSpeech(MaxKBBaseModel, BaseTextToSpeech):
+class XFSparkDefaultTextToSpeech(LZKBBaseModel, BaseTextToSpeech):
     """讯飞 TTS 工厂类，根据 api_version 参数路由到具体实现"""
 
     def check_auth(self):

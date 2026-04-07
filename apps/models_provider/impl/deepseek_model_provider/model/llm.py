@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-@Project ：MaxKB 
+@Project ：LZKB 
 @File    ：llm.py
 @Author  ：Brian Yang
 @Date    ：5/12/24 7:44 AM 
@@ -12,11 +12,11 @@ from typing import Dict, Any
 from langchain_core.language_models import LanguageModelInput
 from langchain_core.messages import AIMessage
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_chat_open_ai import BaseChatOpenAI
 
 
-class DeepSeekChatModel(MaxKBBaseModel, BaseChatOpenAI):
+class DeepSeekChatModel(LZKBBaseModel, BaseChatOpenAI):
 
     @staticmethod
     def is_cache_model():
@@ -24,7 +24,7 @@ class DeepSeekChatModel(MaxKBBaseModel, BaseChatOpenAI):
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
 
         deepseek_chat_open_ai = DeepSeekChatModel(
             model=model_name,

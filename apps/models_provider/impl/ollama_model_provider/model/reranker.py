@@ -5,15 +5,15 @@ from langchain_core.callbacks import Callbacks
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class OllamaReranker(MaxKBBaseModel, OllamaEmbeddings, BaseModel):
+class OllamaReranker(LZKBBaseModel, OllamaEmbeddings, BaseModel):
     top_n: Optional[int] = Field(3, description="Number of top documents to return")
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
         return OllamaReranker(
             model=model_name,
             base_url=model_credential.get('api_base'),

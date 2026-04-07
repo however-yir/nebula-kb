@@ -12,7 +12,7 @@ mkdir -p /opt/maxkb/python-packages
 
 rm -f /opt/maxkb-app/tmp/*
 
-_INIT_SHELL_DIR=${MAXKB_INIT_SHELL_DIR:-/opt/maxkb/local/init-shells}
+_INIT_SHELL_DIR=${LZKB_INIT_SHELL_DIR:-${MAXKB_INIT_SHELL_DIR:-/opt/maxkb/local/init-shells}}
 if [ -d $_INIT_SHELL_DIR ]; then
     chmod -R g-rwx $_INIT_SHELL_DIR
     find $_INIT_SHELL_DIR -maxdepth 1 -type f -name "*.sh" | sort | while IFS= read -r f; do

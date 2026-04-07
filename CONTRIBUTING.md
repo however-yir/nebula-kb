@@ -1,30 +1,47 @@
 # Contributing
 
-As a contributor, you should agree that:
+Thanks for contributing to **LZKB**.
 
-- The producer can adjust the open-source agreement to be more strict or relaxed as deemed necessary.
-- Your contributed code may be used for commercial purposes, including but not limited to its cloud business operations.
+## Before you start
 
-## Create pull request
-PR are always welcome, even if they only contain small fixes like typos or a few lines of code. If there will be a significant effort, please document it as an issue and get a discussion going before starting to work on it.
+- Open an issue first for large changes.
+- Keep PRs focused and small.
+- Include reproducible steps and expected behavior for bug fixes.
 
-Please submit a PR broken down into small changes bit by bit. A PR consisting of a lot of features and code changes may be hard to review. It is recommended to submit PRs in an incremental fashion.
+## Development setup
 
-This [development guideline](https://github.com/1Panel-dev/MaxKB/wiki/3-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA) contains information about repository structure, how to set up development environment, how to run it, and more.
+1. Backend:
 
-Note: If you split your pull request to small changes, please make sure any of the changes goes to master will not break anything. Otherwise, it can not be merged until this feature complete.
+```bash
+python -m uv pip install -r pyproject.toml
+python apps/manage.py migrate
+python main.py dev web
+```
 
-## Report issues
-It is a great way to contribute by reporting an issue. Well-written and complete bug reports are always welcome! Please open an issue and follow the template to fill in required information.
+2. Frontend:
 
-Before opening any issue, please look up the existing issues to avoid submitting a duplication.
-If you find a match, you can "subscribe" to it to get notified on updates. If you have additional helpful information about the issue, please leave a comment.
+```bash
+cd ui
+npm install
+npm run dev
+```
 
-When reporting issues, always include:
+## Pull request checklist
 
-* Which version you are using.
-* Steps to reproduce the issue.
-* Snapshots or log files if needed
+- [ ] The change is scoped and documented.
+- [ ] Sensitive information is removed from logs/screenshots.
+- [ ] New configuration keys are added to `.env.example` and `config_example.yml` when applicable.
+- [ ] Backward compatibility is considered for existing deployments.
 
-Because the issues are open to the public, when submitting files, be sure to remove any sensitive information, e.g. user name, password, IP address, and company name. You can
-replace those parts with "REDACTED" or other strings like "****".
+## Reporting bugs
+
+Please use the issue templates and include:
+
+- LZKB version
+- Steps to reproduce
+- Expected vs actual behavior
+- Logs or screenshots (with sensitive data redacted)
+
+## License note
+
+By contributing, you agree your contribution is distributed under this repository's license.

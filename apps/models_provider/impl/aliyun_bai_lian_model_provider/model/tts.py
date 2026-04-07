@@ -5,11 +5,11 @@ import dashscope
 from django.utils.translation import gettext as _
 
 from common.utils.common import _remove_empty_lines
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tts import BaseTextToSpeech
 
 
-class AliyunBaiLianTextToSpeech(MaxKBBaseModel, BaseTextToSpeech):
+class AliyunBaiLianTextToSpeech(LZKBBaseModel, BaseTextToSpeech):
     api_key: str
     model: str
     params: dict

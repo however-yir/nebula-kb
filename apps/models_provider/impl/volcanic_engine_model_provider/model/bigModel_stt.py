@@ -18,7 +18,7 @@ import uuid_utils.compat as uuid
 from typing import Dict
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_stt import BaseSpeechToText
 
 audio_format = "mp3"  # wav 或者 mp3，根据实际音频格式设置
@@ -189,7 +189,7 @@ class VolcanicASRClient:
             return None
 
 
-class VolcanicEngineBigModelSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class VolcanicEngineBigModelSpeechToText(LZKBBaseModel, BaseSpeechToText):
     volcanic_app_id: str
     volcanic_api_url: str
     volcanic_token: str

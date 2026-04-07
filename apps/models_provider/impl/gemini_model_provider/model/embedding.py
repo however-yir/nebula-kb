@@ -10,10 +10,10 @@ from typing import Dict
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class GeminiEmbeddingModel(MaxKBBaseModel, GoogleGenerativeAIEmbeddings):
+class GeminiEmbeddingModel(LZKBBaseModel, GoogleGenerativeAIEmbeddings):
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
         return GeminiEmbeddingModel(

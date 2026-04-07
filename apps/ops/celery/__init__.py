@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lzkb.settings')
 
 register_hmac_signed_serializer()
 
-app = Celery('MaxKB')
+app = Celery('LZKB')
 
 configs = {k: v for k, v in settings.__dict__.items() if k.startswith('CELERY')}
 configs['worker_concurrency'] = 5

@@ -6,6 +6,7 @@ from daemon import pidfile
 from .hands import *
 from .hands import __version__
 from .services.base import BaseService
+from lzkb.const import CONFIG
 
 
 class ServicesUtil(object):
@@ -26,7 +27,9 @@ class ServicesUtil(object):
 
     def start_and_watch(self):
         logging.info(time.ctime())
-        logging.info(f'MaxKB version {__version__}, more see https://www.maxkb.cn')
+        logging.info(
+            f'{CONFIG.get_app_name()} version {__version__}, more see {CONFIG.get_official_site_url()}'
+        )
         self.start()
         if self.run_daemon:
             self.show_status()

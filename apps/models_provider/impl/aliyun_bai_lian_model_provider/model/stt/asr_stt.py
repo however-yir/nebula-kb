@@ -6,11 +6,11 @@ from typing import Dict
 import dashscope
 
 from common.utils.logger import maxkb_logger
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_stt import BaseSpeechToText
 
 
-class AliyunBaiLianAsrSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class AliyunBaiLianAsrSpeechToText(LZKBBaseModel, BaseSpeechToText):
     api_key: str
     api_url: str
     model: str

@@ -7,7 +7,7 @@ from langchain_aws import ChatBedrock
 from langchain_core.messages import BaseMessage, get_buffer_string
 
 from common.config.tokenizer_manage_config import TokenizerManage
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
 def get_max_tokens_keyword(model_name):
@@ -33,7 +33,7 @@ def get_max_tokens_keyword(model_name):
         return 'max_tokens'
 
 
-class BedrockModel(MaxKBBaseModel, ChatBedrock):
+class BedrockModel(LZKBBaseModel, ChatBedrock):
 
     @staticmethod
     def is_cache_model():
@@ -48,7 +48,7 @@ class BedrockModel(MaxKBBaseModel, ChatBedrock):
     @classmethod
     def new_instance(cls, model_type: str, model_name: str, model_credential: Dict[str, str],
                      **model_kwargs) -> 'BedrockModel':
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
 
         config = {}
         # 判断model_kwargs是否包含 base_url 且不为空

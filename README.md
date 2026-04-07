@@ -93,17 +93,17 @@ Future roadmap in this fork:
 - deeper business module refactor by domain boundaries;
 - provider abstraction and plugin governance;
 - CI enhancement (tests, quality gates, dependency locks);
-- full GitHub metadata and brand asset replacement.
+- enterprise feature hardening and release governance.
 
-## Repository Metadata (GitHub)
+## Repository Metadata (GitHub, Applied)
 
-Suggested repository description:
+Current repository description:
 
 > LZKB - Self-hosted enterprise agent and knowledge base platform for private deployment and custom AI workflows.
 
-Suggested Topics:
+Current Topics:
 
-`rag`, `agent`, `knowledge-base`, `django`, `vue`, `langchain`, `llm`, `self-hosted`, `enterprise-ai`, `workflow`
+`lzkb`, `ai`, `rag`, `knowledge-base`, `llm`, `django`, `vue3`, `ollama`, `redis`, `postgresql`
 
 ## License
 

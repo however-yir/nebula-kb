@@ -4,7 +4,7 @@ from openai import OpenAI
 
 from common.config.tokenizer_manage_config import TokenizerManage
 from common.utils.common import _remove_empty_lines
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tts import BaseTextToSpeech
 from django.utils.translation import gettext as _
 
@@ -14,7 +14,7 @@ def custom_get_token_ids(text: str):
     return tokenizer.encode(text)
 
 
-class XInferenceTextToSpeech(MaxKBBaseModel, BaseTextToSpeech):
+class XInferenceTextToSpeech(LZKBBaseModel, BaseTextToSpeech):
     api_base: str
     api_key: str
     model: str

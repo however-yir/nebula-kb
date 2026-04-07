@@ -10,10 +10,10 @@ from typing import Dict
 
 from langchain_openai import OpenAIEmbeddings
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class VllmEmbeddingModel(MaxKBBaseModel, OpenAIEmbeddings):
+class VllmEmbeddingModel(LZKBBaseModel, OpenAIEmbeddings):
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
         return VllmEmbeddingModel(

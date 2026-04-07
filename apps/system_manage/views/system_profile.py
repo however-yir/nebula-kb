@@ -19,8 +19,8 @@ from system_manage.serializers.system import SystemProfileSerializer
 class SystemProfile(APIView):
     @extend_schema(
         methods=['GET'],
-        description=_('Get MaxKB related information'),
-        operation_id=_('Get MaxKB related information'),  # type: ignore
+        description=_('Get LZKB related information'),
+        operation_id=_('Get LZKB related information'),  # type: ignore
         responses=SystemProfileAPI.get_response(),
         tags=[_('System parameters')]  # type: ignore
     )

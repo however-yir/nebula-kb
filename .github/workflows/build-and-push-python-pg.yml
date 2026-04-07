@@ -12,9 +12,13 @@ on:
           - linux/amd64
           - linux/arm64
           - linux/amd64,linux/arm64
+
 jobs:
   build-and-push-python-pg-to-ghcr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,17 +27,15 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          DOCKER_IMAGE=ghcr.io/1panel-dev/maxkb-base
+          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/lzkb-base
           DOCKER_PLATFORMS=${{ github.event.inputs.architecture }}
           TAG_NAME=python3.11-pg17.9-20260326
           DOCKER_IMAGE_TAGS="--tag ${DOCKER_IMAGE}:${TAG_NAME}"
-          echo ::set-output name=docker_image::${DOCKER_IMAGE}
-          echo ::set-output name=version::${TAG_NAME}
-          echo ::set-output name=buildx_args::--platform ${DOCKER_PLATFORMS} --no-cache \
+          echo "buildx_args=--platform ${DOCKER_PLATFORMS} --no-cache \
             --build-arg VERSION=${TAG_NAME} \
             --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
             --build-arg VCS_REF=${GITHUB_SHA::8} \
-            ${DOCKER_IMAGE_TAGS} .
+            ${DOCKER_IMAGE_TAGS} ." >> $GITHUB_OUTPUT
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -45,7 +47,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker Buildx (build-and-push)
         run: |
           docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }} -f installer/Dockerfile-base

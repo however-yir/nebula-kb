@@ -19,6 +19,15 @@ logger = logging.getLogger('lzkb.conf')
 
 class Config(dict):
     defaults = {
+        # 应用品牌与外链
+        "APP_NAME": "LZKB",
+        "APPSTORE_URL": "https://raw.githubusercontent.com/however-yir/LZKB/main/appstore/lzkb.json",
+        "PROJECT_URL": "https://github.com/however-yir/LZKB",
+        "HELP_URL": "https://github.com/however-yir/LZKB/wiki",
+        "PRICING_URL": "https://github.com/however-yir/LZKB#readme",
+        "CONTACT_URL": "https://github.com/however-yir/LZKB/issues",
+        "OFFICIAL_SITE_URL": "https://github.com/however-yir/LZKB",
+        "CHAT_FLOAT_ICON": "LZKB.gif",
         # 数据库相关配置
         "DB_NAME": "lzkb",
         "DB_HOST": "127.0.0.1",
@@ -31,6 +40,7 @@ class Config(dict):
         'LOCAL_MODEL_PORT': '11636',
         'LOCAL_MODEL_PROTOCOL': "http",
         'LOCAL_MODEL_HOST_WORKER': 1,
+        'OLLAMA_BASE_URL': 'http://127.0.0.1:11434',
         # 语言
         'LANGUAGE_CODE': 'zh-CN',
         "DEBUG": False,
@@ -105,6 +115,30 @@ class Config(dict):
 
     def get_log_level(self):
         return self.get('LOG_LEVEL', 'DEBUG')
+
+    def get_app_name(self):
+        return self.get('APP_NAME', 'LZKB')
+
+    def get_appstore_url(self):
+        return self.get('APPSTORE_URL', self.defaults['APPSTORE_URL'])
+
+    def get_project_url(self):
+        return self.get('PROJECT_URL', self.defaults['PROJECT_URL'])
+
+    def get_help_url(self):
+        return self.get('HELP_URL', self.defaults['HELP_URL'])
+
+    def get_pricing_url(self):
+        return self.get('PRICING_URL', self.defaults['PRICING_URL'])
+
+    def get_contact_url(self):
+        return self.get('CONTACT_URL', self.defaults['CONTACT_URL'])
+
+    def get_official_site_url(self):
+        return self.get('OFFICIAL_SITE_URL', self.defaults['OFFICIAL_SITE_URL'])
+
+    def get_chat_float_icon(self):
+        return self.get('CHAT_FLOAT_ICON', self.defaults['CHAT_FLOAT_ICON'])
 
     def get_sandbox_python_package_paths(self):
         return self.get('SANDBOX_PYTHON_PACKAGE_PATHS',

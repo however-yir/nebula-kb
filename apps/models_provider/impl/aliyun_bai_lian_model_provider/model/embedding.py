@@ -10,10 +10,10 @@ from typing import Dict, List
 
 from openai import OpenAI
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class AliyunBaiLianEmbedding(MaxKBBaseModel):
+class AliyunBaiLianEmbedding(LZKBBaseModel):
     model_name: str
     optional_params: dict
 
@@ -27,7 +27,7 @@ class AliyunBaiLianEmbedding(MaxKBBaseModel):
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
         return AliyunBaiLianEmbedding(
             api_key=model_credential.get('dashscope_api_key'),
             model_name=model_name,

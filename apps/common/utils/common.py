@@ -248,9 +248,10 @@ def valid_license(model=None, count=None, message=None):
             record_count = QuerySet(model).count()
 
             if not is_license_valid and record_count >= count:
+                from lzkb.const import CONFIG
                 error_message = message or _(
-                    'Limit {count} exceeded, please contact us (https://fit2cloud.com/).').format(
-                    count=count)
+                    'Limit {count} exceeded, please contact us ({contact_url}).'
+                ).format(count=count, contact_url=CONFIG.get_contact_url())
                 raise AppApiException(400, error_message)
 
             return func(*args, **kwargs)

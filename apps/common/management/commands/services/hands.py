@@ -5,7 +5,7 @@ import sys
 from lzkb.const import CONFIG, PROJECT_DIR, LOG_DIR
 
 try:
-    from apps.maxkb import const
+    from lzkb import const
 
     __version__ = const.VERSION
 except ImportError as e:

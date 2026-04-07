@@ -13,10 +13,10 @@ import requests
 from langchain_core.callbacks import Callbacks
 from langchain_core.documents import BaseDocumentCompressor, Document
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class DockerAIReranker(MaxKBBaseModel, BaseDocumentCompressor):
+class DockerAIReranker(LZKBBaseModel, BaseDocumentCompressor):
     api_base: Optional[str]
     model: Optional[str]
 

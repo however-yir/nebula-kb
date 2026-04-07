@@ -14,10 +14,10 @@ from anthropic import BaseModel
 from langchain_core.embeddings import Embeddings
 
 from lzkb.const import CONFIG
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class LocalEmbedding(MaxKBBaseModel, BaseModel, Embeddings):
+class LocalEmbedding(LZKBBaseModel, BaseModel, Embeddings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model_id = kwargs.get('model_id', None)

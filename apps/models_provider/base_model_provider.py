@@ -92,7 +92,7 @@ class IModelProvider(ABC):
         raise AppApiException(500, _('The current platform does not support downloading models'))
 
 
-class MaxKBBaseModel(ABC):
+class LZKBBaseModel(ABC):
     @staticmethod
     @abstractmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
@@ -109,6 +109,10 @@ class MaxKBBaseModel(ABC):
             if key not in ['model_id', 'use_local', 'streaming', 'show_ref_label', 'stream']:
                 optional_params[key] = value
         return optional_params
+
+
+# Backward compatibility for extensions still importing the legacy name.
+MaxKBBaseModel = LZKBBaseModel
 
 
 class BaseModelCredential(ABC):
@@ -158,7 +162,7 @@ class ModelTypeConst(Enum):
 
 class ModelInfo:
     def __init__(self, name: str, desc: str, model_type: ModelTypeConst, model_credential: BaseModelCredential,
-                 model_class: Type[MaxKBBaseModel],
+                 model_class: Type[LZKBBaseModel],
                  **keywords):
         self.name = name
         self.desc = desc

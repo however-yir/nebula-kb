@@ -9,12 +9,12 @@
 import os
 from typing import Dict
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 from models_provider.impl.base_stt import BaseSpeechToText
 
 
-class AliyunBaiLianDefaultSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class AliyunBaiLianDefaultSpeechToText(LZKBBaseModel, BaseSpeechToText):
     def check_auth(self):
         pass
 

@@ -1,3 +1,4 @@
+ARG LZKB_BASE_IMAGE=ghcr.io/1panel-dev/maxkb-base:python3.11-pg17.9-20260326
 FROM node:24-alpine AS web-build
 COPY ui ui
 RUN cd ui && ls -la && if [ -d "dist" ]; then exit 0; fi && \
@@ -6,7 +7,7 @@ RUN cd ui && ls -la && if [ -d "dist" ]; then exit 0; fi && \
     NODE_OPTIONS="--max-old-space-size=4096" npx concurrently "npm run build" "npm run build-chat" && \
     find . -maxdepth 1 ! -name '.' ! -name 'dist' ! -name 'public' -exec rm -rf {} +
 
-FROM ghcr.io/1panel-dev/maxkb-base:python3.11-pg17.9-20260326 AS stage-build
+FROM ${LZKB_BASE_IMAGE} AS stage-build
 COPY --chmod=700 . /opt/maxkb-app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc g++ gettext libexpat1-dev libffi-dev && \
@@ -24,15 +25,31 @@ RUN gcc -shared -fPIC -o ${MAXKB_SANDBOX_HOME}/lib/sandbox.so /opt/maxkb-app/ins
     rm -rf /opt/maxkb-app/installer
 COPY --from=web-build --chmod=700 ui /opt/maxkb-app/ui
 
-FROM ghcr.io/1panel-dev/maxkb-base:python3.11-pg17.9-20260326
+FROM ${LZKB_BASE_IMAGE}
 ARG DOCKER_IMAGE_TAG=dev \
     BUILD_AT \
     GITHUB_COMMIT
 
-ENV MAXKB_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_COMMIT})" \
+ENV LZKB_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_COMMIT})" \
+    LZKB_DB_NAME=lzkb \
+    LZKB_DB_HOST=127.0.0.1 \
+    LZKB_DB_PORT=5432 \
+    LZKB_DB_USER=${POSTGRES_USER} \
+    LZKB_DB_PASSWORD=${POSTGRES_PASSWORD} \
+    LZKB_DB_MAX_OVERFLOW=80 \
+    LZKB_REDIS_HOST=127.0.0.1 \
+    LZKB_REDIS_PORT=6379 \
+    LZKB_REDIS_DB=0 \
+    LZKB_REDIS_PASSWORD=${REDIS_PASSWORD} \
+    LZKB_EMBEDDING_MODEL_PATH=/opt/maxkb-app/model/embedding \
+    LZKB_EMBEDDING_MODEL_NAME=/opt/maxkb-app/model/embedding/shibing624_text2vec-base-chinese \
+    LZKB_LOCAL_MODEL_HOST=127.0.0.1 \
+    LZKB_LOCAL_MODEL_PORT=11636 \
+    LZKB_LOCAL_MODEL_PROTOCOL=http \
+    MAXKB_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_COMMIT})" \
     MAXKB_DB_NAME=lzkb \
     MAXKB_DB_HOST=127.0.0.1 \
-    MAXKB_DB_PORT=5432  \
+    MAXKB_DB_PORT=5432 \
     MAXKB_DB_USER=${POSTGRES_USER} \
     MAXKB_DB_PASSWORD=${POSTGRES_PASSWORD} \
     MAXKB_DB_MAX_OVERFLOW=80 \

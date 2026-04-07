@@ -20,7 +20,7 @@ import websockets
 from django.utils.translation import gettext as _
 
 from common.utils.common import _remove_empty_lines
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_tts import BaseTextToSpeech
 
 STATUS_FIRST_FRAME = 0  # 第一帧的标识
@@ -32,7 +32,7 @@ ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
 
-class XFSparkTextToSpeech(MaxKBBaseModel, BaseTextToSpeech):
+class XFSparkTextToSpeech(LZKBBaseModel, BaseTextToSpeech):
     spark_app_id: str
     spark_api_key: str
     spark_api_secret: str

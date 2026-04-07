@@ -17,7 +17,7 @@ from urllib.parse import urlencode, urlparse
 
 import websockets
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_stt import BaseSpeechToText
 
 STATUS_FIRST_FRAME = 0  # 第一帧的标识
@@ -29,7 +29,7 @@ ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
 
-class XFSparkSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class XFSparkSpeechToText(LZKBBaseModel, BaseSpeechToText):
     spark_app_id: str
     spark_api_key: str
     spark_api_secret: str

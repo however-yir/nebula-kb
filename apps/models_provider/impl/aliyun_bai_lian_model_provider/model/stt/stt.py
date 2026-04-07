@@ -6,11 +6,11 @@ import dashscope
 from dashscope.audio.asr import (Recognition)
 from pydub import AudioSegment
 
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 from models_provider.impl.base_stt import BaseSpeechToText
 
 
-class AliyunBaiLianSpeechToText(MaxKBBaseModel, BaseSpeechToText):
+class AliyunBaiLianSpeechToText(LZKBBaseModel, BaseSpeechToText):
     api_key: str
     model: str
     params: dict

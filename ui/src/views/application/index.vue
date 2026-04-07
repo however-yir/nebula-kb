@@ -402,6 +402,7 @@ import ApplicationApi from '@/api/application/application'
 import WorkspaceApi from '@/api/workspace/workspace'
 import { MsgSuccess, MsgConfirm, MsgError } from '@/utils/message'
 import { i18n_name, resetUrl } from '@/utils/common'
+import { openPricingPage } from '@/utils/external-links'
 import { isWorkFlow } from '@/utils/application'
 import { dateFormat } from '@/utils/time'
 import { SourceTypeEnum } from '@/enums/common'
@@ -825,7 +826,7 @@ const importApplication = (file: any) => {
           cancelButtonText: t('common.confirm'),
           confirmButtonText: t('common.professional'),
         }).then(() => {
-          window.open('https://maxkb.cn/pricing.html', '_blank')
+          openPricingPage()
         })
       }
     })

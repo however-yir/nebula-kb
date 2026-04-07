@@ -41,7 +41,7 @@ const initActive = async () => {
   const queryParams = new URLSearchParams(route.query as any).toString()
   const redirectUrl = encodeURIComponent(`${window.location.origin}/chat/api/auth/lark?accessToken=${accessToken}&${queryParams}`)
   //const redirectUrl = encodeURIComponent(`http://127.0.0.1:8080/chat/api/auth/lark?accessToken=${accessToken}&${queryParams}`)
-  const url = `https://passport.feishu.cn/suite/passport/oauth/authorize?client_id=${data.agentId}&redirect_uri=${redirectUrl}&response_type=code&state=fit2cloud-lark-qr`
+  const url = `https://passport.feishu.cn/suite/passport/oauth/authorize?client_id=${data.agentId}&redirect_uri=${redirectUrl}&response_type=code&state=lzkb-lark-qr`
 
   const QRLoginObj = window.QRLogin({
     id: 'lark-qr',

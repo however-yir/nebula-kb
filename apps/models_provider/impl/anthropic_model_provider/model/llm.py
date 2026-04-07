@@ -12,7 +12,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage, get_buffer_string
 
 from common.config.tokenizer_manage_config import TokenizerManage
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
 def custom_get_token_ids(text: str):
@@ -20,7 +20,7 @@ def custom_get_token_ids(text: str):
     return tokenizer.encode(text)
 
 
-class AnthropicChatModel(MaxKBBaseModel, ChatAnthropic):
+class AnthropicChatModel(LZKBBaseModel, ChatAnthropic):
 
     @staticmethod
     def is_cache_model():
@@ -28,7 +28,7 @@ class AnthropicChatModel(MaxKBBaseModel, ChatAnthropic):
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
         azure_chat_open_ai = AnthropicChatModel(
             model=model_name,
             anthropic_api_url=model_credential.get('api_base'),

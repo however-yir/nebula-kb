@@ -160,15 +160,15 @@ const model_id = ref('')
 const model_params_setting = ref({})
 
 const promptTemplates = {
-  INIT_TEMPLATE: `你是资深的 Python 工程师，专注于为 MaxKB 平台的工具 / 数据源场景生成可直接运行的 Python 代码。严格遵守以下规则：
+  INIT_TEMPLATE: `你是资深的 Python 工程师，专注于为 LZKB 平台的工具 / 数据源场景生成可直接运行的 Python 代码。严格遵守以下规则：
 
 - 仅输出纯 Python 代码块，无任何多余的文字解释、注释以外的说明；
 - 代码兼容 Python 3.8 及以上版本，符合 PEP8 编码规范，关键逻辑添加简洁中文注释；
-- 仅使用 MaxKB 内置依赖（如 requests、pymysql、pandas、json 等），不引入未声明的第三方库。
+- 仅使用 LZKB 内置依赖（如 requests、pymysql、pandas、json 等），不引入未声明的第三方库。
 
 {userInput}
 
-请为 MaxKB 工具 生成 Python 代码，需求如下：
+请为 LZKB 工具 生成 Python 代码，需求如下：
 
 - 核心功能：用户输入的主题 / 功能需求
 - 启动参数：平台配置的启动参数，如 API 密钥、数据库地址、账号密码等, 已声明参数：{initFieldList}

@@ -1,17 +1,25 @@
-# 安全说明
+# Security Policy / 安全策略
 
-如果您发现安全问题，请直接联系我们：
+如果你发现 LZKB 的安全问题，请不要公开提交 Issue。
 
-- support@fit2cloud.com
-- 400-052-0755
+请通过以下渠道私下联系维护者：
 
-感谢您的支持！
+- Email: `security@lzkb.dev`
+- GitHub Security Advisories: `https://github.com/however-yir/LZKB/security/advisories`
+- 备选渠道（普通问题，不含漏洞细节）: `https://github.com/however-yir/LZKB/issues`
 
-# Security Policy
+When you discover a security vulnerability in LZKB, please do not report it publicly first.
 
-All security bugs should be reported to the contact as below:
+Private reporting channels:
 
-- support@fit2cloud.com
-- 400-052-0755
+- Email: `security@lzkb.dev`
+- GitHub Security Advisories: `https://github.com/however-yir/LZKB/security/advisories`
+- Fallback (non-sensitive communication only): `https://github.com/however-yir/LZKB/issues`
 
-Thanks for your support!
+## Disclosure timeline / 披露流程
+
+- We will acknowledge receipt within 72 hours.
+- We will provide an initial triage within 7 days.
+- We will coordinate a fix and disclosure timeline with the reporter.
+
+我们会在 72 小时内确认收到，在 7 天内完成初步分级，并与报告人协同修复和披露计划。

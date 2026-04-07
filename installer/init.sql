@@ -1,5 +1,5 @@
-CREATE DATABASE "maxkb";
+CREATE DATABASE "lzkb";
 
-\c "maxkb";
+\c "lzkb";
 
 CREATE EXTENSION "vector";

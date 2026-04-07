@@ -1,16 +1,18 @@
 name: sync2gitee
-on: [push]
+
+on:
+  workflow_dispatch:
 
 jobs:
   repo-sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Mirror the Github organization repos to Gitee.
+      - name: Mirror repository to Gitee
         uses: Yikun/hub-mirror-action@master
         with:
-          src: 'github/1Panel-dev'
-          dst: 'gitee/fit2cloud-feizhiyun'
+          src: 'github/however-yir'
+          dst: 'gitee/however-yir'
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token:  ${{ secrets.GITEE_TOKEN }}
-          static_list: "MaxKB"
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          static_list: 'LZKB'
           force_update: true

@@ -15,17 +15,17 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai import AzureChatOpenAI
 
 from common.config.tokenizer_manage_config import TokenizerManage
-from models_provider.base_model_provider import MaxKBBaseModel
+from models_provider.base_model_provider import LZKBBaseModel
 
 
-class AzureChatModel(MaxKBBaseModel, AzureChatOpenAI):
+class AzureChatModel(LZKBBaseModel, AzureChatOpenAI):
     @staticmethod
     def is_cache_model():
         return False
 
     @staticmethod
     def new_instance(model_type, model_name, model_credential: Dict[str, object], **model_kwargs):
-        optional_params = MaxKBBaseModel.filter_optional_params(model_kwargs)
+        optional_params = LZKBBaseModel.filter_optional_params(model_kwargs)
 
         return AzureChatModel(
             azure_endpoint=model_credential.get('api_base'),

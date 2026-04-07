@@ -449,6 +449,7 @@ import TemplateStoreDialog from '@/views/knowledge/template-store/TemplateStoreD
 import ResourceMappingDrawer from '@/components/resource_mapping/index.vue'
 import { MsgSuccess, MsgConfirm } from '@/utils/message'
 import { numberFormat, i18n_name } from '@/utils/common'
+import { openPricingPage } from '@/utils/external-links'
 import { dateFormat } from '@/utils/time'
 import { SourceTypeEnum } from '@/enums/common'
 import { loadSharedApi } from '@/utils/dynamics-api/shared-api'
@@ -703,7 +704,7 @@ function importKnowledgeBundle(file: any) {
           cancelButtonText: t('common.confirm'),
           confirmButtonText: t('common.professional'),
         }).then(() => {
-          window.open('https://maxkb.cn/pricing.html', '_blank')
+          openPricingPage()
         })
       }
     })
