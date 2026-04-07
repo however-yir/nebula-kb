@@ -1,114 +1,165 @@
 # LZKB
 
-LZKB is a self-hosted enterprise agent and knowledge base platform maintained as a customized fork for private deployment and secondary development.
+这是 **LZKB** 的中文说明文档。
 
-## Why This Fork
+本项目用于构建本地优先的知识库与检索增强能力，聚焦知识沉淀、检索问答与可视化管理。
+仓库当前形态以“可运行 + 可维护 + 可二次开发”为目标，兼顾工程实践与业务扩展。
 
-This repository is maintained for:
-- building an internal AI knowledge assistant for private data;
-- customizing model routing and tool workflows for business scenarios;
-- reducing upstream brand coupling in docs, defaults, and runtime naming;
-- creating a stable base for long-term independent iteration.
+## 目录
 
-## What Has Been Customized
+- [1. 项目概述](#1-项目概述)
+- [2. 目标与使用场景](#2-目标与使用场景)
+- [3. 功能与能力边界](#3-功能与能力边界)
+- [4. 技术栈与依赖](#4-技术栈与依赖)
+- [5. 仓库结构说明](#5-仓库结构说明)
+- [6. 快速开始](#6-快速开始)
+- [7. 配置与环境建议](#7-配置与环境建议)
+- [8. 开发与测试流程](#8-开发与测试流程)
+- [9. 发布与协作规范](#9-发布与协作规范)
+- [10. 路线图建议](#10-路线图建议)
+- [11. 贡献指南](#11-贡献指南)
+- [12. License](#12-license)
 
-### 1) Naming and namespace
-- Backend Django namespace migrated from `maxkb` to `lzkb`.
-- Runtime settings module now uses `lzkb.settings`.
-- Frontend global object migrated from `window.MaxKB` to `window.LZKB`.
-- Locale persistence key migrated from `MaxKB-locale` to `LZKB-locale`.
-- Frontend default title changed to `LZKB`.
+## 1. 项目概述
 
-### 2) Secure configuration defaults
-- Sensitive defaults are replaced with placeholders:
-  - `CHANGE_ME_DB_PASSWORD`
-  - `CHANGE_ME_REDIS_PASSWORD`
-- Built-in default user password changed to `ChangeMe@1234!` (must be overridden in production).
-- Added startup guard in `installer/start-all.sh` to block placeholder secrets.
+本仓库面向真实工程场景构建，重点强调以下原则：
 
-### 3) Configuration templates
-- Added root [`config_example.yml`](./config_example.yml) for file-based configuration.
-- Added root [`.env.example`](./.env.example) for environment-based configuration.
-- Preferred env prefix is `LZKB_`, while `MAXKB_` remains compatible for existing deployments.
+- 文档可读：便于团队快速理解上下文与边界。
+- 结构清晰：模块职责明确，便于多人协作。
+- 演进友好：支持持续迭代与版本化管理。
 
-### 4) Branding and links
-- Replaced major visible project identity references in frontend defaults and docs.
-- Project URLs in UI defaults now point to your fork placeholders.
+## 2. 目标与使用场景
 
-## Quick Start (Docker)
+本仓库适用于以下场景：
+
+- 作为业务功能开发与验证的工程基座。
+- 作为团队内部的能力沉淀与知识共享仓库。
+- 作为二次开发与集成扩展的起点。
+
+## 3. 功能与能力边界
+
+当前重点能力包括：
+- 知识入库、清洗、索引与检索问答闭环。
+- 面向业务场景的知识组织与版本管理。
+- 支持本地化部署与可控的数据访问策略。
+
+当前边界说明：
+
+- 优先保证主流程稳定与可维护。
+- 复杂能力按模块扩展，不在单次迭代中堆叠过多变更。
+- 所有新增功能建议配套文档与测试。
+
+## 4. 技术栈与依赖
+
+当前仓库可识别的技术栈如下：
+- Node.js / JavaScript
+- Python
+
+依赖管理建议：
+
+- 锁定关键依赖版本，避免隐性升级带来的回归风险。
+- 在 CI 中增加基础构建与测试校验。
+- 新增第三方依赖时，补充用途说明与安全评估。
+
+## 5. 仓库结构说明
+
+建议优先阅读以下路径：
+
+- \：项目整体说明与入口。
+- \ 或同类目录：架构、规范、部署、FAQ 等。
+- 业务源码目录：按仓库实际模块组织查看。
+
+如需长期维护，建议保持以下约束：
+
+- 公共能力下沉为共享模块。
+- 场景能力通过独立目录隔离。
+- 配置、脚本、文档三者保持一致更新。
+
+## 6. 快速开始
+
+1. 克隆仓库：
+
+\\\
+
+2. 按项目类型安装依赖并启动：
 
 ```bash
-docker run -d \
-  --name=lzkb \
-  --restart=always \
-  -p 8080:8080 \
-  -e POSTGRES_PASSWORD='your-strong-postgres-password' \
-  -e REDIS_PASSWORD='your-strong-redis-password' \
-  -e LZKB_CONFIG_TYPE=ENV \
-  -e LZKB_DB_NAME=lzkb \
-  -e LZKB_DB_HOST=127.0.0.1 \
-  -e LZKB_DB_PORT=5432 \
-  -e LZKB_DB_USER=root \
-  -e LZKB_DB_PASSWORD='your-strong-postgres-password' \
-  -e LZKB_REDIS_HOST=127.0.0.1 \
-  -e LZKB_REDIS_PORT=6379 \
-  -e LZKB_REDIS_PASSWORD='your-strong-redis-password' \
-  -v ~/.lzkb:/opt/maxkb \
-  your-dockerhub-or-registry/lzkb:latest
+# Python 项目
+python -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+[ -f requirements.txt ] && pip install -r requirements.txt
+[ -f pyproject.toml ] && pip install -e .
 ```
 
-Then open:
+3. 首次运行建议先执行最小验证：
 
-- Admin: `http://<your-host>:8080/admin`
-- Chat: `http://<your-host>:8080/chat`
+- 能否完成依赖安装。
+- 能否成功启动核心流程。
+- 能否通过基础测试或静态检查。
 
-## Local Development
+## 7. 配置与环境建议
 
-### Backend
+建议将环境配置分为三层：
 
-```bash
-# from repo root
-python -m uv pip install -r pyproject.toml
-python apps/manage.py migrate
-python main.py dev web
-```
+- 本地开发（dev）
+- 集成联调（staging）
+- 生产发布（prod）
 
-### Frontend
+推荐做法：
 
-```bash
-cd ui
-npm install
-npm run dev
-```
+- 使用 \ 或样例配置文件管理参数模板。
+- 将密钥、令牌、账号等敏感信息放入环境变量或密钥管理系统。
+- 对数据库、缓存、外部 API 地址使用可切换配置。
 
-## Difference from Upstream
+## 8. 开发与测试流程
 
-Compared with upstream MaxKB, this fork currently focuses on:
-- namespace decoupling (`maxkb` -> `lzkb` for core runtime package);
-- security hardening for default credentials and startup checks;
-- project identity replacement in UI/runtime defaults;
-- fork-oriented documentation and deployment entrypoints.
+推荐工作流：
 
-Future roadmap in this fork:
-- deeper business module refactor by domain boundaries;
-- provider abstraction and plugin governance;
-- CI enhancement (tests, quality gates, dependency locks);
-- enterprise feature hardening and release governance.
+1. 基于默认分支创建功能分支。
+2. 小步提交，确保每次提交目标明确。
+3. 本地完成构建与测试后再推送。
+4. 通过 Pull Request 完成评审与合并。
 
-## Repository Metadata (GitHub, Applied)
+测试建议：
 
-Current repository description:
+- 单元测试覆盖核心业务逻辑。
+- 集成测试覆盖关键接口与主流程。
+- 对高风险改动补充回归用例。
 
-> LZKB - Self-hosted enterprise agent and knowledge base platform for private deployment and custom AI workflows.
+## 9. 发布与协作规范
 
-Current Topics:
+发布建议：
 
-`lzkb`, `ai`, `rag`, `knowledge-base`, `llm`, `django`, `vue3`, `ollama`, `redis`, `postgresql`
+- 使用语义化版本（如 \）。
+- 在发布说明中明确新增、修复与不兼容变更。
+- 关键发布前执行一次完整回归。
 
-## License
+协作建议：
 
-This project is a fork based on GPLv3-licensed upstream work and remains under GPLv3 obligations.
+- 需求、设计、代码、测试保持同频更新。
+- 重大改动先在文档中定义边界再实施。
+- 统一 issue / PR 模板，降低沟通成本。
 
-See:
-- [LICENSE](./LICENSE)
-- [NOTICE-LZKB.md](./NOTICE-LZKB.md)
+## 10. 路线图建议
+
+可按以下顺序推进：
+
+1. 稳定主流程，补齐最小可观测性。
+2. 优化模块边界，降低耦合度。
+3. 提升自动化测试覆盖率。
+4. 完善部署与运维手册。
+5. 逐步引入性能优化与安全加固。
+
+## 11. 贡献指南
+
+欢迎以 Issue / PR 方式参与改进，建议提交时包含：
+
+- 变更背景与目标
+- 关键实现说明
+- 测试结果或验证步骤
+- 兼容性与风险评估
+
+## 12. License
+
+本仓库遵循当前项目中已有的 License 文件约定。
