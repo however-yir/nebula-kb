@@ -1,6 +1,24 @@
 # LZKB - 本地知识库与检索增强平台 | Local Knowledge Base & Retrieval Platform
 
+[![Build](https://github.com/however-yir/LZKB/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/however-yir/LZKB/actions/workflows/build-and-push.yml)
+[![Docs](https://img.shields.io/badge/docs-README-0A7EFA)](https://github.com/however-yir/LZKB#readme)
+[![License](https://img.shields.io/badge/license-GPL--3.0-16A34A)](./LICENSE)
+[![Status](https://img.shields.io/badge/status-active-2563EB)](https://github.com/however-yir/LZKB)
+
+> Status: `active`
+>
+> Upstream family: `MaxKB`
+>
+> Series: [local-ai-hub](https://github.com/however-yir/local-ai-hub) · [yourrag](https://github.com/however-yir/yourrag)
+
 项目聚焦知识沉淀、检索问答与本地化部署，适合作为企业或个人知识中台能力底座。
+
+## 项目快照
+
+- 定位：知识库平台，而不是通用聊天工作台。
+- 亮点：Django + PostgreSQL + Redis、多模型接入、知识运营、智能体工作流扩展。
+- 最短运行路径：`python apps/manage.py migrate && python main.py dev web`
+- 系列分工：`Local AI Hub` 管工作台体验，`LZKB` 管知识平台，`YourRAG` 管企业级 RAG/Agent 交付。
 
 ## 目录
 
@@ -37,42 +55,49 @@
 
 ## 4. 技术栈
 
-- Node.js / JavaScript
 - Python
+- Django
+- PostgreSQL
+- Redis
 
 ## 5. 仓库结构
 
 建议优先阅读：
 
-- README.md：项目入口与整体说明。
-- docs 或同类目录：架构、规范、部署与 FAQ。
-- 核心源码目录：按模块深入阅读。
+- `README.md`：项目入口与整体说明。
+- `README_CN.md`：更细化的中文交付说明。
+- `apps/`、`ui/`：后端与界面主目录。
+- `installer/`：安装、初始化与部署辅助脚本。
 
 ## 6. Quick Start
 
 1. 克隆仓库并进入目录：
 
-    git clone https://github.com/however-yir/LZKB.git
-    cd LZKB
+```bash
+git clone https://github.com/however-yir/LZKB.git
+cd LZKB
+```
 
-2. 安装依赖并启动（按项目类型选择）：
+2. 安装依赖并初始化：
 
-Python 项目常用命令：
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install -U pip
-    [ -f requirements.txt ] && pip install -r requirements.txt
-    [ -f pyproject.toml ] && pip install -e .
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+[ -f requirements.txt ] && pip install -r requirements.txt
+[ -f pyproject.toml ] && pip install -e .
+python apps/manage.py migrate
+```
 
-3. 最小验证建议：
+3. 启动开发环境：
 
-- 依赖安装成功。
-- 核心流程可运行。
-- 基础测试或检查通过。
+```bash
+python main.py dev web
+```
 
 ## 7. 配置建议
 
-建议按 dev / staging / prod 分层配置，并将密钥类信息放入环境变量或密钥管理系统。
+建议按 `dev / staging / prod` 分层配置，并将密钥类信息放入环境变量或密钥管理系统。
 
 ## 8. 开发与测试
 
