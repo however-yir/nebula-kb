@@ -1,0 +1,86 @@
+name: LZKB Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - dev
+    paths:
+      - "apps/**"
+      - ".github/workflows/lzkb-tests.yml"
+      - "pyproject.toml"
+      - "config_example.yml"
+  pull_request:
+    branches:
+      - main
+      - master
+      - dev
+    paths:
+      - "apps/**"
+      - ".github/workflows/lzkb-tests.yml"
+      - "pyproject.toml"
+      - "config_example.yml"
+
+jobs:
+  django-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: ${{ github.workspace }}/apps
+      LZKB_CONFIG_TYPE: ENV
+      LZKB_DB_NAME: /tmp/lzkb-test.sqlite3
+      LZKB_DB_HOST: 127.0.0.1
+      LZKB_DB_PORT: "5432"
+      LZKB_DB_USER: root
+      LZKB_DB_PASSWORD: test-password
+      LZKB_DB_ENGINE: django.db.backends.sqlite3
+      LZKB_DB_MAX_OVERFLOW: "10"
+      LZKB_REDIS_HOST: 127.0.0.1
+      LZKB_REDIS_PORT: "6379"
+      LZKB_REDIS_PASSWORD: test-password
+      LZKB_REDIS_DB: "0"
+      LZKB_REDIS_MAX_CONNECTIONS: "10"
+      LZKB_ENABLE_FORCE_GC: "0"
+      LZKB_LANGUAGE_CODE: zh-CN
+      LZKB_TIME_ZONE: Asia/Shanghai
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            "django==5.2.12" \
+            "drf-spectacular[sidecar]==0.28.0" \
+            "django-redis==6.0.0" \
+            "django-db-connection-pool==1.2.6" \
+            "django-mptt==0.17.0" \
+            "psycopg[binary]==3.2.9" \
+            "python-dotenv==1.1.1" \
+            "uuid-utils==0.14.0" \
+            "captcha==0.7.1" \
+            "pytz==2025.2" \
+            "psutil==7.0.0" \
+            "cffi==1.17.1" \
+            "beautifulsoup4==4.13.4" \
+            "requests==2.32.5" \
+            "pydub==0.25.1" \
+            "celery[sqlalchemy]==5.5.3" \
+            "django-celery-beat==2.8.1" \
+            "celery-once==3.0.1" \
+            "django-apscheduler==0.7.0" \
+            "langchain-core==1.1.0" \
+            "langchain-mcp-adapters==0.2.1" \
+            "pylint==3.3.7" \
+            "pycryptodome==3.23.0"
+
+      - name: Run Django Tests
+        run: python apps/manage.py test apps.users apps.chat apps.knowledge apps.tools
