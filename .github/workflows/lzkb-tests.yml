@@ -31,18 +31,91 @@ permissions:
   contents: read
 
 jobs:
-  django-tests:
+  django-test-suites:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: unit
+            test_targets: "apps.users apps.tools"
+            db_backend: sqlite
+            db_engine: django.db.backends.sqlite3
+            db_name: /tmp/lzkb-test.sqlite3
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: root
+            db_password: test-password
+          - suite: unit
+            test_targets: "apps.users apps.tools"
+            db_backend: postgres
+            db_engine: django.db.backends.postgresql
+            db_name: postgres
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: postgres
+            db_password: postgres
+          - suite: api
+            test_targets: "apps.chat"
+            db_backend: sqlite
+            db_engine: django.db.backends.sqlite3
+            db_name: /tmp/lzkb-test.sqlite3
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: root
+            db_password: test-password
+          - suite: api
+            test_targets: "apps.chat"
+            db_backend: postgres
+            db_engine: django.db.backends.postgresql
+            db_name: postgres
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: postgres
+            db_password: postgres
+          - suite: integration
+            test_targets: "apps.users.tests.LoginSerializerTests apps.knowledge.tests.KnowledgeRetrievalTests apps.tools.tests.ToolConnectionTests"
+            db_backend: sqlite
+            db_engine: django.db.backends.sqlite3
+            db_name: /tmp/lzkb-test.sqlite3
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: root
+            db_password: test-password
+          - suite: integration
+            test_targets: "apps.users.tests.LoginSerializerTests apps.knowledge.tests.KnowledgeRetrievalTests apps.tools.tests.ToolConnectionTests"
+            db_backend: postgres
+            db_engine: django.db.backends.postgresql
+            db_name: postgres
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: postgres
+            db_password: postgres
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       PYTHONPATH: ${{ github.workspace }}/apps
+      DJANGO_SETTINGS_MODULE: lzkb.settings.test
       LZKB_CONFIG_TYPE: ENV
-      LZKB_DB_NAME: /tmp/lzkb-test.sqlite3
-      LZKB_DB_HOST: 127.0.0.1
-      LZKB_DB_PORT: "5432"
-      LZKB_DB_USER: root
-      LZKB_DB_PASSWORD: test-password
-      LZKB_DB_ENGINE: django.db.backends.sqlite3
+      LZKB_DB_NAME: ${{ matrix.db_name }}
+      LZKB_DB_HOST: ${{ matrix.db_host }}
+      LZKB_DB_PORT: ${{ matrix.db_port }}
+      LZKB_DB_USER: ${{ matrix.db_user }}
+      LZKB_DB_PASSWORD: ${{ matrix.db_password }}
+      LZKB_DB_ENGINE: ${{ matrix.db_engine }}
       LZKB_DB_MAX_OVERFLOW: "10"
       LZKB_REDIS_HOST: 127.0.0.1
       LZKB_REDIS_PORT: "6379"
@@ -67,6 +140,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install \
+            "coverage==7.6.1" \
             "django==5.2.12" \
             "drf-spectacular[sidecar]==0.28.0" \
             "django-redis==6.0.0" \
@@ -91,8 +165,122 @@ jobs:
             "pylint==3.3.7" \
             "pycryptodome==3.23.0"
 
+      - name: Wait For Postgres (matrix postgres only)
+        if: matrix.db_backend == 'postgres'
+        run: |
+          python - <<'PY'
+          import time
+          import psycopg
+
+          for i in range(40):
+              try:
+                  with psycopg.connect("host=127.0.0.1 port=5432 dbname=postgres user=postgres password=postgres"):
+                      print("Postgres is ready")
+                      break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Postgres did not become ready in time")
+          PY
+
       - name: Validate Django Configuration
         run: python apps/manage.py check
 
-      - name: Run Django Tests
-        run: python apps/manage.py test apps.users apps.chat apps.knowledge apps.tools --noinput --verbosity=2
+      - name: Run ${{ matrix.suite }} Tests (${{ matrix.db_backend }})
+        run: python apps/manage.py test ${{ matrix.test_targets }} --noinput --verbosity=2
+
+  coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: django-test-suites
+    env:
+      PYTHONPATH: ${{ github.workspace }}/apps
+      DJANGO_SETTINGS_MODULE: lzkb.settings.test
+      LZKB_CONFIG_TYPE: ENV
+      LZKB_DB_NAME: /tmp/lzkb-coverage.sqlite3
+      LZKB_DB_HOST: 127.0.0.1
+      LZKB_DB_PORT: "5432"
+      LZKB_DB_USER: root
+      LZKB_DB_PASSWORD: test-password
+      LZKB_DB_ENGINE: django.db.backends.sqlite3
+      LZKB_REDIS_HOST: 127.0.0.1
+      LZKB_REDIS_PORT: "6379"
+      LZKB_REDIS_PASSWORD: test-password
+      LZKB_REDIS_DB: "0"
+      LZKB_REDIS_MAX_CONNECTIONS: "10"
+      LZKB_ENABLE_FORCE_GC: "0"
+      LZKB_LANGUAGE_CODE: zh-CN
+      LZKB_TIME_ZONE: Asia/Shanghai
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            "coverage==7.6.1" \
+            "django==5.2.12" \
+            "drf-spectacular[sidecar]==0.28.0" \
+            "django-redis==6.0.0" \
+            "django-db-connection-pool==1.2.6" \
+            "django-mptt==0.17.0" \
+            "psycopg[binary]==3.2.9" \
+            "python-dotenv==1.1.1" \
+            "uuid-utils==0.14.0" \
+            "captcha==0.7.1" \
+            "pytz==2025.2" \
+            "psutil==7.0.0" \
+            "cffi==1.17.1" \
+            "beautifulsoup4==4.13.4" \
+            "requests==2.32.5" \
+            "pydub==0.25.1" \
+            "celery[sqlalchemy]==5.5.3" \
+            "django-celery-beat==2.8.1" \
+            "celery-once==3.0.1" \
+            "django-apscheduler==0.7.0" \
+            "langchain-core==1.1.0" \
+            "langchain-mcp-adapters==0.2.1" \
+            "pylint==3.3.7" \
+            "pycryptodome==3.23.0"
+
+      - name: Run Coverage
+        run: |
+          coverage run --source=apps -m django test apps.users apps.chat apps.knowledge apps.tools --noinput --verbosity=1
+          coverage xml -o coverage.xml
+          coverage report --fail-under=30
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lzkb-coverage-report
+          path: coverage.xml
+          if-no-files-found: warn
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install audit tool
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Run dependency audit
+        run: pip-audit --progress-spinner off

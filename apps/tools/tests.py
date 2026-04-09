@@ -2,8 +2,9 @@ import json
 from unittest.mock import patch
 
 from django.test import SimpleTestCase
+from rest_framework import serializers
 
-from tools.serializers.tool import ToolSerializer
+from tools.serializers.tool import ToolSerializer, validate_mcp_config
 
 
 class ToolConnectionTests(SimpleTestCase):
@@ -35,3 +36,25 @@ class ToolConnectionTests(SimpleTestCase):
                 ).test_connection()
 
         mock_validate_config.assert_not_called()
+
+    def test_test_connection_propagates_config_validation_errors(self):
+        config_code = json.dumps({"timeout-server": {"command": "python", "args": ["server.py"]}})
+
+        with (
+            patch("tools.serializers.tool.ToolExecutor.validate_mcp_transport"),
+            patch(
+                "tools.serializers.tool.validate_mcp_config",
+                side_effect=serializers.ValidationError("MCP configuration is invalid"),
+            ),
+        ):
+            with self.assertRaises(serializers.ValidationError):
+                ToolSerializer.TestConnection(
+                    data={"workspace_id": "workspace-1", "code": config_code}
+                ).test_connection()
+
+    def test_validate_mcp_config_wraps_timeout_as_validation_error(self):
+        with patch("tools.serializers.tool.asyncio.run", side_effect=TimeoutError("connect timeout")):
+            with self.assertRaises(serializers.ValidationError) as ctx:
+                validate_mcp_config({"demo": {"command": "python", "args": ["-V"]}})
+
+        self.assertIn("MCP configuration is invalid", str(ctx.exception))
