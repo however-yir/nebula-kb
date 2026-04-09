@@ -73,4 +73,4 @@ class LoginSerializerTests(SimpleTestCase):
 
         self.assertEqual(ctx.exception.code, 500)
         self.assertEqual(ctx.exception.message, "The username or password is incorrect")
-        mock_handle_failed.assert_called_once()
+        mock_handle_failed.assert_called_once_with("demo-user", False, 5, 10)

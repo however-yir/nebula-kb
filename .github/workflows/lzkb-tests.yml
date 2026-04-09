@@ -21,6 +21,14 @@ on:
       - ".github/workflows/lzkb-tests.yml"
       - "pyproject.toml"
       - "config_example.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: lzkb-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   django-tests:
@@ -53,6 +61,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install Dependencies
         run: |
@@ -82,5 +91,8 @@ jobs:
             "pylint==3.3.7" \
             "pycryptodome==3.23.0"
 
+      - name: Validate Django Configuration
+        run: python apps/manage.py check
+
       - name: Run Django Tests
-        run: python apps/manage.py test apps.users apps.chat apps.knowledge apps.tools
+        run: python apps/manage.py test apps.users apps.chat apps.knowledge apps.tools --noinput --verbosity=2

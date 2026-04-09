@@ -1,16 +1,30 @@
-from pathlib import Path
-
 from django.test import SimpleTestCase
+from django.urls import resolve
+
+from lzkb.const import CONFIG
 
 
 class ChatRouteSmokeTests(SimpleTestCase):
-    def setUp(self):
-        self.urls_content = Path(__file__).resolve().parent.joinpath("urls.py").read_text(encoding="utf-8")
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.chat_api_prefix = f"{CONFIG.get_chat_path()}/api"
+
+    def _resolve(self, path: str):
+        return resolve(f"{self.chat_api_prefix}{path}")
 
     def test_routes_keep_core_chat_endpoints(self):
-        self.assertIn("path('auth/anonymous', views.AnonymousAuthentication.as_view())", self.urls_content)
-        self.assertIn("path('chat_message/<str:chat_id>', views.ChatView.as_view(), name='chat')", self.urls_content)
+        anonymous_match = self._resolve("/auth/anonymous")
+        chat_match = self._resolve("/chat_message/chat-1")
+
+        self.assertEqual(anonymous_match.func.view_class.__name__, "AnonymousAuthentication")
+        self.assertEqual(chat_match.view_name, "chat")
+        self.assertEqual(chat_match.func.view_class.__name__, "ChatView")
 
     def test_routes_keep_mcp_and_captcha_endpoints(self):
-        self.assertIn("path('mcp', mcp_view)", self.urls_content)
-        self.assertIn("path('captcha', views.CaptchaView.as_view(), name='captcha')", self.urls_content)
+        mcp_match = self._resolve("/mcp")
+        captcha_match = self._resolve("/captcha")
+
+        self.assertEqual(mcp_match.func.__name__, "mcp_view")
+        self.assertEqual(captcha_match.view_name, "captcha")
+        self.assertEqual(captcha_match.func.view_class.__name__, "CaptchaView")
