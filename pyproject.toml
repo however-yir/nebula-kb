@@ -2,7 +2,7 @@
 name = "lzkb"
 version = "2.0.0"
 description = "LZKB: 自主可控的企业级智能体与知识库平台"
-authors = [{ name = "liuzhuoran", email = "liuzhuoran@example.com" }]
+authors = [{ name = "however-yir", email = "however-yir@example.com" }]
 requires-python = "~=3.11.0"
 readme = "README.md"
 dependencies = [
