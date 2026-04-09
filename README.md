@@ -130,6 +130,25 @@ python apps/manage.py migrate
 python main.py dev web
 ```
 
+### 6.1 本地依赖一键准备（PostgreSQL / Redis / 可选 Ollama）
+
+首次启动建议先执行：
+
+```bash
+cp .env.example .env
+# 修改 .env 中所有 CHANGE_ME_* 密码
+
+./scripts/bootstrap-local.sh --start
+# 如需一起拉起 Ollama:
+# ./scripts/bootstrap-local.sh --start --with-ollama
+```
+
+该脚本会：
+
+1. 校验 `.env` 是否存在并阻止占位密码直接启动；
+2. 按 `docker-compose.dev.yml` 拉起 PostgreSQL / Redis；
+3. 可选拉起本地 Ollama，降低首次联调门槛。
+
 ## 7. 配置建议
 
 建议按 `dev / staging / prod` 分层配置，并将密钥类信息放入环境变量或密钥管理系统。

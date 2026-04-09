@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: lzkb-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${LZKB_DB_NAME:-lzkb}
+      POSTGRES_USER: ${LZKB_DB_USER:-root}
+      POSTGRES_PASSWORD: ${LZKB_DB_PASSWORD:-CHANGE_ME_DB_PASSWORD}
+    ports:
+      - "${LZKB_DB_PORT:-5432}:5432"
+    volumes:
+      - lzkb_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: lzkb-redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${LZKB_REDIS_PASSWORD:-CHANGE_ME_REDIS_PASSWORD}"]
+    ports:
+      - "${LZKB_REDIS_PORT:-6379}:6379"
+    volumes:
+      - lzkb_redis_data:/data
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: lzkb-ollama
+    restart: unless-stopped
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - lzkb_ollama_data:/root/.ollama
+
+volumes:
+  lzkb_postgres_data:
+  lzkb_redis_data:
+  lzkb_ollama_data:
