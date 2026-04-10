@@ -39,7 +39,7 @@ dependencies = [
     "zhipuai==2.1.5.20250708",
     "volcengine-python-sdk[ark]==4.0.5",
     "boto3==1.42.46",
-    "tencentcloud-sdk-python==3.0.1420",
+    "tencentcloud-sdk-python==3.1.75",
     "xinference-client==1.7.1.post1",
     "anthropic==0.79.0",
     "dashscope==1.25.7",
