@@ -162,6 +162,7 @@ jobs:
             "django-apscheduler==0.7.0" \
             "langchain-core==1.1.0" \
             "langchain-mcp-adapters==0.2.1" \
+            "jieba==0.42.1" \
             "pylint==3.3.7" \
             "pycryptodome==3.23.0"
 
@@ -247,6 +248,7 @@ jobs:
             "django-apscheduler==0.7.0" \
             "langchain-core==1.1.0" \
             "langchain-mcp-adapters==0.2.1" \
+            "jieba==0.42.1" \
             "pylint==3.3.7" \
             "pycryptodome==3.23.0"
 
