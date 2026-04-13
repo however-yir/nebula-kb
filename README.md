@@ -8,6 +8,11 @@
 > Status: `active`
 >
 > Upstream family: `MaxKB`
+
+> **非官方声明（Non-Affiliation）**  
+> 本仓库为社区维护的衍生/二次开发版本，与上游项目及其权利主体不存在官方关联、授权背书或从属关系。  
+> **商标声明（Trademark Notice）**  
+> 相关项目名称、Logo 与商标归其各自权利人所有。本仓库仅用于说明兼容/来源，不主张任何商标权利。
 >
 > Series: [local-ai-hub](https://github.com/however-yir/local-ai-hub) · [yourrag](https://github.com/however-yir/yourrag)
 
