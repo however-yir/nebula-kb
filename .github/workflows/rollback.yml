@@ -1,0 +1,68 @@
+name: Rollback Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollbackImage:
+        description: 'Image to roll back to, for example ghcr.io/however-yir/lzkb:v2.0.0'
+        required: true
+      releaseUrl:
+        description: 'Optional public URL for post-rollback /healthz and /readyz checks'
+        required: false
+        default: ''
+      deployDir:
+        description: 'Directory containing the LZKB deployment on the target host or runner'
+        required: false
+        default: '/opt/lzkb'
+      deployHost:
+        description: 'Optional SSH host. Leave empty when running on a self-hosted deploy runner.'
+        required: false
+        default: ''
+      deployUser:
+        description: 'SSH user when deployHost is set'
+        required: false
+        default: 'deploy'
+      runner:
+        description: 'Runner label. Use a self-hosted deploy runner when not using SSH.'
+        required: false
+        default: 'ubuntu-latest'
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: ${{ github.event.inputs.runner }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Roll back on current runner
+        if: ${{ github.event.inputs.deployHost == '' }}
+        env:
+          LZKB_ROLLBACK_IMAGE: ${{ github.event.inputs.rollbackImage }}
+          LZKB_RELEASE_URL: ${{ github.event.inputs.releaseUrl }}
+          LZKB_DEPLOY_DIR: ${{ github.event.inputs.deployDir }}
+        run: ./scripts/rollback.sh
+
+      - name: Prepare SSH key
+        if: ${{ github.event.inputs.deployHost != '' }}
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.LZKB_DEPLOY_SSH_KEY }}
+        run: |
+          test -n "$DEPLOY_SSH_KEY"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/lzkb_deploy_key
+          chmod 600 ~/.ssh/lzkb_deploy_key
+
+      - name: Roll back over SSH
+        if: ${{ github.event.inputs.deployHost != '' }}
+        env:
+          ROLLBACK_IMAGE: ${{ github.event.inputs.rollbackImage }}
+          RELEASE_URL: ${{ github.event.inputs.releaseUrl }}
+          DEPLOY_DIR: ${{ github.event.inputs.deployDir }}
+          DEPLOY_HOST: ${{ github.event.inputs.deployHost }}
+          DEPLOY_USER: ${{ github.event.inputs.deployUser }}
+        run: |
+          ssh -i ~/.ssh/lzkb_deploy_key -o StrictHostKeyChecking=accept-new "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "cd '${DEPLOY_DIR}' && LZKB_ROLLBACK_IMAGE='${ROLLBACK_IMAGE}' LZKB_RELEASE_URL='${RELEASE_URL}' ./scripts/rollback.sh"

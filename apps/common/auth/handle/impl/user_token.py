@@ -13,6 +13,7 @@ from django.core.cache import cache
 from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
+from common.auth.tokens import get_valid_session_by_access_token, touch_session
 from common.auth.handle.auth_base_handle import AuthBaseHandle
 from common.constants.authentication_type import AuthenticationType
 from common.constants.cache_version import Cache_Version
@@ -290,19 +291,37 @@ def get_auth(user):
 
 class UserToken(AuthBaseHandle):
     def support(self, request, token: str, get_token_details):
+        session = getattr(request, "_lzkb_device_session", None)
+        if session is None:
+            session = get_valid_session_by_access_token(token)
+            if session is not None:
+                setattr(request, "_lzkb_device_session", session)
+        if session is not None:
+            return True
+
         auth_details = get_token_details()
-        if auth_details is None:
-            return False
-        return 'id' in auth_details and auth_details.get('type') == AuthenticationType.SYSTEM_USER.value
+        return auth_details is not None and 'id' in auth_details and auth_details.get('type') == AuthenticationType.SYSTEM_USER.value
 
     def handle(self, request, token: str, get_token_details):
+        session = getattr(request, "_lzkb_device_session", None)
+        if session is not None:
+            user = session.user
+            if not user.is_active or user.password != session.password_hash:
+                raise AppAuthenticationFailed(1002, _('Authentication information is incorrect'))
+            touch_session(session, user)
+            auth = get_auth(user)
+            auth.session_id = str(session.id)
+            auth.device_id = session.device_id
+            auth.access_token = token
+            return user, auth
+
         version, get_key = Cache_Version.TOKEN.value
         cache_token = cache.get(get_key(token), version=version)
         if cache_token is None:
             raise AppAuthenticationFailed(1002, _('Login expired'))
         auth_details = get_token_details()
         timeout = CONFIG.get_session_timeout()
-        cache.touch(token, timeout=timeout, version=version)
+        cache.touch(get_key(token), timeout=timeout, version=version)
         user = QuerySet(User).get(id=auth_details['id'])
         if not user.is_active or user.password != cache_token.password:
             raise AppAuthenticationFailed(1002, _('Authentication information is incorrect'))

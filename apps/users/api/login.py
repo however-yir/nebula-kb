@@ -11,7 +11,14 @@ from drf_spectacular.utils import OpenApiParameter
 
 from common.mixins.api_mixin import APIMixin
 from common.result import ResultSerializer
-from users.serializers.login import LoginResponse, LoginRequest, CaptchaResponse
+from users.serializers.login import (
+    CaptchaResponse,
+    LoginRequest,
+    LoginResponse,
+    RefreshTokenRequest,
+    RefreshTokenResponse,
+    TokenPolicyResponse,
+)
 
 
 class ApiLoginResponse(ResultSerializer):
@@ -62,3 +69,29 @@ class CaptchaAPI(APIMixin):
     @staticmethod
     def get_response():
         return ApiCaptchaResponse
+
+
+class ApiRefreshTokenResponse(ResultSerializer):
+    def get_data(self):
+        return RefreshTokenResponse()
+
+
+class RefreshTokenAPI(APIMixin):
+    @staticmethod
+    def get_request():
+        return RefreshTokenRequest
+
+    @staticmethod
+    def get_response():
+        return ApiRefreshTokenResponse
+
+
+class ApiTokenPolicyResponse(ResultSerializer):
+    def get_data(self):
+        return TokenPolicyResponse()
+
+
+class TokenPolicyAPI(APIMixin):
+    @staticmethod
+    def get_response():
+        return ApiTokenPolicyResponse

@@ -61,6 +61,8 @@ docker run -d \
 - 管理端：`http://<你的地址>:8080/admin`
 - 对话端：`http://<你的地址>:8080/chat`
 
+生产化部署建议使用分离形态：`web` / `worker` / `scheduler` / PostgreSQL / Redis / object storage。环境变量契约、`/healthz` / `/readyz`、备份恢复和回滚流程见 [docs/ops/operability.md](docs/ops/operability.md) 与 [docs/ops/postgres-backup-restore.md](docs/ops/postgres-backup-restore.md)。
+
 ## 本地开发
 
 ### 后端
@@ -70,6 +72,31 @@ python -m uv pip install -r pyproject.toml
 python apps/manage.py migrate
 python main.py dev web
 ```
+
+### 一键快速安装（推荐）
+
+macOS:
+
+```bash
+./scripts/quick-install-mac.sh
+# 如需一起拉起 Ollama:
+# ./scripts/quick-install-mac.sh --with-ollama
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\quick-install-win.ps1
+# 如需一起拉起 Ollama:
+# powershell -ExecutionPolicy Bypass -File .\scripts\quick-install-win.ps1 -WithOllama
+```
+
+脚本会自动：
+
+1. 初始化 `.env` 并替换 `CHANGE_ME_*` 占位密钥；
+2. 创建 `.venv` 并安装依赖；
+3. 拉起 PostgreSQL / Redis（可选 Ollama）并自动确保 `pgvector` 扩展；
+4. 执行数据库迁移。
 
 ### 前端
 
@@ -91,6 +118,38 @@ npm run dev
 - 按业务域拆分与重构核心模块；
 - 完善模型提供商抽象与插件治理；
 - 补齐测试、质量门禁、依赖锁定和 CI 稳定性。
+
+## 质量与发布验收
+
+LZKB 的可靠性目标是先覆盖最小验收闭环，再逐步提高 CI 拦截能力：
+
+`登录 -> 知识库 -> 上传 -> 检索 -> 应用 -> 权限 -> API Key`
+
+质量体系采用四层测试：单元、集成、API 回归、E2E。高风险模块优先覆盖认证、权限、token、文件上传、公开接口、工作流执行，并按 50% -> 60% -> 核心模块 70%+ 推进覆盖率。
+
+发布前请执行固定检查：
+
+```bash
+bash scripts/quality-gate.sh release
+```
+
+详细方案见：
+
+- [可靠性验收方案](./docs/quality/reliability-acceptance.md)
+- [发布检查清单](./docs/quality/release-checklist.md)
+
+## 企业交付基线
+
+一期企业能力边界聚焦“权限可控、行为可追溯、数据可隔离、客户可交付”，覆盖工作空间、RBAC、审计日志、SSO 交付边界、API Key、配额限流和基础可观测性。
+
+交付文档见：
+
+- [企业交付文档索引](./docs/enterprise/README.md)
+- [一期企业能力边界](./docs/enterprise/enterprise-capability-boundary.md)
+- [管理员手册](./docs/enterprise/administrator-guide.md)
+- [部署手册](./docs/enterprise/deployment-guide.md)
+- [安全说明](./docs/enterprise/security-notes.md)
+- [故障处理文档](./docs/enterprise/troubleshooting-guide.md)
 
 ## 仓库描述与 Topics（已应用）
 

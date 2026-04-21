@@ -7,7 +7,16 @@
     @desc:
 """
 
+import re
+
 from system_manage.models.log_management import Log
+
+
+def _normalize_event_name(menu, operate):
+    event = f"{menu}.{operate}".strip().lower()
+    event = re.sub(r"[^a-z0-9]+", "_", event)
+    event = event.strip("_")[:160]
+    return event or "audit_event"
 
 
 def _get_ip_address(request):
@@ -48,6 +57,38 @@ def _get_user(request):
     return user_info
 
 
+def _get_actor(request, user):
+    auth = getattr(request, 'auth', None)
+    role_list = [str(role) for role in getattr(auth, 'role_list', [])] if auth is not None else []
+    return {
+        "type": "user" if user.get("id") else "anonymous",
+        "id": user.get("id"),
+        "username": user.get("username"),
+        "email": user.get("email"),
+        "roles": role_list,
+    }
+
+
+def _get_resource(request, workspace_id, operation_object):
+    return {
+        "workspace_id": workspace_id,
+        "path": getattr(request, 'path', ''),
+        "method": getattr(request, 'method', ''),
+        "object": operation_object or {},
+    }
+
+
+def _get_result(status, exc=None):
+    result = {
+        "status": status,
+        "success": int(status) < 400,
+    }
+    if exc is not None:
+        result["error_type"] = exc.__class__.__name__
+        result["message"] = str(getattr(exc, 'message', exc))
+    return result
+
+
 def _get_details(request):
     path = request.path
     body = request.data
@@ -64,7 +105,7 @@ def _get_workspace_id(request, kwargs):
 
 
 def log(menu: str, operate, get_user=_get_user, get_ip_address=_get_ip_address, get_details=_get_details,
-        get_operation_object=None, get_workspace_id=_get_workspace_id):
+        get_operation_object=None, get_workspace_id=_get_workspace_id, event_name=None):
     """
     记录审计日志
     @param menu: 操作菜单 str
@@ -80,6 +121,8 @@ def log(menu: str, operate, get_user=_get_user, get_ip_address=_get_ip_address, 
     def inner(func):
         def run(view, request, **kwargs):
             status = 200
+            exc = None
+            response = None
             operation_object = {}
             try:
                 if get_operation_object is not None:
@@ -87,9 +130,12 @@ def log(menu: str, operate, get_user=_get_user, get_ip_address=_get_ip_address, 
             except Exception as e:
                 pass
             try:
-                return func(view, request, **kwargs)
+                response = func(view, request, **kwargs)
+                status = getattr(response, 'status_code', 200)
+                return response
             except Exception as e:
-                status = 500
+                status = getattr(e, 'status_code', 500)
+                exc = e
                 raise e
             finally:
                 ip = get_ip_address(request)
@@ -99,8 +145,13 @@ def log(menu: str, operate, get_user=_get_user, get_ip_address=_get_ip_address, 
                 _operate = operate
                 if callable(operate):
                     _operate = operate(request)
+                _event_name = event_name or _normalize_event_name(menu, _operate)
+                actor = _get_actor(request, user)
+                resource = _get_resource(request, workspace_id, operation_object)
+                result = _get_result(status, exc)
                 # 插入审计日志
-                Log(menu=menu, operate=_operate, user=user, status=status, ip_address=ip, details=details,
+                Log(event_name=_event_name, actor=actor, resource=resource, result=result, menu=menu,
+                    operate=_operate, user=user, status=status, ip_address=ip, details=details,
                     operation_object=operation_object, workspace_id=workspace_id).save()
 
         return run

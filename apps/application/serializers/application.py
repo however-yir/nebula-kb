@@ -8,7 +8,6 @@
 """
 import asyncio
 import base64
-import hashlib
 import json
 import os
 import pickle
@@ -41,7 +40,7 @@ from common.exception.app_exception import AppApiException
 from common.field.common import UploadedFileField
 from common.utils.appstore import fetch_filtered_appstore_apps
 from common.utils.common import get_file_content, restricted_loads, generate_uuid, _remove_empty_lines, \
-    bytes_to_uploaded_file
+    bytes_to_uploaded_file, generate_secure_token
 from common.utils.logger import maxkb_logger
 from common.utils.tool_code import ToolExecutor
 from knowledge.models import Knowledge, KnowledgeScope, File, FileSourceType
@@ -552,7 +551,7 @@ class ApplicationSerializer(serializers.Serializer):
         application_model.save()
         # 插入认证信息
         ApplicationAccessToken(application_id=application_model.id,
-                               access_token=hashlib.md5(str(uuid.uuid7()).encode()).hexdigest()[8:24]).save()
+                               access_token=generate_secure_token(nbytes=24)).save()
         return ApplicationCreateSerializer.ApplicationResponse(application_model).data
 
     @staticmethod
@@ -576,7 +575,7 @@ class ApplicationSerializer(serializers.Serializer):
         application_model.save()
         # 插入认证信息
         ApplicationAccessToken(application_id=application_model.id,
-                               access_token=hashlib.md5(str(uuid.uuid7()).encode()).hexdigest()[8:24]).save()
+                               access_token=generate_secure_token(nbytes=24)).save()
         # 插入关联数据
         QuerySet(ResourceMapping).bulk_create(application_knowledge_mapping_model_list)
         return ApplicationCreateSerializer.ApplicationResponse(application_model).data
@@ -628,7 +627,7 @@ class ApplicationSerializer(serializers.Serializer):
         }).auth_resource(str(application_model.id))
         # 插入认证信息
         ApplicationAccessToken(application_id=application_model.id,
-                               access_token=hashlib.md5(str(uuid.uuid7()).encode()).hexdigest()[8:24]).save()
+                               access_token=generate_secure_token(nbytes=24)).save()
         if is_import_tool:
             if len(tool_model_list) > 0:
                 QuerySet(Tool).bulk_create(tool_model_list)
@@ -919,9 +918,7 @@ class ApplicationOperateSerializer(serializers.Serializer):
                                                workspace_id=workspace_id)
         self.reset_application_version(work_flow_version, application)
         work_flow_version.save()
-        access_token = hashlib.md5(
-            str(uuid.uuid7()).encode()).hexdigest()[
-                       8:24]
+        access_token = generate_secure_token(nbytes=24)
         application_access_token = QuerySet(ApplicationAccessToken).filter(
             application_id=application.id).first()
         if application_access_token is None:

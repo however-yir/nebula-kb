@@ -21,6 +21,13 @@ if not os.path.exists(celery_data_dir) or not os.path.isdir(celery_data_dir):
 redis_celery_once_db = CONFIG.get("REDIS_DB")
 redis_celery_db = CONFIG.get('REDIS_DB')
 CELERY_BROKER_URL_FORMAT = '%(protocol)s://:%(password)s@%(host)s:%(port)s/%(db)s'
+
+
+def build_redis_url(protocol, host, port, db, password=None):
+    auth = f':{password}@' if password else ''
+    return f'{protocol}://{auth}{host}:{port}/{db}'
+
+
 if CONFIG.get('REDIS_SENTINEL_MASTER') and CONFIG.get('REDIS_SENTINEL_SENTINELS'):
     sentinels_str = CONFIG.get('REDIS_SENTINEL_SENTINELS')
     sentinels = [
@@ -28,10 +35,10 @@ if CONFIG.get('REDIS_SENTINEL_MASTER') and CONFIG.get('REDIS_SENTINEL_SENTINELS'
         for hostport in sentinels_str.split(',')
         for host, port in [hostport.strip().split(':')]
     ]
-    CELERY_BROKER_URL = ';'.join([CELERY_BROKER_URL_FORMAT % {
-        'protocol': 'sentinel', 'password': CONFIG.get('REDIS_PASSWORD'),
-        'host': item[0], 'port': item[1], 'db': redis_celery_db
-    } for item in sentinels])
+    CELERY_BROKER_URL = ';'.join([
+        build_redis_url('sentinel', item[0], item[1], redis_celery_db, CONFIG.get('REDIS_PASSWORD'))
+        for item in sentinels
+    ])
     SENTINEL_OPTIONS = {
         'master_name': CONFIG.get('REDIS_SENTINEL_MASTER'),
     }
@@ -51,22 +58,22 @@ if CONFIG.get('REDIS_SENTINEL_MASTER') and CONFIG.get('REDIS_SENTINEL_SENTINELS'
         'db': redis_celery_once_db,
     }
 else:
-    CELERY_BROKER_URL = CELERY_BROKER_URL_FORMAT % {
-        'protocol': 'redis',
-        'password': CONFIG.get('REDIS_PASSWORD'),
-        'host': CONFIG.get('REDIS_HOST'),
-        'port': CONFIG.get('REDIS_PORT'),
-        'db': redis_celery_db
-    }
+    CELERY_BROKER_URL = build_redis_url(
+        CONFIG.get('REDIS_PROTOCOL', 'redis'),
+        CONFIG.get('REDIS_HOST'),
+        CONFIG.get('REDIS_PORT'),
+        redis_celery_db,
+        CONFIG.get('REDIS_PASSWORD'),
+    )
     # celery-once 常规模式配置
     celery_once_settings = {
-        'url': CELERY_BROKER_URL_FORMAT % {
-            'protocol': 'redis',
-            'password': CONFIG.get('REDIS_PASSWORD'),
-            'host': CONFIG.get('REDIS_HOST'),
-            'port': CONFIG.get('REDIS_PORT'),
-            'db': redis_celery_once_db,
-        }
+        'url': build_redis_url(
+            CONFIG.get('REDIS_PROTOCOL', 'redis'),
+            CONFIG.get('REDIS_HOST'),
+            CONFIG.get('REDIS_PORT'),
+            redis_celery_once_db,
+            CONFIG.get('REDIS_PASSWORD'),
+        )
     }
 CELERY_result_backend = CELERY_BROKER_URL
 CELERY_timezone = CONFIG.get_time_zone()

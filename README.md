@@ -152,7 +152,33 @@ cp .env.example .env
 
 1. 校验 `.env` 是否存在并阻止占位密码直接启动；
 2. 按 `docker-compose.dev.yml` 拉起 PostgreSQL / Redis；
-3. 可选拉起本地 Ollama，降低首次联调门槛。
+3. 自动确保 `pgvector` 扩展已启用；
+4. 可选拉起本地 Ollama，降低首次联调门槛。
+
+### 6.2 极速安装脚本（macOS / Windows）
+
+macOS:
+
+```bash
+./scripts/quick-install-mac.sh
+# 如需一起拉起 Ollama:
+# ./scripts/quick-install-mac.sh --with-ollama
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\quick-install-win.ps1
+# 如需一起拉起 Ollama:
+# powershell -ExecutionPolicy Bypass -File .\scripts\quick-install-win.ps1 -WithOllama
+```
+
+快速脚本会自动完成：
+
+1. 初始化 `.env` 并替换 `CHANGE_ME_*` 占位密钥；
+2. 创建 `.venv` 并安装 Python 依赖；
+3. 拉起 PostgreSQL / Redis（可选 Ollama）并确保 `pgvector`；
+4. 执行数据库迁移。
 
 ## 7. 配置建议
 
@@ -165,6 +191,9 @@ cp .env.example .env
 | 开发模式 | `python main.py dev web` | 本地功能开发 |
 | 一键本地启动 | `installer/start-all.sh` | 演示与快速验证 |
 | 分组件启动 | `installer/start-postgres.sh` / `installer/start-redis.sh` / `installer/start-maxkb.sh` | 更接近生产的联调环境 |
+| 可运维分离部署 | `docker compose -f deploy/docker-compose.operational.yml up -d` | web / worker / scheduler / PostgreSQL / Redis / object storage 独立部署 |
+
+运维部署、环境变量契约、健康检查、备份恢复和回滚流程见 [docs/ops/operability.md](docs/ops/operability.md) 与 [docs/ops/postgres-backup-restore.md](docs/ops/postgres-backup-restore.md)。
 
 ## 8. 开发与测试
 

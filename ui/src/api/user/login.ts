@@ -34,6 +34,17 @@ const logout: (loading?: Ref<boolean>) => Promise<Result<boolean>> = (loading) =
   return post('/user/logout', undefined, undefined, loading)
 }
 
+const refreshToken: (refreshToken?: string, loading?: Ref<boolean>) => Promise<Result<any>> = (
+  refreshToken,
+  loading,
+) => {
+  return post('/user/token/refresh', refreshToken ? { refresh_token: refreshToken } : undefined, undefined, loading)
+}
+
+const tokenPolicy: (loading?: Ref<boolean>) => Promise<Result<any>> = (loading) => {
+  return get('/user/token/policy', undefined, loading)
+}
+
 /**
  * 获取验证码
  * @param loading 接口加载器
@@ -107,6 +118,8 @@ const samlLogin: (loading?: Ref<boolean>) => Promise<Result<any>> = (
 export default {
   login,
   logout,
+  refreshToken,
+  tokenPolicy,
   getCaptcha,
   getAuthType,
   getDingCallback,

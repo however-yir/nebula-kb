@@ -1,5 +1,3 @@
-import hashlib
-
 import uuid_utils.compat as uuid
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -11,6 +9,7 @@ from application.models.application_api_key import ApplicationApiKey
 from common.cache_data.application_api_key_cache import get_application_api_key, del_application_api_key
 from common.db.search import page_search
 from common.exception.app_exception import AppApiException
+from common.utils.common import generate_secure_token
 
 
 class ApplicationKeySerializerModel(serializers.ModelSerializer):
@@ -51,7 +50,7 @@ class ApplicationKeySerializer(serializers.Serializer):
         if with_valid:
             self.is_valid(raise_exception=True)
         application_id = self.data.get("application_id")
-        secret_key = 'agent-' + hashlib.md5(str(uuid.uuid7()).encode()).hexdigest()
+        secret_key = generate_secure_token(prefix='agent-', nbytes=32)
         application_api_key = ApplicationApiKey(id=uuid.uuid7(),
                                                 secret_key=secret_key,
                                                 application_id=application_id)

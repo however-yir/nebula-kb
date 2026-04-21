@@ -10,64 +10,67 @@ const useLoginStore = defineStore('login', {
   }),
   actions: {
     getToken(): string | null {
-      if (this.token) {
-        return this.token
-      }
-      return localStorage.getItem('token')
+      return this.token || null
+    },
+    setTokenFromPayload(data: any) {
+      this.token = data?.access_token || data?.token || ''
+    },
+    clearToken() {
+      this.token = ''
     },
 
     async asyncLogin(data: any, loading?: Ref<boolean>) {
       return LoginApi.login(data).then((ok) => {
-        this.token = ok?.data?.token
-        localStorage.setItem('token', ok?.data?.token)
+        this.setTokenFromPayload(ok?.data)
         const user = useUserStore()
         return user.profile(loading)
       })
     },
     async asyncLdapLogin(data: LoginRequest, loading?: Ref<boolean>) {
       return LoginApi.ldapLogin(data).then((ok) => {
-        this.token = ok?.data?.token
-        localStorage.setItem('token', ok?.data?.token)
+        this.setTokenFromPayload(ok?.data)
         const user = useUserStore()
         return user.profile(loading)
       })
     },
     async dingCallback(code: string) {
       return LoginApi.getDingCallback(code).then((ok) => {
-        this.token = ok?.data?.token
-        localStorage.setItem('token', ok?.data?.token)
+        this.setTokenFromPayload(ok?.data)
         const user = useUserStore()
         return user.profile()
       })
     },
     async dingOauth2Callback(code: string) {
       return LoginApi.getDingOauth2Callback(code).then((ok) => {
-        this.token = ok?.data?.token
-        localStorage.setItem('token', ok?.data?.token)
+        this.setTokenFromPayload(ok?.data)
         const user = useUserStore()
         return user.profile()
       })
     },
     async wecomCallback(code: string) {
       return LoginApi.getWecomCallback(code).then((ok) => {
-        this.token = ok?.data?.token
-        localStorage.setItem('token', ok?.data?.token)
+        this.setTokenFromPayload(ok?.data)
         const user = useUserStore()
         return user.profile()
       })
     },
     async larkCallback(code: string) {
       return LoginApi.getLarkCallback(code).then((ok) => {
-        this.token = ok?.data?.token
-        localStorage.setItem('token', ok?.data?.token)
+        this.setTokenFromPayload(ok?.data)
         const user = useUserStore()
         return user.profile()
+      })
+    },
+    async refreshToken() {
+      return LoginApi.refreshToken().then((ok) => {
+        this.setTokenFromPayload(ok?.data)
+        return ok
       })
     },
 
     async logout() {
       return LoginApi.logout().then(() => {
-        localStorage.removeItem('token')
+        this.clearToken()
         return true
       })
     },

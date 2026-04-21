@@ -50,10 +50,13 @@ def init_chat_doc(system_urlpatterns, chat_urlpatterns):
 
 
 def encrypt(text):
-    md5 = hashlib.md5()
-    md5.update(text.encode())
-    result = md5.hexdigest()
-    return result
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def is_doc_password_valid():
+    expected_hash = CONFIG.get('DOC_PASSWORD_SHA256')
+    return expected_hash is not None and CONFIG.get('DOC_PASSWORD') is not None and encrypt(
+        CONFIG.get('DOC_PASSWORD')) == expected_hash
 
 
 def get_call(application_urlpatterns, patterns, params, func):
@@ -64,12 +67,10 @@ def get_call(application_urlpatterns, patterns, params, func):
     return run
 
 
-init_list = [(init_app_doc, {'valid': lambda: CONFIG.get('DOC_PASSWORD') is not None and encrypt(
-    CONFIG.get('DOC_PASSWORD')) == 'd4fc097197b4b90a122b92cbd5bbe867',
+init_list = [(init_app_doc, {'valid': is_doc_password_valid,
                              'get_call': get_call,
                              'get_params': lambda application_urlpatterns, patterns: (application_urlpatterns,)}),
-             (init_chat_doc, {'valid': lambda: CONFIG.get('DOC_PASSWORD') is not None and encrypt(
-                 CONFIG.get('DOC_PASSWORD')) == 'd4fc097197b4b90a122b92cbd5bbe867' or True, 'get_call': get_call,
+             (init_chat_doc, {'valid': lambda: is_doc_password_valid() or True, 'get_call': get_call,
                               'get_params': lambda application_urlpatterns, patterns: (
                                   application_urlpatterns, patterns)})]
 

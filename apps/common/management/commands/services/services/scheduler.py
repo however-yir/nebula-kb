@@ -17,7 +17,7 @@ class SchedulerService(BaseService):
         print("\n- Start Scheduler Server")
 
         log_format = '%(h)s %(t)s %(L)ss "%(r)s" %(s)s %(b)s '
-        bind = f'127.0.0.1:6060'
+        bind = f'0.0.0.0:{CONFIG.get("SCHEDULER_HTTP_PORT", 6060)}'
         max_requests = 10240 if int(self.worker) > 1 else 0
         cmd = [
             'gunicorn', 'lzkb.wsgi:application',
@@ -45,6 +45,7 @@ class SchedulerService(BaseService):
         # 复制当前环境变量，并设置 ENABLE_SCHEDULER=1
         env = os.environ.copy()
         env['ENABLE_SCHEDULER'] = '1'
+        env['SERVER_NAME'] = 'scheduler'
         kwargs = {
             'cwd': self.cwd,
             'stderr': self.log_file,

@@ -15,7 +15,7 @@ CACHES = {
 
 # Speed up auth-related tests.
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.MD5PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
 ]
 
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"

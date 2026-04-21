@@ -10,7 +10,7 @@ import { ref, type WritableComputedRef } from 'vue'
 
 const axiosConfig = {
   baseURL: (window.LZKB?.prefix ? window.LZKB?.prefix : '/admin') + '/api',
-  withCredentials: false,
+  withCredentials: true,
   timeout: 1800000, // 30分钟 timeout
   headers: {},
 }
@@ -35,7 +35,7 @@ instance.interceptors.request.use(
     }
     return config
   },
-  (err: any) => {
+  async (err: any) => {
     return Promise.reject(err)
   },
 )
@@ -59,7 +59,7 @@ instance.interceptors.response.use(
     }
     return response
   },
-  (err: any) => {
+  async (err: any) => {
     if (err.code === 'ECONNABORTED') {
       MsgError(err.message)
       console.error(err)
@@ -70,6 +70,24 @@ instance.interceptors.response.use(
       }
     }
     if (err.response?.status === 401) {
+      const originalRequest = err.response.config
+      const isRefreshRequest = originalRequest.url?.includes('/user/token/refresh')
+      const isLoginRequest = originalRequest.url?.includes('/user/login')
+      if (!originalRequest._retry && !isRefreshRequest && !isLoginRequest) {
+        originalRequest._retry = true
+        try {
+          const { login } = useStore()
+          await login.refreshToken()
+          const token = login.getToken()
+          if (token) {
+            originalRequest.headers['AUTHORIZATION'] = `Bearer ${token}`
+          }
+          return instance(originalRequest)
+        } catch {
+          const { login } = useStore()
+          login.clearToken()
+        }
+      }
       if (
         !err.response.config.url.includes('chat/open') &&
         !err.response.config.url.includes('application/profile')
@@ -220,6 +238,7 @@ export const postStream: (url: string, data?: unknown) => Promise<Result<any> | 
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
     headers: headers,
+    credentials: 'include',
   })
 }
 

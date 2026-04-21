@@ -6,7 +6,6 @@
     @date：2025/4/14 19:25
     @desc:
 """
-from django.core.cache import cache
 from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
@@ -15,7 +14,7 @@ from rest_framework.views import APIView
 
 from common.auth.authenticate import TokenAuth
 from common.auth.authentication import has_permissions
-from common.constants.cache_version import Cache_Version
+from common.auth.tokens import clear_auth_cookies
 from common.constants.permission_constants import PermissionConstants, Permission, Group, Operate, RoleConstants
 from common.log.log import log
 from common.result import result
@@ -373,7 +372,5 @@ class ResetCurrentUserPasswordView(APIView):
     def post(self, request: Request):
         serializer_obj = ResetCurrentUserPassword(data=request.data)
         if serializer_obj.reset_password(request.user.id):
-            version, get_key = Cache_Version.TOKEN.value
-            cache.delete(get_key(token=request.auth), version=version)
-            return result.success(True)
+            return clear_auth_cookies(result.success(True))
         return result.error(_("Failed to change password"))

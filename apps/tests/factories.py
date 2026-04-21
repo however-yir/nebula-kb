@@ -7,10 +7,14 @@ def make_mock_user(
     username: str = "demo-user",
     email: str = "demo@example.com",
     is_active: bool = True,
+    password: str = "encoded-password",
+    source: str = "LOCAL",
 ):
     return SimpleNamespace(
         id=user_id,
         username=username,
         email=email,
         is_active=is_active,
+        password=password,
+        source=source,
     )

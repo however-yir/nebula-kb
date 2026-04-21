@@ -1,0 +1,54 @@
+FROM node:24-alpine AS web-build
+
+WORKDIR /opt/lzkb/ui
+COPY ui ./ui
+WORKDIR /opt/lzkb/ui
+RUN npm ci --no-audit --prefer-offline
+RUN npm run build && npm run build-chat
+
+FROM python:3.11-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/opt/maxkb-app/apps \
+    LZKB_DATA_DIR=/opt/maxkb \
+    MAXKB_DATA_DIR=/opt/maxkb \
+    HF_HOME=/opt/maxkb-app/model/base \
+    TMPDIR=/opt/maxkb-app/tmp \
+    TIKTOKEN_CACHE_DIR=/opt/maxkb-app/model/tokenizer/openai-tiktoken-cl100k-base
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      gcc \
+      g++ \
+      gettext \
+      curl \
+      libexpat1-dev \
+      libffi-dev \
+      libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/maxkb-app
+
+COPY pyproject.toml README.md ./
+RUN python -m pip install --upgrade pip && \
+    pip install "uv==0.7.13" && \
+    python -m uv pip install -r pyproject.toml
+
+COPY . .
+COPY --from=web-build /opt/lzkb/ui/dist /opt/maxkb-app/ui/dist
+
+RUN chmod +x scripts/*.sh && \
+    mkdir -p \
+      /opt/maxkb \
+      /opt/maxkb-app/tmp \
+      /opt/maxkb-app/model/base \
+      /opt/maxkb-app/model/tokenizer/openai-tiktoken-cl100k-base && \
+    python apps/manage.py compilemessages
+
+EXPOSE 8080 8081 6060 11636
+
+ENTRYPOINT ["./scripts/run-service.sh"]
+CMD ["web"]

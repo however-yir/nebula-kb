@@ -67,17 +67,11 @@ const useChatUserStore = defineStore('chat-user', {
         this.token = token
         return token
       }
-      const local_token = localStorage.getItem(`${this.accessToken}-accessToken`)
-      if (local_token) {
-        this.token = local_token
-        return local_token
-      }
-      return localStorage.getItem(`accessToken`)
+      return undefined
     },
     setToken(token: string) {
       this.token = token
       sessionStorage.setItem(`${this.accessToken}-accessToken`, token)
-      localStorage.setItem(`${this.accessToken}-accessToken`, token)
     },
     /**
      *匿名认证
@@ -109,7 +103,6 @@ const useChatUserStore = defineStore('chat-user', {
     logout() {
       return ChatAPI.logout().then(() => {
         sessionStorage.removeItem(`${this.accessToken}-accessToken`)
-        localStorage.removeItem(`${this.accessToken}-accessToken`)
         this.token = undefined
         return true
       })

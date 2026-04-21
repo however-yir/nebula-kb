@@ -26,6 +26,7 @@ from common.auth import ChatTokenAuth
 from common.constants.permission_constants import ChatAuth
 from common.exception.app_exception import AppAuthenticationFailed
 from common.log.log import _get_ip_address
+from common.middleware.cross_domain_middleware import build_cors_headers
 from common.result import result
 from knowledge.models import FileSourceType
 from oss.serializers.file import FileSerializer
@@ -92,9 +93,8 @@ class OpenAIView(APIView):
 class AnonymousAuthentication(APIView):
     def options(self, request, *args, **kwargs):
         return HttpResponse(
-            headers={"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Credentials": "true",
-                     "Access-Control-Allow-Methods": "POST",
-                     "Access-Control-Allow-Headers": "Origin,Content-Type,Cookie,Accept,Token"}, )
+            headers=build_cors_headers(request.META.get("HTTP_ORIGIN")),
+        )
 
     @extend_schema(
         methods=['POST'],
@@ -109,9 +109,7 @@ class AnonymousAuthentication(APIView):
         return result.success(
             AnonymousAuthenticationSerializer(data={'access_token': request.data.get("access_token")}).auth(
                 request),
-            headers={"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Credentials": "true",
-                     "Access-Control-Allow-Methods": "POST",
-                     "Access-Control-Allow-Headers": "Origin,Content-Type,Cookie,Accept,Token"}
+            headers=build_cors_headers(request.META.get("HTTP_ORIGIN"))
         )
 
 

@@ -24,7 +24,16 @@ SECRET_KEY = CONFIG.get("SECRET_KEY") or 'django-insecure-zm^1_^i5)3gp^&0io6zg72
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = CONFIG.get_debug()
 
-ALLOWED_HOSTS = ['*']
+def _split_config_list(value):
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple, set)):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return [item.strip() for item in str(value).split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = _split_config_list(CONFIG.get("ALLOWED_HOSTS")) or ["localhost", "127.0.0.1", "[::1]"]
+CSRF_TRUSTED_ORIGINS = _split_config_list(CONFIG.get("CSRF_TRUSTED_ORIGINS"))
 
 # Application definition
 

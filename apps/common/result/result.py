@@ -12,6 +12,8 @@ from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
+from common.contracts import PAGINATION_FIELDS, RESPONSE_FIELDS
+
 
 class Page(dict):
     """
@@ -19,7 +21,12 @@ class Page(dict):
     """
 
     def __init__(self, total: int, records: List, current_page: int, page_size: int, **kwargs):
-        super().__init__(**{'total': total, 'records': records, 'current': current_page, 'size': page_size})
+        super().__init__(**{
+            PAGINATION_FIELDS[0]: total,
+            PAGINATION_FIELDS[1]: records,
+            PAGINATION_FIELDS[2]: current_page,
+            PAGINATION_FIELDS[3]: page_size,
+        })
 
 
 class Result(JsonResponse):
@@ -29,7 +36,7 @@ class Result(JsonResponse):
     """
 
     def __init__(self, code=200, message=_('Success'), data=None, response_status=status.HTTP_200_OK, **kwargs):
-        back_info_dict = {"code": code, "message": message, 'data': data}
+        back_info_dict = {RESPONSE_FIELDS[0]: code, RESPONSE_FIELDS[1]: message, RESPONSE_FIELDS[2]: data}
         super().__init__(data=back_info_dict, status=response_status, **kwargs)
 
 

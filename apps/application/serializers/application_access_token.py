@@ -6,9 +6,6 @@
     @date：2025/6/9 17:49
     @desc:
 """
-import hashlib
-
-import uuid_utils.compat as uuid
 from django.core.cache import cache
 from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
@@ -18,6 +15,7 @@ from application.models import ApplicationAccessToken, Application
 from common.constants.cache_version import Cache_Version
 from common.database_model_manage.database_model_manage import DatabaseModelManage
 from common.exception.app_exception import AppApiException
+from common.utils.common import generate_secure_token
 
 
 class AccessTokenEditSerializer(serializers.Serializer):
@@ -64,7 +62,7 @@ class AccessTokenSerializer(serializers.Serializer):
         if 'is_active' in instance:
             application_access_token.is_active = instance.get("is_active")
         if 'access_token_reset' in instance and instance.get('access_token_reset'):
-            application_access_token.access_token = hashlib.md5(str(uuid.uuid7()).encode()).hexdigest()[8:24]
+            application_access_token.access_token = generate_secure_token(nbytes=24)
         if 'access_num' in instance and instance.get('access_num') is not None:
             application_access_token.access_num = instance.get("access_num")
         if 'white_active' in instance and instance.get('white_active') is not None:
@@ -99,9 +97,8 @@ class AccessTokenSerializer(serializers.Serializer):
             application_id=application_id).first()
         if application_access_token is None:
             application_access_token = ApplicationAccessToken(application_id=application_id,
-                                                              access_token=hashlib.md5(
-                                                                  str(uuid.uuid7()).encode()).hexdigest()[
-                                                                           8:24], is_active=True)
+                                                              access_token=generate_secure_token(nbytes=24),
+                                                              is_active=True)
             application_access_token.save()
         other = {}
         license_is_valid = cache.get(Cache_Version.SYSTEM.get_key(key='license_is_valid'),

@@ -6,6 +6,8 @@ app_name = "user"
 # @formatter:off
 urlpatterns = [
     path('user/login', views.LoginView.as_view(), name='login'),
+    path('user/token/refresh', views.RefreshTokenView.as_view(), name='token_refresh'),
+    path('user/token/policy', views.TokenPolicyView.as_view(), name='token_policy'),
     path('user/profile', views.UserProfileView.as_view(), name="user_profile"),
     path('user/captcha', views.CaptchaView.as_view(), name='captcha'),
     path('user/test', views.TestPermissionsUserView.as_view(), name="test"),

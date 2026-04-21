@@ -28,12 +28,17 @@ from common.result import Result
 from lzkb import settings
 from lzkb.conf import PROJECT_DIR
 from lzkb.const import CONFIG
+from lzkb.health import healthz, readyz
 
 admin_api_prefix = CONFIG.get_admin_path()[1:] + '/api/'
 admin_ui_prefix = CONFIG.get_admin_path()
 chat_api_prefix = CONFIG.get_chat_path()[1:] + '/api/'
 chat_ui_prefix = CONFIG.get_chat_path()
 urlpatterns = [
+    path('healthz', healthz, name='healthz'),
+    path('healthz/', healthz, name='healthz-slash'),
+    path('readyz', readyz, name='readyz'),
+    path('readyz/', readyz, name='readyz-slash'),
     path(admin_api_prefix, include("users.urls")),
     path(admin_api_prefix, include("tools.urls")),
     path(admin_api_prefix, include("models_provider.urls")),

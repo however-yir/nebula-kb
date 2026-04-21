@@ -1,17 +1,26 @@
 from unittest.mock import MagicMock, patch
 
-from django.core import signing
 from django.test import SimpleTestCase
 
-from common.constants.authentication_type import AuthenticationType
-from common.constants.cache_version import Cache_Version
 from common.exception.app_exception import AppApiException
 from tests.factories import make_mock_user
 from users.serializers.login import LoginSerializer
 
 
+TOKEN_PAYLOAD = {
+    "access_token": "access-token",
+    "refresh_token": "refresh-token",
+    "token_type": "Bearer",
+    "expires_in": 900,
+    "refresh_expires_in": 604800,
+    "user_id": "a8e2dc0d-8d09-4e95-a570-8e6bb44a49d2",
+    "session_id": "session-id",
+    "device_id": "device-id",
+}
+
+
 class LoginSerializerTests(SimpleTestCase):
-    def test_login_success_returns_signed_token_and_caches_user(self):
+    def test_login_success_returns_access_refresh_tokens(self):
         fake_user = make_mock_user()
         user_query = MagicMock()
         user_query.first.return_value = fake_user
@@ -27,23 +36,15 @@ class LoginSerializerTests(SimpleTestCase):
                 return_value=lambda: False,
             ),
             patch("users.serializers.login.User.objects.filter", return_value=user_query),
+            patch("users.serializers.login.password_matches", return_value=True) as mock_password_matches,
             patch("users.serializers.login.cache.delete") as mock_cache_delete,
-            patch("users.serializers.login.cache.set") as mock_cache_set,
+            patch("users.serializers.login.create_device_session", return_value=TOKEN_PAYLOAD) as mock_create_session,
         ):
             result = LoginSerializer.login({"username": "demo-user", "password": "pass@123"})
 
-        self.assertIn("token", result)
-        token_payload = signing.loads(result["token"])
-        self.assertEqual(token_payload["username"], fake_user.username)
-        self.assertEqual(token_payload["email"], fake_user.email)
-        self.assertEqual(token_payload["type"], AuthenticationType.SYSTEM_USER.value)
-
-        _, get_key = Cache_Version.TOKEN.value
-        self.assertEqual(mock_cache_set.call_count, 1)
-        self.assertEqual(mock_cache_set.call_args.args[0], get_key(result["token"]))
-        self.assertEqual(mock_cache_set.call_args.args[1], fake_user)
-        self.assertIn("timeout", mock_cache_set.call_args.kwargs)
-        self.assertIn("version", mock_cache_set.call_args.kwargs)
+        self.assertEqual(result, TOKEN_PAYLOAD)
+        mock_password_matches.assert_called_once_with("pass@123", fake_user.password)
+        mock_create_session.assert_called_once()
         self.assertGreaterEqual(mock_cache_delete.call_count, 2)
 
     def test_login_raises_error_when_credentials_invalid(self):
@@ -61,6 +62,7 @@ class LoginSerializerTests(SimpleTestCase):
                 return_value=lambda: False,
             ),
             patch("users.serializers.login.User.objects.filter", return_value=user_query),
+            patch("users.serializers.login.password_matches", return_value=False),
             patch.object(LoginSerializer, "_handle_failed_login") as mock_handle_failed,
         ):
             with self.assertRaises(AppApiException) as ctx:

@@ -6,18 +6,19 @@
     @date：2025/4/14 18:23
     @desc:
 """
-import hashlib
 import io
 import mimetypes
 import pickle
 import random
 import re
+import secrets
 import shutil
 import uuid
 from functools import reduce
 from typing import List, Dict
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import QuerySet
 from django.utils.translation import gettext as _
 from pydub import AudioSegment
@@ -28,14 +29,26 @@ from ..exception.app_exception import AppApiException
 
 def password_encrypt(row_password):
     """
-    密码 md5加密
+    使用 Django 安全密码哈希保存密码。
+
+    历史实现使用可预测的摘要；新写入的密码统一交给 Django
+    password hasher，便于按框架配置升级算法与迭代次数。
     :param row_password: 密码
     :return:  加密后密码
     """
-    md5 = hashlib.md5()  # 2，实例化md5() 方法
-    md5.update(row_password.encode())  # 3，对字符串的字节类型加密
-    result = md5.hexdigest()  # 4，加密
-    return result
+    return make_password(row_password)
+
+
+def password_matches(row_password, encoded_password):
+    """
+    验证明文密码是否匹配 Django password hasher 生成的密码摘要。
+    """
+    if not row_password or not encoded_password:
+        return False
+    try:
+        return check_password(row_password, encoded_password)
+    except Exception:
+        return False
 
 
 def group_by(list_source: List, key):
@@ -65,6 +78,11 @@ def get_random_chars(number=4):
     if number <= 0:
         return ""
     return ''.join(random.choices(SAFE_CHAR_SET, k=number))
+
+
+def generate_secure_token(prefix: str = "", nbytes: int = 32):
+    token = secrets.token_urlsafe(nbytes)
+    return f"{prefix}{token}" if prefix else token
 
 
 def encryption(message: str):

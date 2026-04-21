@@ -28,7 +28,7 @@ def get_dynamics_model(attr: dict, table_name='dynamics'):
     :return: django 模型
     """
     # 创建缓存键，基于属性和表名
-    cache_key = hashlib.md5(f"{table_name}_{str(sorted(attr.items()))}".encode()).hexdigest()
+    cache_key = hashlib.sha256(f"{table_name}_{str(sorted(attr.items()))}".encode()).hexdigest()
     # print(f'cache_key: {cache_key}')
 
     # 如果模型已存在，直接返回缓存的模型

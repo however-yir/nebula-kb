@@ -9,7 +9,7 @@ import { ref, type WritableComputedRef } from 'vue'
 
 const axiosConfig = {
   baseURL: (window.LZKB?.prefix ? window.LZKB?.prefix : '/chat') + '/api',
-  withCredentials: false,
+  withCredentials: true,
   timeout: 600000,
   headers: {},
 }
@@ -187,6 +187,7 @@ export const postStream: (url: string, data?: unknown) => Promise<Result<any> | 
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
     headers: headers,
+    credentials: 'include',
   })
 }
 

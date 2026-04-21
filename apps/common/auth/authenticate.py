@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from rest_framework.authentication import TokenAuthentication
 
+from common.auth.tokens import get_request_access_token
 from common.exception.app_exception import AppAuthenticationFailed, AppEmbedIdentityFailed, AppChatNumOutOfBoundsFailed, \
     AppApiException
 from common.utils.logger import maxkb_logger
@@ -76,14 +77,14 @@ class TokenAuth(TokenAuthentication):
 
     # 重新 authenticate 方法，自定义认证规则
     def authenticate(self, request):
-        auth = request.META.get('HTTP_AUTHORIZATION')
+        token = get_request_access_token(request)
         # 未认证
-        if auth is None:
+        if token is None:
             raise AppAuthenticationFailed(1003, _('Not logged in, please log in first'))
-        if not auth.startswith("Bearer "):
+        auth = request.META.get('HTTP_AUTHORIZATION')
+        if auth is not None and not auth.startswith("Bearer "):
             raise AppAuthenticationFailed(1002, _('Authentication information is incorrect! illegal user'))
         try:
-            token = auth[7:]
             token_details = TokenDetails(token)
             for handle in handles:
                 if handle.support(request, token, token_details.get_token_details):

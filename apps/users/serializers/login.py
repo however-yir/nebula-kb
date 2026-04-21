@@ -8,23 +8,20 @@
 """
 import base64
 import json
-import logging
+from types import SimpleNamespace
 
 from captcha.image import ImageCaptcha
-from django.core import signing
 from django.core.cache import cache
-from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from application.models import ApplicationAccessToken
-from common.constants.authentication_type import AuthenticationType
+from common.auth.tokens import create_device_session, get_access_token_ttl, get_refresh_token_ttl
 from common.constants.cache_version import Cache_Version
 from common.database_model_manage.database_model_manage import DatabaseModelManage
 from common.exception.app_exception import AppApiException
-from common.utils.common import password_encrypt, get_random_chars
+from common.utils.common import password_matches, get_random_chars
 from common.utils.rsa_util import decrypt
-from lzkb.const import CONFIG
 from users.models import User
 from common.utils.logger import maxkb_logger
 
@@ -45,7 +42,14 @@ class LoginResponse(serializers.Serializer):
     """
     登录响应对象
     """
-    token = serializers.CharField(required=True, label=_("token"))
+    access_token = serializers.CharField(required=True, label=_("access token"))
+    refresh_token = serializers.CharField(required=True, label=_("refresh token"))
+    token_type = serializers.CharField(required=True, label=_("token type"))
+    expires_in = serializers.IntegerField(required=True, label=_("access token expires in"))
+    refresh_expires_in = serializers.IntegerField(required=True, label=_("refresh token expires in"))
+    user_id = serializers.CharField(required=True, label=_("user id"))
+    session_id = serializers.CharField(required=True, label=_("session id"))
+    device_id = serializers.CharField(required=True, label=_("device id"))
 
 
 def record_login_fail(username: str, expire: int = 600):
@@ -96,7 +100,7 @@ class LoginSerializer(serializers.Serializer):
         return auth_setting
 
     @staticmethod
-    def login(instance):
+    def login(instance, request=None):
         # 解密数据
         username = instance.get("username", "")
         encrypted_data = instance.get("encryptedData", "")
@@ -145,12 +149,9 @@ class LoginSerializer(serializers.Serializer):
                 LoginSerializer._validate_captcha(username, captcha)
 
         # 验证用户凭据
-        user = User.objects.filter(
-            username=username,
-            password=password_encrypt(password)
-        ).first()
+        user = User.objects.filter(username=username).first()
 
-        if not user:
+        if not user or not password_matches(password, user.password):
             LoginSerializer._handle_failed_login(username, is_license_valid, failed_attempts, lock_time)
             raise AppApiException(500, _('The username or password is incorrect'))
 
@@ -160,18 +161,8 @@ class LoginSerializer(serializers.Serializer):
         # 清除失败计数并生成令牌
         cache.delete(system_get_key(f'system_{username}'), version=system_version)
         cache.delete(system_get_key(f'system_{username}_lock'), version=system_version)
-        token = signing.dumps({
-            'username': user.username,
-            'id': str(user.id),
-            'email': user.email,
-            'type': AuthenticationType.SYSTEM_USER.value
-        })
-
-        version, get_key = Cache_Version.TOKEN.value
-        timeout = CONFIG.get_session_timeout()
-        cache.set(get_key(token), user, timeout=timeout, version=version)
-
-        return {'token': token}
+        request = request or SimpleNamespace(META={})
+        return create_device_session(user, request, login_method=getattr(user, "source", None) or "LOCAL")
 
     @staticmethod
     def _is_account_locked(username: str, failed_attempts: int) -> bool:
@@ -262,6 +253,28 @@ class LoginSerializer(serializers.Serializer):
             1005,
             _("This account has been locked for %s minutes, please try again later") % lock_time
         )
+
+
+class RefreshTokenRequest(serializers.Serializer):
+    refresh_token = serializers.CharField(required=False, allow_blank=True, allow_null=True, label=_("refresh token"))
+
+
+class RefreshTokenResponse(LoginResponse):
+    pass
+
+
+class TokenPolicyResponse(serializers.Serializer):
+    access_token_expires_in = serializers.IntegerField(required=True, label=_("access token expires in"))
+    refresh_token_expires_in = serializers.IntegerField(required=True, label=_("refresh token expires in"))
+    token_type = serializers.CharField(required=True, label=_("token type"))
+
+
+def get_token_policy():
+    return {
+        "access_token_expires_in": get_access_token_ttl(),
+        "refresh_token_expires_in": get_refresh_token_ttl(),
+        "token_type": "Bearer",
+    }
 
 
 class CaptchaResponse(serializers.Serializer):

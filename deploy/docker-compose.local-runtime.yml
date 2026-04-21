@@ -1,0 +1,24 @@
+services:
+  local-model:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.runtime
+    image: lzkb:local-runtime
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.runtime
+    image: lzkb:local-runtime
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.runtime
+    image: lzkb:local-runtime
+
+  scheduler:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.runtime
+    image: lzkb:local-runtime

@@ -9,6 +9,7 @@
 import uuid_utils.compat as uuid
 
 from django.db import models
+from django.utils import timezone
 
 from common.encoder.encoder import SystemEncoder
 from common.mixins.app_model_mixin import AppModelMixin
@@ -19,6 +20,16 @@ class Log(AppModelMixin):
     审计日志
     """
     id = models.UUIDField(primary_key=True, max_length=128, default=uuid.uuid7, editable=False, verbose_name="主键id")
+
+    event_name = models.CharField(max_length=160, verbose_name="审计事件名称", default="", db_index=True)
+
+    actor = models.JSONField(verbose_name="操作者契约", default=dict, encoder=SystemEncoder)
+
+    resource = models.JSONField(verbose_name="资源契约", default=dict, encoder=SystemEncoder)
+
+    timestamp = models.DateTimeField(verbose_name="事件时间", default=timezone.now, db_index=True)
+
+    result = models.JSONField(verbose_name="结果契约", default=dict, encoder=SystemEncoder)
 
     menu = models.CharField(max_length=128, verbose_name="操作菜单")
 

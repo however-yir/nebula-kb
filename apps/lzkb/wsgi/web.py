@@ -45,5 +45,13 @@ def post_handler():
     init_template.run()
 
 
+def scheduler_handler():
+    from ops.celery.signal_handler import init_scheduler
+    init_scheduler()
+
+
 # 启动后处理函数
-post_handler()
+if os.environ.get('ENABLE_SCHEDULER') == '1':
+    scheduler_handler()
+else:
+    post_handler()

@@ -9,6 +9,7 @@
 import errno
 import logging
 import os
+from urllib.parse import unquote, urlparse
 
 import yaml
 
@@ -28,7 +29,18 @@ class Config(dict):
         "CONTACT_URL": "https://github.com/however-yir/LZKB/issues",
         "OFFICIAL_SITE_URL": "https://github.com/however-yir/LZKB",
         "CHAT_FLOAT_ICON": "LZKB.gif",
+        "ENVIRONMENT": "dev",
+        "SECRET_KEY": "",
+        "ALLOWED_HOSTS": "localhost,127.0.0.1",
+        "CSRF_TRUSTED_ORIGINS": "",
+        "CORS_ALLOWED_ORIGINS": "",
+        "AUTH_ACCESS_TOKEN_TTL_SECONDS": 900,
+        "AUTH_REFRESH_TOKEN_TTL_SECONDS": 604800,
+        "TOKEN_EXPIRE": 900,
+        "AUTH_COOKIE_SECURE": False,
+        "AUTH_COOKIE_SAMESITE": "Lax",
         # 数据库相关配置
+        "DATABASE_URL": "",
         "DB_NAME": "lzkb",
         "DB_HOST": "127.0.0.1",
         "DB_PORT": 5432,
@@ -41,10 +53,14 @@ class Config(dict):
         'LOCAL_MODEL_PROTOCOL': "http",
         'LOCAL_MODEL_HOST_WORKER': 1,
         'OLLAMA_BASE_URL': 'http://127.0.0.1:11434',
+        'HTTP_LISTEN_PORT': 8080,
+        'SCHEDULER_HTTP_PORT': 6060,
         # 语言
         'LANGUAGE_CODE': 'zh-CN',
         "DEBUG": False,
         # redis host
+        "REDIS_URL": "",
+        "REDIS_PROTOCOL": "redis",
         'REDIS_HOST': '127.0.0.1',
         # 端口
         'REDIS_PORT': 6379,
@@ -53,11 +69,27 @@ class Config(dict):
         # 库
         'REDIS_DB': 0,
         # 最大连接数
-        'REDIS_MAX_CONNECTIONS': 100
+        'REDIS_MAX_CONNECTIONS': 100,
+        # object storage
+        "STORAGE_BACKEND": "local",
+        "STORAGE_ENDPOINT": "",
+        "STORAGE_BUCKET": "",
+        "STORAGE_ACCESS_KEY": "",
+        "STORAGE_SECRET_KEY": "",
+        "STORAGE_REGION": "",
+        "STORAGE_HEALTHCHECK_URL": "",
+        "STORAGE_FORCE_PATH_STYLE": True,
+        # health checks
+        "MODEL_SERVICE_HEALTHCHECK_ENABLED": True,
+        "MODEL_SERVICE_HEALTHCHECK_TIMEOUT": 3,
+        "STORAGE_HEALTHCHECK_TIMEOUT": 3,
     }
 
     def get_debug(self) -> bool:
-        return self.get('DEBUG') if 'DEBUG' in self else True
+        value = self.get('DEBUG') if 'DEBUG' in self else True
+        if isinstance(value, str):
+            return value.lower() in {'1', 'true', 'yes', 'on'}
+        return bool(value)
 
     def get_time_zone(self) -> str:
         return self.get('TIME_ZONE') if 'TIME_ZONE' in self else 'Asia/Shanghai'
@@ -84,14 +116,18 @@ class Config(dict):
         redis_config = {
             'default': {
                 'BACKEND': 'django_redis.cache.RedisCache',
-                'LOCATION': f'redis://{self.get("REDIS_HOST")}:{self.get("REDIS_PORT")}/{self.get("REDIS_DB")}',
+                'LOCATION': (
+                    f'{self.get("REDIS_PROTOCOL", "redis")}://'
+                    f'{self.get("REDIS_HOST")}:{self.get("REDIS_PORT")}/{self.get("REDIS_DB")}'
+                ),
                 'OPTIONS': {
                     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-                    "PASSWORD": self.get("REDIS_PASSWORD"),
                     "CONNECTION_POOL_KWARGS": {"max_connections": int(self.get("REDIS_MAX_CONNECTIONS"))}
                 },
             },
         }
+        if self.get("REDIS_PASSWORD"):
+            redis_config['default']['OPTIONS']["PASSWORD"] = self.get("REDIS_PASSWORD")
         if self.get('REDIS_SENTINEL_SENTINELS') is not None:
             sentinels_str = self.get('REDIS_SENTINEL_SENTINELS')
             sentinels = [
@@ -110,8 +146,91 @@ class Config(dict):
 
         return redis_config
 
+    def normalize(self):
+        self._apply_file_values()
+        self._apply_aliases()
+        self._apply_database_url()
+        self._apply_redis_url()
+        return self
+
+    def _apply_file_values(self):
+        for key, value in list(self.items()):
+            if not key.endswith('_FILE') or not value:
+                continue
+            target_key = key[:-5]
+            try:
+                with open(value, 'rt', encoding='utf8') as f:
+                    self[target_key] = f.read().strip()
+            except OSError as exc:
+                raise ImportError(f'Unable to load secret file for {target_key}: {value}') from exc
+
+    def _apply_aliases(self):
+        if self.get('ENV') and not self.get('ENVIRONMENT'):
+            self['ENVIRONMENT'] = self.get('ENV')
+        if self.get('TOKEN_EXPIRE') and not self.get('AUTH_ACCESS_TOKEN_TTL_SECONDS'):
+            self['AUTH_ACCESS_TOKEN_TTL_SECONDS'] = self.get('TOKEN_EXPIRE')
+
+    def _apply_database_url(self):
+        database_url = self.get('DATABASE_URL')
+        if not database_url:
+            return
+        parsed = urlparse(database_url)
+        scheme = parsed.scheme.split('+', 1)[0]
+        if scheme in ('postgres', 'postgresql'):
+            self['DB_ENGINE'] = self.get('DB_ENGINE') or 'dj_db_conn_pool.backends.postgresql'
+            if parsed.path and parsed.path != '/':
+                self['DB_NAME'] = unquote(parsed.path.lstrip('/'))
+            if parsed.hostname:
+                self['DB_HOST'] = parsed.hostname
+            if parsed.port:
+                self['DB_PORT'] = parsed.port
+            if parsed.username:
+                self['DB_USER'] = unquote(parsed.username)
+            if parsed.password:
+                self['DB_PASSWORD'] = unquote(parsed.password)
+        elif scheme in ('sqlite', 'sqlite3'):
+            self['DB_ENGINE'] = 'django.db.backends.sqlite3'
+            sqlite_name = unquote(parsed.path or parsed.netloc or ':memory:')
+            if sqlite_name == '/:memory:':
+                sqlite_name = ':memory:'
+            elif sqlite_name.startswith('//'):
+                sqlite_name = sqlite_name[1:]
+            self['DB_NAME'] = sqlite_name
+
+    def _apply_redis_url(self):
+        redis_url = self.get('REDIS_URL')
+        if not redis_url:
+            return
+        parsed = urlparse(redis_url)
+        if parsed.scheme not in ('redis', 'rediss'):
+            return
+        self['REDIS_PROTOCOL'] = parsed.scheme
+        if parsed.hostname:
+            self['REDIS_HOST'] = parsed.hostname
+        if parsed.port:
+            self['REDIS_PORT'] = parsed.port
+        self['REDIS_PASSWORD'] = unquote(parsed.password) if parsed.password is not None else ''
+        if parsed.path and parsed.path != '/':
+            redis_db = parsed.path.lstrip('/')
+            self['REDIS_DB'] = int(redis_db) if redis_db.isdigit() else redis_db
+
     def get_language_code(self):
         return self.get('LANGUAGE_CODE', 'zh-CN')
+
+    def get_environment(self):
+        return self.get('ENVIRONMENT', 'dev')
+
+    def get_storage_setting(self):
+        return {
+            'BACKEND': self.get('STORAGE_BACKEND', 'local'),
+            'ENDPOINT': self.get('STORAGE_ENDPOINT', ''),
+            'BUCKET': self.get('STORAGE_BUCKET', ''),
+            'ACCESS_KEY': self.get('STORAGE_ACCESS_KEY', ''),
+            'SECRET_KEY': self.get('STORAGE_SECRET_KEY', ''),
+            'REGION': self.get('STORAGE_REGION', ''),
+            'HEALTHCHECK_URL': self.get('STORAGE_HEALTHCHECK_URL', ''),
+            'FORCE_PATH_STYLE': self.get('STORAGE_FORCE_PATH_STYLE', True),
+        }
 
     def get_log_level(self):
         return self.get('LOG_LEVEL', 'DEBUG')
@@ -214,7 +333,17 @@ class ConfigManager:
         return True
 
     def load_from_yml(self):
-        for i in ['config_example.yml', 'config.yaml', 'config.yml']:
+        env = os.environ.get('LZKB_ENVIRONMENT', os.environ.get('LZKB_ENV', os.environ.get('APP_ENV', '')))
+        candidates = []
+        if env:
+            candidates.extend([
+                f'config.{env}.yml',
+                f'config.{env}.yaml',
+                os.path.join('config', f'{env}.yml'),
+                os.path.join('config', f'{env}.yaml'),
+            ])
+        candidates.extend(['config.yaml', 'config.yml', 'config_example.yml'])
+        for i in candidates:
             if not os.path.isfile(os.path.join(self.root_path, i)):
                 continue
             loaded = self.from_yaml(i)
@@ -232,12 +361,41 @@ class ConfigManager:
     def load_from_env(self):
         keys = os.environ.keys()
         config = {}
+        direct_env_keys = {
+            'APP_ENV',
+            'ENVIRONMENT',
+            'DATABASE_URL',
+            'DATABASE_URL_FILE',
+            'REDIS_URL',
+            'REDIS_URL_FILE',
+            'REDIS_PROTOCOL',
+            'SECRET_KEY',
+            'SECRET_KEY_FILE',
+            'TOKEN_EXPIRE',
+            'STORAGE_BACKEND',
+            'STORAGE_ENDPOINT',
+            'STORAGE_BUCKET',
+            'STORAGE_ACCESS_KEY',
+            'STORAGE_ACCESS_KEY_FILE',
+            'STORAGE_SECRET_KEY',
+            'STORAGE_SECRET_KEY_FILE',
+            'STORAGE_REGION',
+            'STORAGE_HEALTHCHECK_URL',
+            'STORAGE_FORCE_PATH_STYLE',
+            'MODEL_SERVICE_HEALTHCHECK_ENABLED',
+            'MODEL_SERVICE_HEALTHCHECK_TIMEOUT',
+            'STORAGE_HEALTHCHECK_TIMEOUT',
+        }
         for key in keys:
             if key.startswith('LZKB_'):
                 config[key.replace('LZKB_', '')] = os.environ.get(key)
             elif key.startswith('MAXKB_') and key.replace('MAXKB_', '') not in config:
                 # Backward compatibility for existing MAXKB deployments.
                 config[key.replace('MAXKB_', '')] = os.environ.get(key)
+            elif key in direct_env_keys and key not in config:
+                config[key] = os.environ.get(key)
+        if config.get('APP_ENV') and not config.get('ENVIRONMENT'):
+            config['ENVIRONMENT'] = config.get('APP_ENV')
         if len(config.keys()) <= 0:
             msg = f"""
 
@@ -269,9 +427,20 @@ class ConfigManager:
             root_path = PROJECT_DIR
         manager = cls(root_path=root_path)
         config_type = os.environ.get('LZKB_CONFIG_TYPE', os.environ.get('MAXKB_CONFIG_TYPE'))
+        env_contract_keys = (
+            'DATABASE_URL',
+            'DATABASE_URL_FILE',
+            'REDIS_URL',
+            'REDIS_URL_FILE',
+            'SECRET_KEY',
+            'SECRET_KEY_FILE',
+        )
+        if config_type is None and any(os.environ.get(key) for key in env_contract_keys):
+            config_type = 'ENV'
         if config_type is None or config_type != 'ENV':
             manager.load_from_yml()
         else:
             manager.load_from_env()
         config = manager.config
+        config.normalize()
         return config

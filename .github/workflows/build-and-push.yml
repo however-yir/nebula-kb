@@ -32,10 +32,18 @@ on:
           - ghcr
           - dockerhub
           - dockerhub,ghcr
+      postReleaseHealthcheckUrl:
+        description: 'Optional URL to verify with /healthz and /readyz after push'
+        required: false
+        default: ''
 
 jobs:
+  preflight-tests:
+    uses: ./.github/workflows/lzkb-tests.yml
+
   build-and-push-to-ghcr:
     if: ${{ contains(github.event.inputs.registry, 'ghcr') }}
+    needs: preflight-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,9 +89,13 @@ jobs:
       - name: Docker Buildx (build-and-push)
         run: |
           docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }} -f installer/Dockerfile
+      - name: Post-release health check
+        if: ${{ github.event.inputs.postReleaseHealthcheckUrl != '' }}
+        run: ./scripts/post-release-healthcheck.sh "${{ github.event.inputs.postReleaseHealthcheckUrl }}"
 
   build-and-push-to-dockerhub:
     if: ${{ contains(github.event.inputs.registry, 'dockerhub') }}
+    needs: preflight-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -129,3 +141,6 @@ jobs:
       - name: Docker Buildx (build-and-push)
         run: |
           docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }} -f installer/Dockerfile
+      - name: Post-release health check
+        if: ${{ github.event.inputs.postReleaseHealthcheckUrl != '' }}
+        run: ./scripts/post-release-healthcheck.sh "${{ github.event.inputs.postReleaseHealthcheckUrl }}"

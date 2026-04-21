@@ -30,17 +30,17 @@ router.beforeEach(
     const notAuthRouteNameList = ['login', 'ForgotPassword', 'ResetPassword', 'Chat', 'UserLogin']
     if (!notAuthRouteNameList.includes(to.name ? to.name.toString() : '')) {
       if (to.query && to.query.token) {
-        localStorage.setItem('token', to.query.token.toString())
-      }
-      const token = login.getToken()
-      if (!token) {
-        next({
-          path: '/login',
-        })
-        return
+        login.setTokenFromPayload({ access_token: to.query.token.toString() })
       }
       if (!user.userInfo) {
-        await user.profile()
+        try {
+          await user.profile()
+        } catch {
+          next({
+            path: '/login',
+          })
+          return
+        }
       }
     }
     set_next_route(to)

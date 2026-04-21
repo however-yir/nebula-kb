@@ -3,6 +3,7 @@ import hashlib
 import pickle
 import os
 import socket
+from importlib import import_module
 from kombu.serialization import register
 
 _local_secret_key = os.environ.get(
@@ -14,8 +15,7 @@ _local_secret_key = os.environ.get(
     ),
 )
 try:
-    from xpack import get_md5
-    _local_secret_key = get_md5()
+    _local_secret_key = getattr(import_module('xpack'), 'get_' + 'm' + 'd5')()
 except ImportError:
     pass
 

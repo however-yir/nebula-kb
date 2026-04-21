@@ -1,4 +1,5 @@
 import {fileURLToPath, URL} from 'node:url'
+import type {IncomingMessage, ServerResponse} from 'node:http'
 import type {ProxyOptions} from 'vite'
 import {defineConfig, loadEnv} from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -27,6 +28,38 @@ const renameHtmlPlugin = (outDir: string, entry: string) => {
         // 重命名文件
         fs.renameSync(oldFile, newFile)
       }
+    },
+  }
+}
+
+const createHistoryEntryFallbackPlugin = (basePath: string, entry: string) => {
+  const normalizedBasePath = basePath.endsWith('/') ? basePath : `${basePath}/`
+  const basePathWithoutSlash = normalizedBasePath.replace(/\/$/, '')
+
+  const shouldRewriteToEntry = (req: IncomingMessage) => {
+    if (!req.url || !req.method || !['GET', 'HEAD'].includes(req.method)) {
+      return false
+    }
+
+    const url = req.url.split('?')[0]
+    const accept = req.headers.accept || ''
+    const isHtmlRequest = accept.includes('text/html') || accept.includes('*/*')
+    const isBaseRoute = url === basePathWithoutSlash || url === normalizedBasePath
+    const isHistoryRoute = url.startsWith(normalizedBasePath) && !url.slice(normalizedBasePath.length).includes('.')
+    const isApiRequest = url.startsWith(`${normalizedBasePath}api`)
+
+    return isHtmlRequest && !isApiRequest && (isBaseRoute || isHistoryRoute)
+  }
+
+  return {
+    name: 'history-entry-fallback',
+    configureServer(server: {middlewares: {use: (handler: (req: IncomingMessage, res: ServerResponse, next: () => void) => void) => void}}) {
+      server.middlewares.use((req, _res, next) => {
+        if (shouldRewriteToEntry(req)) {
+          req.url = `/${entry}`
+        }
+        next()
+      })
     },
   }
 }
@@ -73,13 +106,6 @@ export default defineConfig((conf: any) => {
     target: `http://127.0.0.1:8080`,
     changeOrigin: true,
   }
-  // 前端静态资源转发到本身
-  proxyConf[ENV.VITE_BASE_PATH] = {
-    target: `http://127.0.0.1:${ENV.VITE_APP_PORT}`,
-    changeOrigin: true,
-    rewrite: (path: string) => path.replace(ENV.VITE_BASE_PATH, '/'),
-  }
-
   return {
     preflight: false,
     lintOnSave: false,
@@ -90,6 +116,7 @@ export default defineConfig((conf: any) => {
       vueJsx(),
       DefineOptions(),
       createHtmlPlugin({template: ENV.VITE_ENTRY}),
+      createHistoryEntryFallbackPlugin(ENV.VITE_BASE_PATH, ENV.VITE_ENTRY),
       renameHtmlPlugin(`dist${ENV.VITE_BASE_PATH}`, ENV.VITE_ENTRY),
     ],
     server: {

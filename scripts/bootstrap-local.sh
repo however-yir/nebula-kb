@@ -4,8 +4,32 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${ROOT_DIR}/.env"
 ENV_EXAMPLE="${ROOT_DIR}/.env.example"
+COMPOSE_FILE="${ROOT_DIR}/docker-compose.dev.yml"
 WITH_OLLAMA=0
 START_STACK=0
+PG_READY_RETRIES=30
+
+compose_cmd() {
+  docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" "$@"
+}
+
+wait_for_postgres() {
+  local attempt=1
+  until compose_cmd exec -T postgres sh -c 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null 2>&1; do
+    if [[ "${attempt}" -ge "${PG_READY_RETRIES}" ]]; then
+      echo "PostgreSQL did not become ready after ${PG_READY_RETRIES} attempts." >&2
+      return 1
+    fi
+    sleep 2
+    attempt=$((attempt + 1))
+  done
+}
+
+ensure_pgvector_extension() {
+  compose_cmd exec -T postgres sh -c \
+    'PGPASSWORD="$POSTGRES_PASSWORD" psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS vector;"' \
+    >/dev/null
+}
 
 usage() {
   cat <<'USAGE'
@@ -55,8 +79,11 @@ if [[ "${START_STACK}" -eq 1 ]]; then
   if [[ "${WITH_OLLAMA}" -eq 1 ]]; then
     services+=(ollama)
   fi
-  docker compose --env-file "${ENV_FILE}" -f "${ROOT_DIR}/docker-compose.dev.yml" up -d "${services[@]}"
+  compose_cmd up -d "${services[@]}"
+  wait_for_postgres
+  ensure_pgvector_extension
   echo "Dependencies are up: ${services[*]}"
+  echo "pgvector extension ensured in ${LZKB_DB_NAME:-lzkb}."
 fi
 
 cat <<'NEXT'

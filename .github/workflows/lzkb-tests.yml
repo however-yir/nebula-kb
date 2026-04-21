@@ -8,9 +8,15 @@ on:
       - dev
     paths:
       - "apps/**"
+      - "deploy/**"
+      - "docs/ops/**"
+      - "docs/quality/**"
       - ".github/workflows/lzkb-tests.yml"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
       - "pyproject.toml"
       - "config_example.yml"
+      - "scripts/**"
+      - "scripts/quality-gate.sh"
   pull_request:
     branches:
       - main
@@ -18,10 +24,17 @@ on:
       - dev
     paths:
       - "apps/**"
+      - "deploy/**"
+      - "docs/ops/**"
+      - "docs/quality/**"
       - ".github/workflows/lzkb-tests.yml"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
       - "pyproject.toml"
       - "config_example.yml"
+      - "scripts/**"
+      - "scripts/quality-gate.sh"
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: lzkb-tests-${{ github.workflow }}-${{ github.ref }}
@@ -92,6 +105,24 @@ jobs:
             db_port: "5432"
             db_user: postgres
             db_password: postgres
+          - suite: risk-regression
+            test_targets: "apps.application apps.knowledge apps.system_manage"
+            db_backend: sqlite
+            db_engine: django.db.backends.sqlite3
+            db_name: /tmp/lzkb-test.sqlite3
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: root
+            db_password: test-password
+          - suite: risk-regression
+            test_targets: "apps.application apps.knowledge apps.system_manage"
+            db_backend: postgres
+            db_engine: django.db.backends.postgresql
+            db_name: postgres
+            db_host: 127.0.0.1
+            db_port: "5432"
+            db_user: postgres
+            db_password: postgres
     services:
       postgres:
         image: postgres:16
@@ -110,6 +141,7 @@ jobs:
       PYTHONPATH: ${{ github.workspace }}/apps
       DJANGO_SETTINGS_MODULE: lzkb.settings.test
       LZKB_CONFIG_TYPE: ENV
+      LZKB_DATA_DIR: /tmp/lzkb-ci-data
       LZKB_DB_NAME: ${{ matrix.db_name }}
       LZKB_DB_HOST: ${{ matrix.db_host }}
       LZKB_DB_PORT: ${{ matrix.db_port }}
@@ -125,6 +157,8 @@ jobs:
       LZKB_ENABLE_FORCE_GC: "0"
       LZKB_LANGUAGE_CODE: zh-CN
       LZKB_TIME_ZONE: Asia/Shanghai
+      COVERAGE_FAIL_UNDER: "50"
+      CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
 
     steps:
       - name: Checkout Repository
@@ -198,6 +232,7 @@ jobs:
       PYTHONPATH: ${{ github.workspace }}/apps
       DJANGO_SETTINGS_MODULE: lzkb.settings.test
       LZKB_CONFIG_TYPE: ENV
+      LZKB_DATA_DIR: /tmp/lzkb-ci-data
       LZKB_DB_NAME: /tmp/lzkb-coverage.sqlite3
       LZKB_DB_HOST: 127.0.0.1
       LZKB_DB_PORT: "5432"
@@ -212,6 +247,8 @@ jobs:
       LZKB_ENABLE_FORCE_GC: "0"
       LZKB_LANGUAGE_CODE: zh-CN
       LZKB_TIME_ZONE: Asia/Shanghai
+      COVERAGE_FAIL_UNDER: "50"
+      CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -253,10 +290,7 @@ jobs:
             "pycryptodome==3.23.0"
 
       - name: Run Coverage
-        run: |
-          coverage run --source=apps -m django test apps.users apps.chat apps.knowledge apps.tools --noinput --verbosity=1
-          coverage xml -o coverage.xml
-          coverage report --fail-under=30
+        run: bash scripts/quality-gate.sh coverage
 
       - name: Upload Coverage Report
         if: always()

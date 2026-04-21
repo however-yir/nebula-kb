@@ -1,0 +1,18 @@
+ENVIRONMENT: prod
+DEBUG: false
+LOG_LEVEL: INFO
+SECRET_KEY_FILE: /run/secrets/lzkb_secret_key
+DATABASE_URL_FILE: /run/secrets/lzkb_database_url
+REDIS_URL_FILE: /run/secrets/lzkb_redis_url
+LOCAL_MODEL_PROTOCOL: http
+LOCAL_MODEL_HOST: local-model
+LOCAL_MODEL_PORT: 11636
+MODEL_SERVICE_HEALTHCHECK_ENABLED: true
+STORAGE_BACKEND: s3
+STORAGE_ENDPOINT: https://storage.example.com
+STORAGE_BUCKET: lzkb
+STORAGE_ACCESS_KEY_FILE: /run/secrets/lzkb_storage_access_key
+STORAGE_SECRET_KEY_FILE: /run/secrets/lzkb_storage_secret_key
+STORAGE_REGION: us-east-1
+STORAGE_HEALTHCHECK_URL:
+STORAGE_FORCE_PATH_STYLE: true

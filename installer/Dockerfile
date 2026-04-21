@@ -70,5 +70,7 @@ COPY --from=stage-build /opt/py3 /opt/py3
 
 EXPOSE 8080
 VOLUME /opt/maxkb
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=5 \
+    CMD curl -fsS "http://127.0.0.1:${LZKB_HTTP_LISTEN_PORT:-8080}/readyz" || exit 1
 ENTRYPOINT ["bash", "-c"]
 CMD [ "/usr/bin/start-all.sh" ]

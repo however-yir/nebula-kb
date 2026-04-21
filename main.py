@@ -79,8 +79,26 @@ def dev():
 
 
 if __name__ == '__main__':
-    os.environ['HF_HOME'] = '/opt/maxkb-app/model/base'
-    os.environ['TMPDIR'] = '/opt/maxkb-app/tmp'
+    runtime_root = (
+        os.environ.get('LZKB_DATA_DIR')
+        or os.environ.get('MAXKB_DATA_DIR')
+        or os.path.join(BASE_DIR, '.runtime')
+    )
+    hf_home = os.environ.get('LZKB_HF_HOME') or os.environ.get('MAXKB_HF_HOME') or os.path.join(runtime_root, 'model', 'base')
+    tmp_dir = os.environ.get('LZKB_TMPDIR') or os.environ.get('MAXKB_TMPDIR') or os.path.join(runtime_root, 'tmp')
+    tiktoken_cache_dir = (
+        os.environ.get('LZKB_TIKTOKEN_CACHE_DIR')
+        or os.environ.get('MAXKB_TIKTOKEN_CACHE_DIR')
+        or os.path.join(runtime_root, 'model', 'tokenizer', 'openai-tiktoken-cl100k-base')
+    )
+
+    os.makedirs(hf_home, exist_ok=True)
+    os.makedirs(tmp_dir, exist_ok=True)
+    os.makedirs(tiktoken_cache_dir, exist_ok=True)
+
+    os.environ.setdefault('HF_HOME', hf_home)
+    os.environ.setdefault('TMPDIR', tmp_dir)
+    os.environ.setdefault('TIKTOKEN_CACHE_DIR', tiktoken_cache_dir)
     parser = argparse.ArgumentParser(
         description="""
            qabot service control tools;
@@ -98,7 +116,10 @@ if __name__ == '__main__':
     args, e = parser.parse_known_args()
     parser.add_argument(
         "services", type=str, default='all' if args.action == 'start' else 'web', nargs="*",
-        choices=("all", "web", "task") if args.action == 'start' else ("web", "celery", 'local_model'),
+        choices=(
+            "all", "web", "worker", "task", "scheduler", "model", "local_model",
+            "gunicorn", "celery", "celery_default", "celery_model"
+        ) if args.action == 'start' else ("web", "celery", 'local_model'),
         help="The service to start",
     )
 
@@ -110,8 +131,10 @@ if __name__ == '__main__':
     services = args.services if isinstance(args.services, list) else args.services
     if services.__contains__('web'):
         os.environ.setdefault('SERVER_NAME', 'web')
-    elif services.__contains__('local_model'):
+    elif services.__contains__('local_model') or services.__contains__('model'):
         os.environ.setdefault('SERVER_NAME', 'local_model')
+    elif services.__contains__('scheduler'):
+        os.environ.setdefault('SERVER_NAME', 'scheduler')
     django.setup()
     if action == "upgrade_db":
         perform_db_migrate()

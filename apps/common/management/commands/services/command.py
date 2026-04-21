@@ -14,6 +14,9 @@ class Services(TextChoices):
     web = 'web', 'web'
     celery = 'celery', 'celery'
     celery_model = 'celery_model', 'celery_model'
+    worker = 'worker', 'worker'
+    scheduler = 'scheduler', 'scheduler'
+    model = 'model', 'model'
     task = 'task', 'task'
     all = 'all', 'all'
 
@@ -22,31 +25,51 @@ class Services(TextChoices):
         from . import services
         services_map = {
             cls.gunicorn.value: services.GunicornService,
-            cls.celery_default: services.CeleryDefaultService,
-            cls.local_model: services.GunicornLocalModelService,
+            cls.celery_default.value: services.CeleryDefaultService,
+            cls.celery_model.value: services.CeleryModelService,
+            cls.local_model.value: services.GunicornLocalModelService,
+            cls.scheduler.value: services.SchedulerService,
         }
         return services_map.get(name)
 
     @classmethod
     def web_services(cls):
-        return [cls.gunicorn, cls.local_model]
+        return [cls.gunicorn]
 
     @classmethod
     def celery_services(cls):
         return [cls.celery_default, cls.celery_model]
 
     @classmethod
+    def worker_services(cls):
+        return cls.celery_services()
+
+    @classmethod
     def task_services(cls):
         return cls.celery_services()
 
+    @classmethod
+    def scheduler_services(cls):
+        return [cls.scheduler]
+
+    @classmethod
+    def model_services(cls):
+        return [cls.local_model]
 
     @classmethod
     def all_services(cls):
-        return cls.web_services() + cls.task_services()
+        return cls.web_services() + cls.worker_services() + cls.scheduler_services() + cls.model_services()
 
     @classmethod
     def export_services_values(cls):
-        return [cls.all.value, cls.web.value, cls.task.value] + [s.value for s in cls.all_services()]
+        return [
+            cls.all.value,
+            cls.web.value,
+            cls.worker.value,
+            cls.task.value,
+            cls.scheduler.value,
+            cls.model.value,
+        ] + [s.value for s in cls.all_services()]
 
     @classmethod
     def get_service_objects(cls, service_names, **kwargs):

@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: lzkb-postgres
     restart: unless-stopped
     environment:
@@ -11,6 +11,7 @@ services:
       - "${LZKB_DB_PORT:-5432}:5432"
     volumes:
       - lzkb_postgres_data:/var/lib/postgresql/data
+      - ./deploy/postgres/initdb:/docker-entrypoint-initdb.d:ro
 
   redis:
     image: redis:7-alpine
