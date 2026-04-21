@@ -286,11 +286,11 @@
                     <span class="mr-4">
                       <el-button
                         text
-                        @click="showTast = showTast === 'agent' + index ? '' : 'agent' + index"
+                        @click="showTask = showTask === 'agent' + index ? '' : 'agent' + index"
                       >
                         <el-icon
                           class="arrow-icon"
-                          :class="showTast === 'agent' + index ? 'rotate-180' : ''"
+                          :class="showTask === 'agent' + index ? 'rotate-180' : ''"
                         >
                           <ArrowDown />
                         </el-icon>
@@ -301,7 +301,7 @@
                 <ApplicationParameter
                   class="mt-8 mb-8"
                   ref="applicationParameterRef"
-                  v-if="showTast === 'agent' + index && applicationDetailsDict[item.source_id]"
+                  v-if="showTask === 'agent' + index && applicationDetailsDict[item.source_id]"
                   :application="applicationDetailsDict[item.source_id]"
                   :trigger="form"
                   v-model="item.parameter"
@@ -334,11 +334,11 @@
                     <span class="mr-4">
                       <el-button
                         text
-                        @click="showTast = showTast === 'tool' + index ? '' : 'tool' + index"
+                        @click="showTask = showTask === 'tool' + index ? '' : 'tool' + index"
                       >
                         <el-icon
                           class="arrow-icon"
-                          :class="showTast === 'tool' + index ? 'rotate-180' : ''"
+                          :class="showTask === 'tool' + index ? 'rotate-180' : ''"
                         >
                           <ArrowDown />
                         </el-icon>
@@ -349,7 +349,7 @@
                 <ToolParameter
                   class="mt-8 mb-8"
                   ref="toolParameterRef"
-                  v-if="showTast === 'tool' + index && toolDetailsDict[item.source_id]"
+                  v-if="showTask === 'tool' + index && toolDetailsDict[item.source_id]"
                   :tool="toolDetailsDict[item.source_id]"
                   :trigger="form"
                   v-model="item.parameter"
@@ -406,11 +406,11 @@
                     <span class="mr-4">
                       <el-button
                         text
-                        @click="showTast = showTast === 'agent' + index ? '' : 'agent' + index"
+                        @click="showTask = showTask === 'agent' + index ? '' : 'agent' + index"
                       >
                         <el-icon
                           class="arrow-icon"
-                          :class="showTast === 'agent' + index ? 'rotate-180' : ''"
+                          :class="showTask === 'agent' + index ? 'rotate-180' : ''"
                         >
                           <ArrowDown />
                         </el-icon>
@@ -426,7 +426,7 @@
                 <ApplicationParameter
                   class="mt-8 mb-8"
                   ref="applicationParameterRef"
-                  v-if="showTast === 'agent' + index && applicationDetailsDict[item.source_id]"
+                  v-if="showTask === 'agent' + index && applicationDetailsDict[item.source_id]"
                   :application="applicationDetailsDict[item.source_id]"
                   :trigger="form"
                   v-model="item.parameter"
@@ -473,11 +473,11 @@
                     <span class="mr-4">
                       <el-button
                         text
-                        @click="showTast = showTast === 'tool' + index ? '' : 'tool' + index"
+                        @click="showTask = showTask === 'tool' + index ? '' : 'tool' + index"
                       >
                         <el-icon
                           class="arrow-icon"
-                          :class="showTast === 'tool' + index ? 'rotate-180' : ''"
+                          :class="showTask === 'tool' + index ? 'rotate-180' : ''"
                         >
                           <ArrowDown />
                         </el-icon>
@@ -493,7 +493,7 @@
                 <ToolParameter
                   class="mt-8 mb-8"
                   ref="toolParameterRef"
-                  v-if="showTast === 'tool' + index && toolDetailsDict[item.source_id]"
+                  v-if="showTask === 'tool' + index && toolDetailsDict[item.source_id]"
                   :tool="toolDetailsDict[item.source_id]"
                   :trigger="form"
                   v-model="item.parameter"
@@ -555,7 +555,7 @@ const collapseData = reactive({
   tool: true,
   agent: true,
 })
-const showTast = ref<string>('')
+const showTask = ref<string>('')
 
 const route = useRoute()
 const apiType = computed(() => {
@@ -695,7 +695,7 @@ const applicationRefresh = (application_selected: any) => {
         parameter: {},
       })
     })
-  showTast.value = 'agent0'
+  showTask.value = 'agent0'
 }
 const applicationTask = computed(() => {
   return form.value.trigger_task.filter((task: any) => task.source_type === 'APPLICATION')
@@ -736,7 +736,7 @@ const toolRefresh = (tool_selected: any) => {
         parameter: {},
       })
     })
-  showTast.value = 'tool0'
+  showTask.value = 'tool0'
 }
 
 const applicationDialogRef = ref<InstanceType<typeof ApplicationDialog>>()

@@ -226,7 +226,7 @@ const toDetails = (row: any) => {
 }
 
 const changeFilterHandle = () => {
-  query.value = { name: '', statu: '' }
+  query.value = { name: '', state: '' }
 }
 const changeSize = () => {
   paginationConfig.current_page = 1

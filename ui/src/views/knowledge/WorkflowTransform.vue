@@ -45,7 +45,7 @@ const workflowDefault = ref(knowledgeTemplate.default)
 
 const loading = ref(false)
 function transformHandle() {
-  MsgConfirm(t('common.tip'), t('views.knowledge.transform.comfirm'), {
+  MsgConfirm(t('common.tip'), t('views.knowledge.transform.confirm'), {
     cancelButtonText: t('common.close'),
     type: 'warning',
   })

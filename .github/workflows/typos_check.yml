@@ -25,6 +25,9 @@ jobs:
           "**/loopEdge.ts",
           "**/edge.ts",
         ]
+
+        [default.extend-words]
+        EngSerViceType = "EngSerViceType"
         EOF
     - name: Check spelling
       uses: crate-ci/typos@master
