@@ -186,5 +186,6 @@ poetry.lock
 uv.lock
 apps/models_provider/impl/*/icon/
 tmp/
+.runtime/
 config.yml
 .SANDBOX_BANNED_HOSTS

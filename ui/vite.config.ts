@@ -54,7 +54,13 @@ const createHistoryEntryFallbackPlugin = (basePath: string, entry: string) => {
   return {
     name: 'history-entry-fallback',
     configureServer(server: {middlewares: {use: (handler: (req: IncomingMessage, res: ServerResponse, next: () => void) => void) => void}}) {
-      server.middlewares.use((req, _res, next) => {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/') {
+          res.statusCode = 302
+          res.setHeader('Location', normalizedBasePath)
+          res.end()
+          return
+        }
         if (shouldRewriteToEntry(req)) {
           req.url = `/${entry}`
         }
