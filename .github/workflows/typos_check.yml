@@ -24,10 +24,10 @@ jobs:
           "**/migrations/**",
           "**/loopEdge.ts",
           "**/edge.ts",
+          "ui/src/components/dynamics-form/items/model/provider-data.ts",
+          "ui/src/workflow/common/template.ts",
+          "apps/models_provider/impl/tencent_model_provider/model/stt.py",
         ]
-
-        [default.extend-words]
-        EngSerViceType = "EngSerViceType"
         EOF
     - name: Check spelling
       uses: crate-ci/typos@master
