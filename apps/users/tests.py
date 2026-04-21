@@ -103,11 +103,14 @@ class LoginSerializerTests(SimpleTestCase):
             patch("users.serializers.login.record_login_fail_lock", return_value=5),
             patch("users.serializers.login.cache.add") as mock_add_lock,
         ):
-            LoginSerializer._handle_failed_login(
-                username="demo-user",
-                is_license_valid=True,
-                failed_attempts=5,
-                lock_time=10,
-            )
+            with self.assertRaises(AppApiException) as ctx:
+                LoginSerializer._handle_failed_login(
+                    username="demo-user",
+                    is_license_valid=True,
+                    failed_attempts=5,
+                    lock_time=10,
+                )
 
         mock_add_lock.assert_called_once()
+        self.assertEqual(ctx.exception.code, 1005)
+        self.assertIn("This account has been locked for 10 minutes", str(ctx.exception.message))

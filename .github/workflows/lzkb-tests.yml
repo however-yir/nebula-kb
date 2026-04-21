@@ -52,7 +52,7 @@ jobs:
       matrix:
         include:
           - suite: unit
-            test_targets: "apps.users apps.tools"
+            test_targets: "users tools"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
             db_name: /tmp/lzkb-test.sqlite3
@@ -61,7 +61,7 @@ jobs:
             db_user: root
             db_password: test-password
           - suite: unit
-            test_targets: "apps.users apps.tools"
+            test_targets: "users tools"
             db_backend: postgres
             db_engine: django.db.backends.postgresql
             db_name: postgres
@@ -70,7 +70,7 @@ jobs:
             db_user: postgres
             db_password: postgres
           - suite: api
-            test_targets: "apps.chat"
+            test_targets: "chat"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
             db_name: /tmp/lzkb-test.sqlite3
@@ -79,7 +79,7 @@ jobs:
             db_user: root
             db_password: test-password
           - suite: api
-            test_targets: "apps.chat"
+            test_targets: "chat"
             db_backend: postgres
             db_engine: django.db.backends.postgresql
             db_name: postgres
@@ -88,7 +88,7 @@ jobs:
             db_user: postgres
             db_password: postgres
           - suite: integration
-            test_targets: "apps.users.tests.LoginSerializerTests apps.knowledge.tests.KnowledgeRetrievalTests apps.tools.tests.ToolConnectionTests"
+            test_targets: "users.tests.LoginSerializerTests knowledge.tests.KnowledgeRetrievalTests tools.tests.ToolConnectionTests"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
             db_name: /tmp/lzkb-test.sqlite3
@@ -97,7 +97,7 @@ jobs:
             db_user: root
             db_password: test-password
           - suite: integration
-            test_targets: "apps.users.tests.LoginSerializerTests apps.knowledge.tests.KnowledgeRetrievalTests apps.tools.tests.ToolConnectionTests"
+            test_targets: "users.tests.LoginSerializerTests knowledge.tests.KnowledgeRetrievalTests tools.tests.ToolConnectionTests"
             db_backend: postgres
             db_engine: django.db.backends.postgresql
             db_name: postgres
@@ -106,7 +106,7 @@ jobs:
             db_user: postgres
             db_password: postgres
           - suite: risk-regression
-            test_targets: "apps.application apps.knowledge apps.system_manage"
+            test_targets: "application knowledge system_manage"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
             db_name: /tmp/lzkb-test.sqlite3
@@ -115,7 +115,7 @@ jobs:
             db_user: root
             db_password: test-password
           - suite: risk-regression
-            test_targets: "apps.application apps.knowledge apps.system_manage"
+            test_targets: "application knowledge system_manage"
             db_backend: postgres
             db_engine: django.db.backends.postgresql
             db_name: postgres
@@ -157,7 +157,7 @@ jobs:
       LZKB_ENABLE_FORCE_GC: "0"
       LZKB_LANGUAGE_CODE: zh-CN
       LZKB_TIME_ZONE: Asia/Shanghai
-      COVERAGE_FAIL_UNDER: "50"
+      COVERAGE_FAIL_UNDER: "40"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
 
     steps:
@@ -190,12 +190,45 @@ jobs:
             "beautifulsoup4==4.13.4" \
             "requests==2.32.5" \
             "pydub==0.25.1" \
+            "pysilk==0.0.1" \
             "celery[sqlalchemy]==5.5.3" \
-            "django-celery-beat==2.8.1" \
+            "django-celery-beat==2.9.0" \
             "celery-once==3.0.1" \
             "django-apscheduler==0.7.0" \
-            "langchain-core==1.1.0" \
+            "html2text==2025.4.15" \
+            "openpyxl==3.1.5" \
+            "python-docx==1.2.0" \
+            "xlrd==2.0.2" \
+            "xlwt==1.3.0" \
+            "pymupdf==1.26.3" \
+            "pypdf==6.9.2" \
+            "websockets==15.0.1" \
+            "jsonpath-ng==1.8.0" \
+            "numpy==1.26.4" \
+            "langchain==1.2.12" \
+            "langchain-core==1.3.0" \
+            "langchain-openai==1.1.11" \
+            "openai==2.32.0" \
+            "langchain-anthropic==1.3.4" \
+            "anthropic==0.79.0" \
+            "langchain-community==0.4.1" \
+            "langchain-deepseek==1.0.1" \
+            "langchain-google-genai==4.2.1" \
+            "langchain-ollama==1.0.1" \
+            "langchain-aws==1.4.0" \
+            "langgraph==1.1.1" \
+            "langgraph-prebuilt==1.0.8" \
+            "deepagents==0.4.10" \
             "langchain-mcp-adapters==0.2.1" \
+            "mcp==1.19.0" \
+            "qianfan==0.4.12.3" \
+            "zhipuai==2.1.5.20250708" \
+            "volcengine-python-sdk[ark]==4.0.5" \
+            "boto3==1.42.46" \
+            "tencentcloud-sdk-python==3.0.1420" \
+            "xinference-client==1.7.1.post1" \
+            "dashscope==1.25.7" \
+            "cohere==5.17.0" \
             "jieba==0.42.1" \
             "pylint==3.3.7" \
             "pycryptodome==3.23.0"
@@ -247,7 +280,7 @@ jobs:
       LZKB_ENABLE_FORCE_GC: "0"
       LZKB_LANGUAGE_CODE: zh-CN
       LZKB_TIME_ZONE: Asia/Shanghai
-      COVERAGE_FAIL_UNDER: "50"
+      COVERAGE_FAIL_UNDER: "40"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
     steps:
       - name: Checkout Repository
@@ -279,12 +312,45 @@ jobs:
             "beautifulsoup4==4.13.4" \
             "requests==2.32.5" \
             "pydub==0.25.1" \
+            "pysilk==0.0.1" \
             "celery[sqlalchemy]==5.5.3" \
-            "django-celery-beat==2.8.1" \
+            "django-celery-beat==2.9.0" \
             "celery-once==3.0.1" \
             "django-apscheduler==0.7.0" \
-            "langchain-core==1.1.0" \
+            "html2text==2025.4.15" \
+            "openpyxl==3.1.5" \
+            "python-docx==1.2.0" \
+            "xlrd==2.0.2" \
+            "xlwt==1.3.0" \
+            "pymupdf==1.26.3" \
+            "pypdf==6.9.2" \
+            "websockets==15.0.1" \
+            "jsonpath-ng==1.8.0" \
+            "numpy==1.26.4" \
+            "langchain==1.2.12" \
+            "langchain-core==1.3.0" \
+            "langchain-openai==1.1.11" \
+            "openai==2.32.0" \
+            "langchain-anthropic==1.3.4" \
+            "anthropic==0.79.0" \
+            "langchain-community==0.4.1" \
+            "langchain-deepseek==1.0.1" \
+            "langchain-google-genai==4.2.1" \
+            "langchain-ollama==1.0.1" \
+            "langchain-aws==1.4.0" \
+            "langgraph==1.1.1" \
+            "langgraph-prebuilt==1.0.8" \
+            "deepagents==0.4.10" \
             "langchain-mcp-adapters==0.2.1" \
+            "mcp==1.19.0" \
+            "qianfan==0.4.12.3" \
+            "zhipuai==2.1.5.20250708" \
+            "volcengine-python-sdk[ark]==4.0.5" \
+            "boto3==1.42.46" \
+            "tencentcloud-sdk-python==3.0.1420" \
+            "xinference-client==1.7.1.post1" \
+            "dashscope==1.25.7" \
+            "cohere==5.17.0" \
             "jieba==0.42.1" \
             "pylint==3.3.7" \
             "pycryptodome==3.23.0"

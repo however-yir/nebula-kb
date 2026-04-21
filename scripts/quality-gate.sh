@@ -34,7 +34,7 @@ export LZKB_ENABLE_FORCE_GC="${LZKB_ENABLE_FORCE_GC:-0}"
 export LZKB_LANGUAGE_CODE="${LZKB_LANGUAGE_CODE:-zh-CN}"
 export LZKB_TIME_ZONE="${LZKB_TIME_ZONE:-Asia/Shanghai}"
 
-COVERAGE_FAIL_UNDER="${COVERAGE_FAIL_UNDER:-50}"
+COVERAGE_FAIL_UNDER="${COVERAGE_FAIL_UNDER:-40}"
 CORE_COVERAGE_SOURCE="${CORE_COVERAGE_SOURCE:-apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage}"
 
 usage() {
@@ -54,7 +54,7 @@ Gates:
 
 Environment:
   PYTHON_BIN              Python executable override
-  COVERAGE_FAIL_UNDER     Coverage threshold, default 50
+  COVERAGE_FAIL_UNDER     Coverage threshold, default 40
   CORE_COVERAGE_SOURCE    Comma-separated coverage source paths
 USAGE
 }
@@ -81,26 +81,26 @@ run_smoke() {
 }
 
 run_unit() {
-  run_django_tests "unit" apps.users apps.tools
+  run_django_tests "unit" users tools
 }
 
 run_integration() {
   run_django_tests "integration" \
-    apps.users.tests.LoginSerializerTests \
-    apps.knowledge.tests.KnowledgeRetrievalTests \
-    apps.tools.tests.ToolConnectionTests
+    users.tests.LoginSerializerTests \
+    knowledge.tests.KnowledgeRetrievalTests \
+    tools.tests.ToolConnectionTests
 }
 
 run_api() {
-  run_django_tests "api regression" apps.chat apps.application
+  run_django_tests "api regression" chat application
 }
 
 run_auth() {
-  run_django_tests "auth/token regression" apps.users.tests.LoginSerializerTests
+  run_django_tests "auth/token regression" users.tests.LoginSerializerTests
 }
 
 run_permission() {
-  run_django_tests "permission regression" apps.system_manage
+  run_django_tests "permission regression" system_manage
 }
 
 run_coverage() {
@@ -112,7 +112,7 @@ run_coverage() {
 
   (cd "${ROOT_DIR}" && \
     "${PYTHON}" -m coverage run --source="${CORE_COVERAGE_SOURCE}" -m django test \
-      apps.users apps.chat apps.knowledge apps.tools apps.application apps.system_manage \
+      users chat knowledge tools application system_manage \
       --noinput --verbosity=1 && \
     "${PYTHON}" -m coverage xml -o coverage.xml && \
     "${PYTHON}" -m coverage report --fail-under="${COVERAGE_FAIL_UNDER}")

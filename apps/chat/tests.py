@@ -20,7 +20,7 @@ class ChatRouteSmokeTests(SimpleTestCase):
         chat_match = self._resolve("/chat_message/chat-1")
 
         self.assertEqual(anonymous_match.func.view_class.__name__, "AnonymousAuthentication")
-        self.assertEqual(chat_match.view_name, "chat")
+        self.assertEqual(chat_match.url_name, "chat")
         self.assertEqual(chat_match.func.view_class.__name__, "ChatView")
 
     def test_routes_keep_mcp_and_captcha_endpoints(self):
@@ -28,7 +28,7 @@ class ChatRouteSmokeTests(SimpleTestCase):
         captcha_match = self._resolve("/captcha")
 
         self.assertEqual(mcp_match.func.__name__, "mcp_view")
-        self.assertEqual(captcha_match.view_name, "captcha")
+        self.assertEqual(captcha_match.url_name, "captcha")
         self.assertEqual(captcha_match.func.view_class.__name__, "CaptchaView")
 
 

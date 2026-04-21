@@ -37,7 +37,9 @@ CSRF_TRUSTED_ORIGINS = _split_config_list(CONFIG.get("CSRF_TRUSTED_ORIGINS"))
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
@@ -61,6 +63,8 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.common.CommonMiddleware',
     'common.middleware.gzip.GZipMiddleware',
     'common.middleware.chat_headers_middleware.ChatHeadersMiddleware',
