@@ -18,7 +18,8 @@ RUN pip3 install --upgrade pip setuptools && \
     python3 install_model_bert_base_cased.py && \
     cp -r model/base/hub model/tokenizer
 
-ARG LZKB_VECTOR_MODEL_BASE_IMAGE=ghcr.io/1panel-dev/maxkb-vector-model:v1.0.1
+ARG NEBULA_VECTOR_MODEL_BASE_IMAGE=nebulakb/vector-model:v1.0.1
+ARG LZKB_VECTOR_MODEL_BASE_IMAGE=${NEBULA_VECTOR_MODEL_BASE_IMAGE}
 FROM ${LZKB_VECTOR_MODEL_BASE_IMAGE} AS vector-model
 
 FROM alpine AS tmp-stage2

@@ -83,7 +83,7 @@ if [[ "${START_STACK}" -eq 1 ]]; then
   wait_for_postgres
   ensure_pgvector_extension
   echo "Dependencies are up: ${services[*]}"
-  echo "pgvector extension ensured in ${LZKB_DB_NAME:-lzkb}."
+  echo "pgvector extension ensured in ${NEBULA_DB_NAME:-${LZKB_DB_NAME:-nebula}}."
 fi
 
 cat <<'NEXT'

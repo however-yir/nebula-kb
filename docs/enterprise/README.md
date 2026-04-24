@@ -1,6 +1,6 @@
-# LZKB 企业交付文档
+# NebulaKB 企业交付文档
 
-本目录收敛 LZKB 一期企业能力和客户交付材料。
+本目录收敛 NebulaKB 一期企业能力和客户交付材料。
 
 - [一期企业能力边界](./enterprise-capability-boundary.md)
 - [管理员手册](./administrator-guide.md)

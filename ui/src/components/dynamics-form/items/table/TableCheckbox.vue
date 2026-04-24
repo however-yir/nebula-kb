@@ -60,6 +60,7 @@ import type { ElTable } from 'element-plus'
 
 import _ from 'lodash'
 import TableColumn from '@/components/dynamics-form/items/table/TableColumn.vue'
+import { renderSafeExpression } from '@/utils/safe-expression'
 const filterText = ref<string>('')
 const props = defineProps<{
   formValue?: any
@@ -74,7 +75,7 @@ const props = defineProps<{
 const rowTemp = ref<any>()
 const evalF: (text: string, row: any) => string = (text: string, row: any) => {
   rowTemp.value = row
-  return eval(text)
+  return renderSafeExpression(text, row)
 }
 const emit = defineEmits(['update:modelValue', 'change'])
 

@@ -12,7 +12,7 @@ APP_DIR = os.path.join(BASE_DIR, 'apps')
 
 os.chdir(BASE_DIR)
 sys.path.insert(0, APP_DIR)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lzkb.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "nebula.settings")
 
 
 def collect_static():
@@ -52,7 +52,10 @@ def start_services():
     if args.worker:
         start_args.extend(['--worker', str(args.worker)])
     else:
-        worker = os.environ.get('LZKB_CORE_WORKER', os.environ.get('MAXKB_CORE_WORKER'))
+        worker = os.environ.get(
+            'NEBULA_CORE_WORKER',
+            os.environ.get('LZKB_CORE_WORKER', os.environ.get('MAXKB_CORE_WORKER'))
+        )
         if isinstance(worker, str) and worker.isdigit():
             start_args.extend(['--worker', worker])
 
@@ -73,21 +76,23 @@ def dev():
     elif services.__contains__('celery'):
         management.call_command('celery', 'celery')
     elif services.__contains__('local_model'):
-        from lzkb.const import CONFIG
+        from nebula.const import CONFIG
         bind = f'{CONFIG.get("LOCAL_MODEL_HOST")}:{CONFIG.get("LOCAL_MODEL_PORT")}'
         management.call_command('runserver', bind)
 
 
 if __name__ == '__main__':
     runtime_root = (
-        os.environ.get('LZKB_DATA_DIR')
+        os.environ.get('NEBULA_DATA_DIR')
+        or os.environ.get('LZKB_DATA_DIR')
         or os.environ.get('MAXKB_DATA_DIR')
         or os.path.join(BASE_DIR, '.runtime')
     )
-    hf_home = os.environ.get('LZKB_HF_HOME') or os.environ.get('MAXKB_HF_HOME') or os.path.join(runtime_root, 'model', 'base')
-    tmp_dir = os.environ.get('LZKB_TMPDIR') or os.environ.get('MAXKB_TMPDIR') or os.path.join(runtime_root, 'tmp')
+    hf_home = os.environ.get('NEBULA_HF_HOME') or os.environ.get('LZKB_HF_HOME') or os.environ.get('MAXKB_HF_HOME') or os.path.join(runtime_root, 'model', 'base')
+    tmp_dir = os.environ.get('NEBULA_TMPDIR') or os.environ.get('LZKB_TMPDIR') or os.environ.get('MAXKB_TMPDIR') or os.path.join(runtime_root, 'tmp')
     tiktoken_cache_dir = (
-        os.environ.get('LZKB_TIKTOKEN_CACHE_DIR')
+        os.environ.get('NEBULA_TIKTOKEN_CACHE_DIR')
+        or os.environ.get('LZKB_TIKTOKEN_CACHE_DIR')
         or os.environ.get('MAXKB_TIKTOKEN_CACHE_DIR')
         or os.path.join(runtime_root, 'model', 'tokenizer', 'openai-tiktoken-cl100k-base')
     )

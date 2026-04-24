@@ -1,4 +1,4 @@
-name: LZKB Tests
+name: NebulaKB Tests
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
       - "deploy/**"
       - "docs/ops/**"
       - "docs/quality/**"
-      - ".github/workflows/lzkb-tests.yml"
+      - ".github/workflows/nebulakb-tests.yml"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "pyproject.toml"
       - "config_example.yml"
@@ -27,7 +27,7 @@ on:
       - "deploy/**"
       - "docs/ops/**"
       - "docs/quality/**"
-      - ".github/workflows/lzkb-tests.yml"
+      - ".github/workflows/nebulakb-tests.yml"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "pyproject.toml"
       - "config_example.yml"
@@ -37,7 +37,7 @@ on:
   workflow_call:
 
 concurrency:
-  group: lzkb-tests-${{ github.workflow }}-${{ github.ref }}
+  group: nebulakb-tests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -55,7 +55,7 @@ jobs:
             test_targets: "users tools"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
-            db_name: /tmp/lzkb-test.sqlite3
+            db_name: /tmp/nebula-test.sqlite3
             db_host: 127.0.0.1
             db_port: "5432"
             db_user: root
@@ -73,7 +73,7 @@ jobs:
             test_targets: "chat"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
-            db_name: /tmp/lzkb-test.sqlite3
+            db_name: /tmp/nebula-test.sqlite3
             db_host: 127.0.0.1
             db_port: "5432"
             db_user: root
@@ -91,7 +91,7 @@ jobs:
             test_targets: "users.tests.LoginSerializerTests knowledge.tests.KnowledgeRetrievalTests tools.tests.ToolConnectionTests"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
-            db_name: /tmp/lzkb-test.sqlite3
+            db_name: /tmp/nebula-test.sqlite3
             db_host: 127.0.0.1
             db_port: "5432"
             db_user: root
@@ -109,7 +109,7 @@ jobs:
             test_targets: "application knowledge system_manage"
             db_backend: sqlite
             db_engine: django.db.backends.sqlite3
-            db_name: /tmp/lzkb-test.sqlite3
+            db_name: /tmp/nebula-test.sqlite3
             db_host: 127.0.0.1
             db_port: "5432"
             db_user: root
@@ -139,24 +139,24 @@ jobs:
           --health-retries 5
     env:
       PYTHONPATH: ${{ github.workspace }}/apps
-      DJANGO_SETTINGS_MODULE: lzkb.settings.test
-      LZKB_CONFIG_TYPE: ENV
-      LZKB_DATA_DIR: /tmp/lzkb-ci-data
-      LZKB_DB_NAME: ${{ matrix.db_name }}
-      LZKB_DB_HOST: ${{ matrix.db_host }}
-      LZKB_DB_PORT: ${{ matrix.db_port }}
-      LZKB_DB_USER: ${{ matrix.db_user }}
-      LZKB_DB_PASSWORD: ${{ matrix.db_password }}
-      LZKB_DB_ENGINE: ${{ matrix.db_engine }}
-      LZKB_DB_MAX_OVERFLOW: "10"
-      LZKB_REDIS_HOST: 127.0.0.1
-      LZKB_REDIS_PORT: "6379"
-      LZKB_REDIS_PASSWORD: test-password
-      LZKB_REDIS_DB: "0"
-      LZKB_REDIS_MAX_CONNECTIONS: "10"
-      LZKB_ENABLE_FORCE_GC: "0"
-      LZKB_LANGUAGE_CODE: zh-CN
-      LZKB_TIME_ZONE: Asia/Shanghai
+      DJANGO_SETTINGS_MODULE: nebula.settings.test
+      NEBULA_CONFIG_TYPE: ENV
+      NEBULA_DATA_DIR: /tmp/nebula-ci-data
+      NEBULA_DB_NAME: ${{ matrix.db_name }}
+      NEBULA_DB_HOST: ${{ matrix.db_host }}
+      NEBULA_DB_PORT: ${{ matrix.db_port }}
+      NEBULA_DB_USER: ${{ matrix.db_user }}
+      NEBULA_DB_PASSWORD: ${{ matrix.db_password }}
+      NEBULA_DB_ENGINE: ${{ matrix.db_engine }}
+      NEBULA_DB_MAX_OVERFLOW: "10"
+      NEBULA_REDIS_HOST: 127.0.0.1
+      NEBULA_REDIS_PORT: "6379"
+      NEBULA_REDIS_PASSWORD: test-password
+      NEBULA_REDIS_DB: "0"
+      NEBULA_REDIS_MAX_CONNECTIONS: "10"
+      NEBULA_ENABLE_FORCE_GC: "0"
+      NEBULA_LANGUAGE_CODE: zh-CN
+      NEBULA_TIME_ZONE: Asia/Shanghai
       COVERAGE_FAIL_UNDER: "40"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
 
@@ -263,23 +263,23 @@ jobs:
     needs: django-test-suites
     env:
       PYTHONPATH: ${{ github.workspace }}/apps
-      DJANGO_SETTINGS_MODULE: lzkb.settings.test
-      LZKB_CONFIG_TYPE: ENV
-      LZKB_DATA_DIR: /tmp/lzkb-ci-data
-      LZKB_DB_NAME: /tmp/lzkb-coverage.sqlite3
-      LZKB_DB_HOST: 127.0.0.1
-      LZKB_DB_PORT: "5432"
-      LZKB_DB_USER: root
-      LZKB_DB_PASSWORD: test-password
-      LZKB_DB_ENGINE: django.db.backends.sqlite3
-      LZKB_REDIS_HOST: 127.0.0.1
-      LZKB_REDIS_PORT: "6379"
-      LZKB_REDIS_PASSWORD: test-password
-      LZKB_REDIS_DB: "0"
-      LZKB_REDIS_MAX_CONNECTIONS: "10"
-      LZKB_ENABLE_FORCE_GC: "0"
-      LZKB_LANGUAGE_CODE: zh-CN
-      LZKB_TIME_ZONE: Asia/Shanghai
+      DJANGO_SETTINGS_MODULE: nebula.settings.test
+      NEBULA_CONFIG_TYPE: ENV
+      NEBULA_DATA_DIR: /tmp/nebula-ci-data
+      NEBULA_DB_NAME: /tmp/nebula-coverage.sqlite3
+      NEBULA_DB_HOST: 127.0.0.1
+      NEBULA_DB_PORT: "5432"
+      NEBULA_DB_USER: root
+      NEBULA_DB_PASSWORD: test-password
+      NEBULA_DB_ENGINE: django.db.backends.sqlite3
+      NEBULA_REDIS_HOST: 127.0.0.1
+      NEBULA_REDIS_PORT: "6379"
+      NEBULA_REDIS_PASSWORD: test-password
+      NEBULA_REDIS_DB: "0"
+      NEBULA_REDIS_MAX_CONNECTIONS: "10"
+      NEBULA_ENABLE_FORCE_GC: "0"
+      NEBULA_LANGUAGE_CODE: zh-CN
+      NEBULA_TIME_ZONE: Asia/Shanghai
       COVERAGE_FAIL_UNDER: "40"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
     steps:
@@ -362,7 +362,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lzkb-coverage-report
+          name: nebula-coverage-report
           path: coverage.xml
           if-no-files-found: warn
 

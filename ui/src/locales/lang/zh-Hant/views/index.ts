@@ -16,6 +16,7 @@ import login from './login'
 import operateLog from './operate-log'
 import shared from './shared'
 import trigger from './trigger'
+import knowledgeOps from './knowledge-ops'
 export default {
   application,
   applicationOverview,
@@ -34,5 +35,6 @@ export default {
   workspace,
   chatUser,
   shared,
-  trigger
+  trigger,
+  knowledgeOps
 }

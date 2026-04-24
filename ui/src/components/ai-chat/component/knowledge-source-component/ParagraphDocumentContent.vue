@@ -13,6 +13,6 @@ const is_pdf = computed(() => {
   return props.detail?.meta?.source_file_id
 })
 const pdfSrc = computed(() => {
-  return `${window.LZKB.prefix}/oss/file/${props.detail?.meta?.source_file_id}`
+  return `${window.NEBULA.prefix}/oss/file/${props.detail?.meta?.source_file_id}`
 })
 </script>

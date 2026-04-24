@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 const useApplicationStore = defineStore('application', {
   state: () => ({
-    location: `${window.location.origin}${window.LZKB.chatPrefix ? window.LZKB.chatPrefix : window.LZKB.prefix}/`,
+    location: `${window.location.origin}${window.NEBULA.chatPrefix ? window.NEBULA.chatPrefix : window.NEBULA.prefix}/`,
   }),
   actions: {},
 })

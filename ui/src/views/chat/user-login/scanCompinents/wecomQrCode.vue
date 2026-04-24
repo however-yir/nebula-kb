@@ -48,7 +48,7 @@ function createTransparentIFrame(el: string) {
 }
 
 function getLang() {
-  const lang = localStorage.getItem('LZKB-locale') || getBrowserLang()
+  const lang = localStorage.getItem('NEBULA-locale') || getBrowserLang()
   return lang === 'en-US' ? 'en' : 'zh'
 }
 

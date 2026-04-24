@@ -133,10 +133,15 @@ const errMsg = computed(() => {
  */
 const to_rule = (rule: any) => {
   if (rule.validator) {
-    // eslint-disable-next-line prefer-const, @typescript-eslint/no-unused-vars
-    let validator = (rule: any, value: string, callback: any) => {}
-    eval(rule.validator)
-    return { ...rule, validator }
+    if (typeof rule.validator === 'function') {
+      return rule
+    }
+    return {
+      ...rule,
+      validator: (_rule: any, _value: string, callback: any) => {
+        callback()
+      },
+    }
   }
   return rule
 }

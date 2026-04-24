@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-    @project: LZKB
+    @project: NebulaKB
     @Author：虎虎
     @file： conf.py
     @date：2025/4/11 16:58
@@ -15,20 +15,21 @@ import yaml
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
-logger = logging.getLogger('lzkb.conf')
+logger = logging.getLogger('nebula.conf')
 
 
 class Config(dict):
     defaults = {
         # 应用品牌与外链
         "APP_NAME": "NebulaKB",
-        "APPSTORE_URL": "https://raw.githubusercontent.com/however-yir/LZKB/main/appstore/lzkb.json",
-        "PROJECT_URL": "https://github.com/however-yir/LZKB",
-        "HELP_URL": "https://github.com/however-yir/LZKB/wiki",
-        "PRICING_URL": "https://github.com/however-yir/LZKB#readme",
-        "CONTACT_URL": "https://github.com/however-yir/LZKB/issues",
-        "OFFICIAL_SITE_URL": "https://github.com/however-yir/LZKB",
-        "CHAT_FLOAT_ICON": "LZKB.gif",
+        "APPSTORE_URL": "https://raw.githubusercontent.com/however-yir/nebula-kb/main/appstore/nebula.json",
+        "PROJECT_URL": "https://github.com/however-yir/nebula-kb",
+        "HELP_URL": "https://docs.nebulakb.ai",
+        "PRICING_URL": "https://nebulakb.ai/pricing",
+        "CONTACT_URL": "https://github.com/however-yir/nebula-kb/issues",
+        "OFFICIAL_SITE_URL": "https://nebulakb.ai",
+        "DOCS_URL": "https://docs.nebulakb.ai",
+        "CHAT_FLOAT_ICON": "NebulaKB.gif",
         "ENVIRONMENT": "dev",
         "SECRET_KEY": "",
         "ALLOWED_HOSTS": "localhost,127.0.0.1",
@@ -41,7 +42,7 @@ class Config(dict):
         "AUTH_COOKIE_SAMESITE": "Lax",
         # 数据库相关配置
         "DATABASE_URL": "",
-        "DB_NAME": "lzkb",
+        "DB_NAME": "nebula",
         "DB_HOST": "127.0.0.1",
         "DB_PORT": 5432,
         "DB_USER": "root",
@@ -333,7 +334,16 @@ class ConfigManager:
         return True
 
     def load_from_yml(self):
-        env = os.environ.get('LZKB_ENVIRONMENT', os.environ.get('LZKB_ENV', os.environ.get('APP_ENV', '')))
+        env = os.environ.get(
+            'NEBULA_ENVIRONMENT',
+            os.environ.get(
+                'NEBULA_ENV',
+                os.environ.get(
+                    'LZKB_ENVIRONMENT',
+                    os.environ.get('LZKB_ENV', os.environ.get('APP_ENV', ''))
+                )
+            ),
+        )
         candidates = []
         if env:
             candidates.extend([
@@ -387,7 +397,10 @@ class ConfigManager:
             'STORAGE_HEALTHCHECK_TIMEOUT',
         }
         for key in keys:
-            if key.startswith('LZKB_'):
+            if key.startswith('NEBULA_'):
+                config[key.replace('NEBULA_', '')] = os.environ.get(key)
+            elif key.startswith('LZKB_') and key.replace('LZKB_', '') not in config:
+                # Backward compatibility for existing LZKB deployments.
                 config[key.replace('LZKB_', '')] = os.environ.get(key)
             elif key.startswith('MAXKB_') and key.replace('MAXKB_', '') not in config:
                 # Backward compatibility for existing MAXKB deployments.
@@ -402,18 +415,21 @@ class ConfigManager:
                              Error: No config env found.
 
                              Please set environment variables
-                                LZKB_CONFIG_TYPE: 配置文件读取方式 FILE: 使用配置文件配置  ENV: 使用ENV配置
-                                LZKB_DB_NAME: 数据库名称
-                                LZKB_DB_HOST: 数据库主机
-                                LZKB_DB_PORT: 数据库端口
-                                LZKB_DB_USER: 数据库用户名
-                                LZKB_DB_PASSWORD: 数据库密码
-                                
-                                LZKB_REDIS_HOST:缓存数据库主机
-                                LZKB_REDIS_PORT:缓存数据库端口
-                                LZKB_REDIS_PASSWORD:缓存数据库密码
-                                LZKB_REDIS_DB:缓存数据库
-                                LZKB_REDIS_MAX_CONNECTIONS:缓存数据库最大连接数
+                                NEBULA_CONFIG_TYPE: 配置文件读取方式 FILE: 使用配置文件配置  ENV: 使用ENV配置
+                                NEBULA_DB_NAME: 数据库名称
+                                NEBULA_DB_HOST: 数据库主机
+                                NEBULA_DB_PORT: 数据库端口
+                                NEBULA_DB_USER: 数据库用户名
+                                NEBULA_DB_PASSWORD: 数据库密码
+
+                                NEBULA_REDIS_HOST:缓存数据库主机
+                                NEBULA_REDIS_PORT:缓存数据库端口
+                                NEBULA_REDIS_PASSWORD:缓存数据库密码
+                                NEBULA_REDIS_DB:缓存数据库
+                                NEBULA_REDIS_MAX_CONNECTIONS:缓存数据库最大连接数
+
+                             Compatibility:
+                                LZKB_* and MAXKB_* are still supported.
                              """
             raise ImportError(msg)
         self.from_mapping(config)
@@ -426,7 +442,10 @@ class ConfigManager:
         if not root_path:
             root_path = PROJECT_DIR
         manager = cls(root_path=root_path)
-        config_type = os.environ.get('LZKB_CONFIG_TYPE', os.environ.get('MAXKB_CONFIG_TYPE'))
+        config_type = os.environ.get(
+            'NEBULA_CONFIG_TYPE',
+            os.environ.get('LZKB_CONFIG_TYPE', os.environ.get('MAXKB_CONFIG_TYPE'))
+        )
         env_contract_keys = (
             'DATABASE_URL',
             'DATABASE_URL_FILE',
@@ -435,8 +454,14 @@ class ConfigManager:
             'SECRET_KEY',
             'SECRET_KEY_FILE',
         )
-        if config_type is None and any(os.environ.get(key) for key in env_contract_keys):
-            config_type = 'ENV'
+        if config_type is None:
+            if any(os.environ.get(key) for key in env_contract_keys):
+                config_type = 'ENV'
+            else:
+                for prefix in ('NEBULA_', 'LZKB_', 'MAXKB_'):
+                    if any(os.environ.get(f'{prefix}{key}') for key in env_contract_keys):
+                        config_type = 'ENV'
+                        break
         if config_type is None or config_type != 'ENV':
             manager.load_from_yml()
         else:

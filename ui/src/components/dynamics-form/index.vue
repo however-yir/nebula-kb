@@ -41,6 +41,7 @@ import type { FormInstance } from 'element-plus'
 import type Result from '@/request/Result'
 import _ from 'lodash'
 import { get, post, put, del } from '@/request/index'
+import { normalizeDynamicFormResponse } from '@/utils/safe-expression'
 const request = {
   get,
   post,
@@ -148,42 +149,24 @@ const trigger = (
   self: any,
   loading: Ref<boolean>,
 ) => {
-  const request_call = new Function(
-    'self',
-    'trigger_setting',
-    'request',
-    'extra',
-    trigger_setting.request
-      ? trigger_setting.request
-      : 'return  request.get(extra.renderTemplate(trigger_setting.url));',
-  )(self, trigger_setting, request, {
-    renderTemplate: (url: string) =>
-      renderTemplate(url, {
-        trigger_value: trigger_value,
-        ...props.otherParams,
-      }),
+  const url = renderTemplate(trigger_setting.url, {
+    trigger_value: trigger_value,
+    ...props.otherParams,
   })
+
+  if (trigger_setting.request && String(trigger_setting.request).includes('self.children')) {
+    self.children = () => request.get(url)
+  }
+
+  const request_call = request.get(url)
 
   if (!trigger_setting.change && !trigger_setting.change_field) {
     return
   }
   request_call.then((ok: any) => {
-    new Function(
-      'self',
-      'trigger_setting',
-      'response',
-      'extra',
-      trigger_setting.change
-        ? trigger_setting.change
-        : `self[trigger_setting.change_field]=[
-        ...response.data.shared_model.map((m) => {
-          return { ...m, type: 'share' }
-        }),
-        ...response.data.model.map((m) => {
-          return { ...m, type: 'workspace' }
-        })
-      ];`,
-    )(self, trigger_setting, ok, { form_data: formValue, getDefault: getFormDefaultValue })
+    if (trigger_setting.change_field) {
+      self[trigger_setting.change_field] = normalizeDynamicFormResponse(ok)
+    }
   })
 }
 /**

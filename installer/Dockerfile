@@ -1,4 +1,5 @@
-ARG LZKB_BASE_IMAGE=ghcr.io/1panel-dev/maxkb-base:python3.11-pg17.9-20260326
+ARG NEBULA_BASE_IMAGE=nebulakb/base:python3.11-pg17.9-20260326
+ARG LZKB_BASE_IMAGE=${NEBULA_BASE_IMAGE}
 FROM node:24-alpine AS web-build
 COPY ui ui
 RUN cd ui && ls -la && if [ -d "dist" ]; then exit 0; fi && \
@@ -30,8 +31,24 @@ ARG DOCKER_IMAGE_TAG=dev \
     BUILD_AT \
     GITHUB_COMMIT
 
-ENV LZKB_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_COMMIT})" \
-    LZKB_DB_NAME=lzkb \
+ENV NEBULA_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_COMMIT})" \
+    NEBULA_DB_NAME=nebula \
+    NEBULA_DB_HOST=127.0.0.1 \
+    NEBULA_DB_PORT=5432 \
+    NEBULA_DB_USER=${POSTGRES_USER} \
+    NEBULA_DB_PASSWORD=${POSTGRES_PASSWORD} \
+    NEBULA_DB_MAX_OVERFLOW=80 \
+    NEBULA_REDIS_HOST=127.0.0.1 \
+    NEBULA_REDIS_PORT=6379 \
+    NEBULA_REDIS_DB=0 \
+    NEBULA_REDIS_PASSWORD=${REDIS_PASSWORD} \
+    NEBULA_EMBEDDING_MODEL_PATH=/opt/maxkb-app/model/embedding \
+    NEBULA_EMBEDDING_MODEL_NAME=/opt/maxkb-app/model/embedding/shibing624_text2vec-base-chinese \
+    NEBULA_LOCAL_MODEL_HOST=127.0.0.1 \
+    NEBULA_LOCAL_MODEL_PORT=11636 \
+    NEBULA_LOCAL_MODEL_PROTOCOL=http \
+    LZKB_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_COMMIT})" \
+    LZKB_DB_NAME=nebula \
     LZKB_DB_HOST=127.0.0.1 \
     LZKB_DB_PORT=5432 \
     LZKB_DB_USER=${POSTGRES_USER} \
@@ -47,7 +64,7 @@ ENV LZKB_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_CO
     LZKB_LOCAL_MODEL_PORT=11636 \
     LZKB_LOCAL_MODEL_PROTOCOL=http \
     MAXKB_VERSION="${DOCKER_IMAGE_TAG} (build at ${BUILD_AT}, commit: ${GITHUB_COMMIT})" \
-    MAXKB_DB_NAME=lzkb \
+    MAXKB_DB_NAME=nebula \
     MAXKB_DB_HOST=127.0.0.1 \
     MAXKB_DB_PORT=5432 \
     MAXKB_DB_USER=${POSTGRES_USER} \
@@ -71,6 +88,6 @@ COPY --from=stage-build /opt/py3 /opt/py3
 EXPOSE 8080
 VOLUME /opt/maxkb
 HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=5 \
-    CMD curl -fsS "http://127.0.0.1:${LZKB_HTTP_LISTEN_PORT:-8080}/readyz" || exit 1
+    CMD curl -fsS "http://127.0.0.1:${NEBULA_HTTP_LISTEN_PORT:-${LZKB_HTTP_LISTEN_PORT:-8080}}/readyz" || exit 1
 ENTRYPOINT ["bash", "-c"]
 CMD [ "/usr/bin/start-all.sh" ]

@@ -3,22 +3,22 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.runtime
-    image: lzkb:local-runtime
+    image: nebulakb/local-runtime:latest
 
   web:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.runtime
-    image: lzkb:local-runtime
+    image: nebulakb/local-runtime:latest
 
   worker:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.runtime
-    image: lzkb:local-runtime
+    image: nebulakb/local-runtime:latest
 
   scheduler:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.runtime
-    image: lzkb:local-runtime
+    image: nebulakb/local-runtime:latest

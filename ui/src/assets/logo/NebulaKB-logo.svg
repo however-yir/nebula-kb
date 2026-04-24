@@ -1,0 +1,19 @@
+<svg width="260" height="52" viewBox="0 0 260 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="nebula_bg" x1="4" y1="4" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#14B8A6"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+    <linearGradient id="nebula_text" x1="62" y1="12" x2="208" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#C2410C"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="44" height="44" rx="12" fill="url(#nebula_bg)"/>
+  <circle cx="26" cy="20" r="7" fill="white" fill-opacity="0.95"/>
+  <path d="M18 32C20.8 26.8 31.2 26.8 34 32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="18" cy="17" r="2.1" fill="white" fill-opacity="0.88"/>
+  <circle cx="34" cy="17" r="2.1" fill="white" fill-opacity="0.88"/>
+  <text x="62" y="30" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="url(#nebula_text)">NebulaKB</text>
+  <text x="62" y="43" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#64748B">KNOWLEDGE OS</text>
+</svg>

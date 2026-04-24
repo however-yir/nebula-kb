@@ -2,15 +2,16 @@
 
 ## Repository Name
 
-LZKB
+nebula-kb
 
 ## Description
 
-LZKB - Self-hosted enterprise agent and knowledge base platform for private deployment and custom AI workflows.
+NebulaKB - self-hosted knowledge operations hub for private deployment, governed RAG, and custom AI workflows.
 
 ## Suggested Topics
 
-- lzkb
+- nebulakb
+- knowledge-ops
 - ai
 - rag
 - knowledge-base
@@ -23,4 +24,4 @@ LZKB - Self-hosted enterprise agent and knowledge base platform for private depl
 
 ## Short Website (optional)
 
-https://github.com/however-yir/LZKB
+https://nebulakb.ai

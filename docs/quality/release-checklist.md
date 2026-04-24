@@ -1,4 +1,4 @@
-# LZKB Release Checklist
+# NebulaKB Release Checklist
 
 每次发布前使用这份清单。未完成项必须记录负责人、风险等级和是否允许发布。
 

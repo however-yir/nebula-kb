@@ -1,4 +1,4 @@
-# LZKB 部署手册
+# NebulaKB 部署手册
 
 本文面向交付、运维和二开团队，说明企业交付版部署步骤和上线检查。
 
@@ -16,16 +16,16 @@
 
 | 变量 | 说明 |
 | --- | --- |
-| `LZKB_CONFIG_TYPE` | 配置来源，推荐生产使用 `ENV` |
-| `LZKB_DB_NAME` | PostgreSQL 数据库名 |
-| `LZKB_DB_HOST` | PostgreSQL 地址 |
-| `LZKB_DB_PORT` | PostgreSQL 端口 |
-| `LZKB_DB_USER` | PostgreSQL 用户 |
-| `LZKB_DB_PASSWORD` | PostgreSQL 密码 |
-| `LZKB_REDIS_HOST` | Redis 地址 |
-| `LZKB_REDIS_PORT` | Redis 端口 |
-| `LZKB_REDIS_PASSWORD` | Redis 密码 |
-| `LZKB_CORE_WORKER` | Web worker 数量 |
+| `NEBULA_CONFIG_TYPE` | 配置来源，推荐生产使用 `ENV` |
+| `NEBULA_DB_NAME` | PostgreSQL 数据库名 |
+| `NEBULA_DB_HOST` | PostgreSQL 地址 |
+| `NEBULA_DB_PORT` | PostgreSQL 端口 |
+| `NEBULA_DB_USER` | PostgreSQL 用户 |
+| `NEBULA_DB_PASSWORD` | PostgreSQL 密码 |
+| `NEBULA_REDIS_HOST` | Redis 地址 |
+| `NEBULA_REDIS_PORT` | Redis 端口 |
+| `NEBULA_REDIS_PASSWORD` | Redis 密码 |
+| `NEBULA_HTTP_LISTEN_PORT` | Web 服务监听端口 |
 
 生产环境禁止保留 `CHANGE_ME_DB_PASSWORD` 或 `CHANGE_ME_REDIS_PASSWORD`。
 
@@ -108,8 +108,8 @@ proxy_read_timeout 300s;
 
 一期 SSO 按以下边界交付：
 
-1. 客户已有 IdP 时，优先通过外部 OIDC/SAML 网关完成认证，再将可信身份传递给 LZKB 的登录扩展。
-2. 原生 OIDC/SAML 对接属于客户化扩展，必须复用 LZKB Token、RBAC 和审计日志契约。
+1. 客户已有 IdP 时，优先通过外部 OIDC/SAML 网关完成认证，再将可信身份传递给 NebulaKB 的登录扩展。
+2. 原生 OIDC/SAML 对接属于客户化扩展，必须复用 NebulaKB Token、RBAC 和审计日志契约。
 3. SSO 用户的 `source` 字段不得为 `LOCAL`，登录事件必须写入 `event_name=login` 或等价事件名。
 
 ## 上线检查
@@ -130,7 +130,7 @@ proxy_read_timeout 300s;
 
 - PostgreSQL 全量备份。
 - Redis 持久化文件或缓存重建策略。
-- `/opt/maxkb` 或 `LZKB_DATA_DIR` 数据目录。
+- `/opt/nebula` 或 `NEBULA_DATA_DIR` 数据目录。`LZKB_DATA_DIR` 仍作为兼容变量可用。
 - 模型文件与上传文件目录。
 
 恢复后必须验证：

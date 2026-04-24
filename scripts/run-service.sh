@@ -5,13 +5,14 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROLE="${1:-web}"
 
 export PYTHONPATH="${ROOT_DIR}/apps:${PYTHONPATH:-}"
-export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-lzkb.settings}"
+export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-nebula.settings}"
 
 health_pid=""
 
 start_health_sidecar() {
   local port="${1}"
-  export LZKB_HEALTH_PORT="${port}"
+  export NEBULA_HEALTH_PORT="${port}"
+  export LZKB_HEALTH_PORT="${NEBULA_HEALTH_PORT}"
   python -m ops.health_http --role "${ROLE}" --port "${port}" &
   health_pid="$!"
 }
@@ -30,7 +31,7 @@ case "${ROLE}" in
     ;;
   worker|task)
     export SERVER_NAME=worker
-    start_health_sidecar "${LZKB_HEALTH_PORT:-8081}"
+    start_health_sidecar "${NEBULA_HEALTH_PORT:-${LZKB_HEALTH_PORT:-8081}}"
     python "${ROOT_DIR}/main.py" start worker
     ;;
   scheduler)
@@ -46,7 +47,7 @@ case "${ROLE}" in
     exec python "${ROOT_DIR}/main.py" start all
     ;;
   *)
-    echo "Unknown LZKB service role: ${ROLE}" >&2
+    echo "Unknown NebulaKB service role: ${ROLE}" >&2
     exit 2
     ;;
 esac

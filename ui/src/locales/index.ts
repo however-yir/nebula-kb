@@ -1,6 +1,11 @@
 import {useLocalStorage, usePreferredLanguages} from '@vueuse/core'
 import {computed} from 'vue'
 import {createI18n} from 'vue-i18n'
+import {
+  getStoredNebulaLocale,
+  migrateNebulaLocale,
+  NEBULA_LOCALE_KEY,
+} from '@/utils/nebula-runtime'
 
 // 导入语言文件
 const langModules = import.meta.glob('./lang/*/index.ts', {eager: true}) as Record<
@@ -15,7 +20,7 @@ const langModuleMap = new Map<string, object>()
 
 export const langCode: Array<string> = []
 
-export const localeConfigKey = 'LZKB-locale'
+export const localeConfigKey = NEBULA_LOCALE_KEY
 
 // 获取浏览器默认语言环境
 const languages = usePreferredLanguages()
@@ -59,11 +64,15 @@ const importMessages = computed(() => {
 
 export const i18n = createI18n({
   legacy: false,
-  locale: useLocalStorage(localeConfigKey, getBrowserLang()).value || getBrowserLang(),
+  locale:
+    useLocalStorage(localeConfigKey, getStoredNebulaLocale() || getBrowserLang()).value ||
+    getBrowserLang(),
   fallbackLocale: getBrowserLang(),
   messages: importMessages.value,
   globalInjection: true
 })
+
+migrateNebulaLocale()
 
 export const langList = computed(() => {
   if (langModuleMap.size === 0) generateLangModuleMap()

@@ -1,12 +1,5 @@
 <template>
   <div class="charts-container">
-    <iframe
-      v-show="false"
-      ref="iframeRef"
-      sandbox="allow-scripts"
-      :srcdoc="iframeHtml"
-      @load="onIframeLoad"
-    ></iframe>
     <div ref="chartsRef" :style="style" v-resize="onResize"></div>
   </div>
 </template>
@@ -19,102 +12,18 @@ const props = defineProps<{ option: string }>()
 
 // ── refs ───────────────────────────────────────────────────────────────────
 const chartsRef = ref<HTMLDivElement>()
-const iframeRef = ref<HTMLIFrameElement>()
 const style = ref({ height: '220px', width: '100%' })
-
-const iframeHtml = /* html */ `
-<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body><script>
-  window.parent.postMessage({ type: 'IFRAME_READY' }, '*')
-  window.addEventListener('message', ({ data, source, origin }) => {
-    if (data?.type !== 'EVAL_OPTION') return
-    try {
-      const option_json = JSON.parse(data.option_str)
-      const style = { value: null }
-      if (option_json.style) style.value = option_json.style
-      let option = {}
-      eval(option_json.option)
-      source.postMessage(
-        { type: 'EVAL_RESULT', id: data.id, result_str: JSON.stringify({ option, style: style.value }) },
-        origin || '*'
-      )
-    } catch (e) {
-      source.postMessage({ type: 'EVAL_ERROR', id: data.id, error: e.message }, origin || '*')
-    }
-  })
-<\/script></body></html>`
-
-let iframeReady = false
-let pendingOption: any = null
-
-const onIframeLoad = () => {
-  iframeReady = true
-  if (pendingOption) {
-    runEval(pendingOption)
-    pendingOption = null
-  }
-}
-
-let evalSeq = 0
-const EVAL_TIMEOUT_MS = 5000
-
-const evalInSandbox = (option_json: any): Promise<{ option: any; style: any }> => {
-  return new Promise((resolve, reject) => {
-    const id = ++evalSeq
-    let settled = false
-
-    const timer = setTimeout(() => {
-      if (settled) return
-      settled = true
-      window.removeEventListener('message', handler)
-      reject(new Error(`evalInSandbox timeout (id=${id})`))
-    }, EVAL_TIMEOUT_MS)
-
-    function handler(event: MessageEvent) {
-      const { type, id: rid, result_str, error } = event.data || {}
-      if (rid !== id) return // 忽略其他实例或旧请求的消息
-      if (type !== 'EVAL_RESULT' && type !== 'EVAL_ERROR') return
-      settled = true
-      clearTimeout(timer)
-      window.removeEventListener('message', handler)
-      if (type === 'EVAL_RESULT') {
-        try {
-          resolve(JSON.parse(result_str))
-        } catch (e) {
-          reject(e)
-        }
-      } else {
-        reject(new Error(error))
-      }
-    }
-
-    window.addEventListener('message', handler)
-    iframeRef.value?.contentWindow?.postMessage(
-      { type: 'EVAL_OPTION', id, option_str: JSON.stringify(option_json) },
-      '*',
-    )
-  })
-}
 
 const ensureChart = (): echarts.ECharts | null => {
   if (!chartsRef.value) return null
   return echarts.getInstanceByDom(chartsRef.value) ?? echarts.init(chartsRef.value)
 }
 
-const runEval = (option: any) => {
-  const chart = ensureChart()
-  if (!chart) return
-  evalInSandbox(option)
-    .then(({ option: opt, style: s }) => {
-      if (s) style.value = s
-      chart.setOption(opt, true)
-    })
-    .catch((e) => console.error('[ECharts EVAL error]', e))
-}
-
 const applyOption = (raw: any) => {
   if (raw.actionType === 'EVAL') {
-    if (iframeReady) runEval(raw)
-    else pendingOption = raw
+    const option = typeof raw.option === 'string' ? JSON.parse(raw.option) : raw.option
+    if (raw.style) style.value = raw.style
+    ensureChart()?.setOption(option, true)
     return
   }
   const chart = ensureChart()

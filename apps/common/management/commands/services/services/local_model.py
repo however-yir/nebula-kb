@@ -29,7 +29,7 @@ class GunicornLocalModelService(BaseService):
         worker = CONFIG.get("LOCAL_MODEL_HOST_WORKER", 1)
         max_requests = 10240 if int(worker) > 1 else 0
         cmd = [
-            'gunicorn', 'lzkb.wsgi:application',
+            'gunicorn', 'nebula.wsgi:application',
             '-b', bind,
             '-k', 'gthread',
             '--threads', '200',

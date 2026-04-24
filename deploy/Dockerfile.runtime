@@ -1,8 +1,8 @@
 FROM node:24-alpine AS web-build
 
-WORKDIR /opt/lzkb/ui
+WORKDIR /opt/nebula/ui
 COPY ui ./ui
-WORKDIR /opt/lzkb/ui
+WORKDIR /opt/nebula/ui
 RUN npm ci --no-audit --prefer-offline
 RUN npm run build && npm run build-chat
 
@@ -12,7 +12,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PYTHONPATH=/opt/maxkb-app/apps \
-    LZKB_DATA_DIR=/opt/maxkb \
+    NEBULA_DATA_DIR=/opt/nebula \
+    LZKB_DATA_DIR=/opt/nebula \
     MAXKB_DATA_DIR=/opt/maxkb \
     HF_HOME=/opt/maxkb-app/model/base \
     TMPDIR=/opt/maxkb-app/tmp \
@@ -38,10 +39,11 @@ RUN python -m pip install --upgrade pip && \
     python -m uv pip install -r pyproject.toml
 
 COPY . .
-COPY --from=web-build /opt/lzkb/ui/dist /opt/maxkb-app/ui/dist
+COPY --from=web-build /opt/nebula/ui/dist /opt/maxkb-app/ui/dist
 
 RUN chmod +x scripts/*.sh && \
     mkdir -p \
+      /opt/nebula \
       /opt/maxkb \
       /opt/maxkb-app/tmp \
       /opt/maxkb-app/model/base \

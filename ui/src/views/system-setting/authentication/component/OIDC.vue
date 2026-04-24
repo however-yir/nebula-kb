@@ -220,7 +220,7 @@ function getDetail() {
       }
     }
     if (!form.value.config.redirectUrl) {
-        form.value.config.redirectUrl = window.location.origin + window.LZKB.prefix + '/api/oidc'
+        form.value.config.redirectUrl = window.location.origin + window.NEBULA.prefix + '/api/oidc'
       }
   })
 }

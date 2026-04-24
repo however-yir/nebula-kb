@@ -4,7 +4,7 @@ import os
 
 from ..const import PROJECT_DIR, CONFIG, LOG_DIR
 
-LZKB_LOG_FILE = os.path.join(LOG_DIR, 'lzkb.log')
+NEBULA_LOG_FILE = os.path.join(LOG_DIR, 'nebula.log')
 DRF_EXCEPTION_LOG_FILE = os.path.join(LOG_DIR, 'drf_exception.log')
 UNEXPECTED_EXCEPTION_LOG_FILE = os.path.join(LOG_DIR, 'unexpected_exception.log')
 LOG_LEVEL = CONFIG.get_log_level()
@@ -28,7 +28,7 @@ LOGGING = {
             'format': '%(levelname)s %(message)s'
         },
         'syslog': {
-            'format': 'lzkb: %(message)s'
+            'format': 'nebulakb: %(message)s'
         },
         'msg': {
             'format': '%(message)s'
@@ -52,7 +52,7 @@ LOGGING = {
             'interval': 1,
             'backupCount': 7,
             'formatter': 'main',
-            'filename': LZKB_LOG_FILE,
+            'filename': NEBULA_LOG_FILE,
         },
         'drf_exception': {
             'encoding': 'utf8',
@@ -104,6 +104,11 @@ LOGGING = {
         'django.server': {
             'handlers': ['console', 'file', 'syslog'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+        'nebula': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
             'propagate': False,
         },
         'lzkb': {

@@ -1,6 +1,6 @@
-# LZKB 可运维部署说明
+# NebulaKB 可运维部署说明
 
-本文定义 LZKB 从一体化运行迁移到分离部署后的运行契约。目标是：服务可独立部署、配置可切换、故障可恢复、发布可回退。
+本文定义 NebulaKB 从一体化运行迁移到分离部署后的运行契约。目标是：服务可独立部署、配置可切换、故障可恢复、发布可回退。
 
 ## 部署形态
 
@@ -20,19 +20,19 @@
 docker compose --env-file deploy/env/dev.env -f deploy/docker-compose.operational.yml up -d
 ```
 
-切换环境文件时设置 `LZKB_ENV_FILE`，例如：
+切换环境文件时设置 `NEBULA_ENV_FILE`，例如：
 
 ```bash
-LZKB_ENV_FILE=./env/prod.env docker compose --env-file deploy/env/prod.env -f deploy/docker-compose.operational.yml up -d
+NEBULA_ENV_FILE=./env/prod.env docker compose --env-file deploy/env/prod.env -f deploy/docker-compose.operational.yml up -d
 ```
 
 ## 环境变量契约
 
 | 变量 | 必填 | 说明 |
 | --- | --- | --- |
-| `APP_ENV` / `LZKB_ENVIRONMENT` | 是 | `dev`、`test`、`prod` |
+| `APP_ENV` / `NEBULA_ENVIRONMENT` | 是 | `dev`、`test`、`prod` |
 | `SECRET_KEY` / `SECRET_KEY_FILE` | prod 必填 | Django 签名密钥，生产必须通过密钥系统注入 |
-| `DATABASE_URL` / `DATABASE_URL_FILE` | 是 | PostgreSQL 连接串，如 `postgresql://user:pass@postgres:5432/lzkb` |
+| `DATABASE_URL` / `DATABASE_URL_FILE` | 是 | PostgreSQL 连接串，如 `postgresql://user:pass@postgres:5432/nebula` |
 | `REDIS_URL` / `REDIS_URL_FILE` | 是 | Redis 连接串，如 `redis://:pass@redis:6379/0` |
 | `STORAGE_BACKEND` | 是 | `local` 或 `s3` |
 | `STORAGE_ENDPOINT` | s3 必填 | S3/MinIO endpoint |
@@ -40,8 +40,8 @@ LZKB_ENV_FILE=./env/prod.env docker compose --env-file deploy/env/prod.env -f de
 | `STORAGE_ACCESS_KEY` / `STORAGE_ACCESS_KEY_FILE` | s3 必填 | 对象存储访问密钥 |
 | `STORAGE_SECRET_KEY` / `STORAGE_SECRET_KEY_FILE` | s3 必填 | 对象存储密钥 |
 | `STORAGE_HEALTHCHECK_URL` | 建议 | 对象存储健康检查 URL |
-| `LZKB_LOCAL_MODEL_HOST` | 是 | web/worker/scheduler 访问模型服务的主机名 |
-| `LZKB_MODEL_SERVICE_HEALTHCHECK_ENABLED` | 否 | 是否把模型服务纳入 `/readyz` |
+| `NEBULA_LOCAL_MODEL_HOST` | 是 | web/worker/scheduler 访问模型服务的主机名 |
+| `NEBULA_MODEL_SERVICE_HEALTHCHECK_ENABLED` | 否 | 是否把模型服务纳入 `/readyz` |
 
 旧的 `LZKB_DB_*`、`LZKB_REDIS_*` 和 `MAXKB_*` 变量仍然兼容。若同时配置 `DATABASE_URL` 和拆分字段，以 `DATABASE_URL` 解析结果为准。
 
@@ -50,7 +50,7 @@ LZKB_ENV_FILE=./env/prod.env docker compose --env-file deploy/env/prod.env -f de
 环境变量模式：
 
 ```bash
-export LZKB_CONFIG_TYPE=ENV
+export NEBULA_CONFIG_TYPE=ENV
 set -a
 . deploy/env/dev.env
 set +a
@@ -60,10 +60,10 @@ python apps/manage.py check
 文件模式：
 
 ```bash
-export LZKB_CONFIG_TYPE=FILE
-export LZKB_ENVIRONMENT=prod
-export LZKB_CONF_DIR=/opt/lzkb/conf
-# /opt/lzkb/conf/config.prod.yml 或 /opt/lzkb/conf/config/prod.yml 会优先加载
+export NEBULA_CONFIG_TYPE=FILE
+export NEBULA_ENVIRONMENT=prod
+export NEBULA_CONF_DIR=/opt/nebulakb/conf
+# /opt/nebulakb/conf/config.prod.yml 或 /opt/nebulakb/conf/config/prod.yml 会优先加载
 python apps/manage.py check
 ```
 
@@ -84,18 +84,18 @@ python apps/manage.py check
 
 ## 发布和回滚
 
-构建发布镜像前必须先通过 `.github/workflows/lzkb-tests.yml`。`build-and-push.yml` 已把测试工作流作为前置依赖。
+构建发布镜像前必须先通过 `.github/workflows/nebulakb-tests.yml`。`build-and-push.yml` 已把测试工作流作为前置依赖。
 
 发布后健康检查：
 
 ```bash
-./scripts/post-release-healthcheck.sh https://lzkb.example.com
+./scripts/post-release-healthcheck.sh https://nebulakb.example.com
 ```
 
 一键回滚到上一镜像：
 
 ```bash
-LZKB_RELEASE_URL=https://lzkb.example.com ./scripts/rollback.sh ghcr.io/however-yir/lzkb:v2.0.0
+NEBULA_RELEASE_URL=https://nebulakb.example.com ./scripts/rollback.sh ghcr.io/however-yir/nebulakb/nebula-kb:v2.0.0
 ```
 
-回滚流程会拉取指定镜像、重启 `web`/`worker`/`scheduler`/`local-model`，并在配置了 `LZKB_RELEASE_URL` 时执行发布后健康检查。
+回滚流程会拉取指定镜像、重启 `web`/`worker`/`scheduler`/`local-model`，并在配置了 `NEBULA_RELEASE_URL` 时执行发布后健康检查。`LZKB_RELEASE_URL` 仍作为兼容变量可用。

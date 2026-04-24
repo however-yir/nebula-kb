@@ -4,11 +4,12 @@ import type { NProgress } from 'nprogress'
 import type { Ref } from 'vue'
 import type { Result } from '@/request/Result'
 import useStore from '@/stores'
+import { getNebulaPrefix } from '@/utils/nebula-runtime'
 
 import { ref, type WritableComputedRef } from 'vue'
 
 const axiosConfig = {
-  baseURL: (window.LZKB?.prefix ? window.LZKB?.prefix : '/chat') + '/api',
+  baseURL: getNebulaPrefix('/chat') + '/api',
   withCredentials: true,
   timeout: 600000,
   headers: {},

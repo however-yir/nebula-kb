@@ -1,6 +1,6 @@
 # PostgreSQL 备份与恢复 SOP
 
-适用范围：LZKB PostgreSQL 主库。目标是在误操作、升级失败或数据损坏时，可以用经过校验的备份恢复服务。
+适用范围：NebulaKB PostgreSQL 主库。目标是在误操作、升级失败或数据损坏时，可以用经过校验的备份恢复服务。
 
 ## 备份策略
 
@@ -14,19 +14,19 @@
 使用 `DATABASE_URL`：
 
 ```bash
-export DATABASE_URL='postgresql://lzkb:password@postgres:5432/lzkb'
+export DATABASE_URL='postgresql://nebula:password@postgres:5432/nebula'
 ./scripts/backup-postgres.sh
 ```
 
 使用拆分变量：
 
 ```bash
-export LZKB_DB_HOST=postgres
-export LZKB_DB_PORT=5432
-export LZKB_DB_NAME=lzkb
-export LZKB_DB_USER=lzkb
-export LZKB_DB_PASSWORD='password'
-./scripts/backup-postgres.sh /secure-backups/lzkb-$(date +%F).dump
+export NEBULA_DB_HOST=postgres
+export NEBULA_DB_PORT=5432
+export NEBULA_DB_NAME=nebula
+export NEBULA_DB_USER=nebula
+export NEBULA_DB_PASSWORD='password'
+./scripts/backup-postgres.sh /secure-backups/nebula-$(date +%F).dump
 ```
 
 备份脚本会生成 `pg_dump --format=custom` 文件和 SHA256 校验文件。
@@ -40,15 +40,15 @@ export LZKB_DB_PASSWORD='password'
 5. 校验备份：
 
 ```bash
-sha256sum -c /secure-backups/lzkb-2026-04-21.dump.sha256
+sha256sum -c /secure-backups/nebula-2026-04-21.dump.sha256
 ```
 
 ## 执行恢复
 
 ```bash
-export DATABASE_URL='postgresql://lzkb:password@postgres:5432/lzkb'
-export LZKB_RESTORE_CONFIRM=yes
-./scripts/restore-postgres.sh /secure-backups/lzkb-2026-04-21.dump
+export DATABASE_URL='postgresql://nebula:password@postgres:5432/nebula'
+export NEBULA_RESTORE_CONFIRM=yes
+./scripts/restore-postgres.sh /secure-backups/nebula-2026-04-21.dump
 ```
 
 恢复脚本使用 `pg_restore --clean --if-exists --no-owner`。恢复目标必须是确认过的目标库，避免误覆盖生产。

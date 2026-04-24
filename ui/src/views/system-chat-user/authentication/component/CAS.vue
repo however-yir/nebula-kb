@@ -130,7 +130,7 @@ function getDetail() {
     }
     if (!form.value.config.redirectUrl) {
       form.value.config.redirectUrl =
-        window.location.origin + window.LZKB.chatPrefix + '/api/auth/cas'
+        window.location.origin + window.NEBULA.chatPrefix + '/api/auth/cas'
     }
   })
 }

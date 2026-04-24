@@ -39,7 +39,7 @@ on:
 
 jobs:
   preflight-tests:
-    uses: ./.github/workflows/lzkb-tests.yml
+    uses: ./.github/workflows/nebulakb-tests.yml
 
   build-and-push-to-ghcr:
     if: ${{ contains(github.event.inputs.registry, 'ghcr') }}
@@ -56,7 +56,7 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/lzkb
+          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/nebulakb/nebula-kb
           DOCKER_PLATFORMS=${{ github.event.inputs.architecture }}
           TAG_NAME=${{ github.event.inputs.dockerImageTag }}
           TAG_NAME_WITH_LATEST=${{ github.event.inputs.dockerImageTagWithLatest }}
@@ -107,9 +107,9 @@ jobs:
         run: |
           DOCKER_NAMESPACE=${{ secrets.DOCKERHUB_NAMESPACE }}
           if [[ -z "$DOCKER_NAMESPACE" ]]; then
-            DOCKER_NAMESPACE=${{ github.repository_owner }}
+            DOCKER_NAMESPACE=nebulakb
           fi
-          DOCKER_IMAGE=${DOCKER_NAMESPACE}/lzkb
+          DOCKER_IMAGE=${DOCKER_NAMESPACE}/nebula-kb
           DOCKER_PLATFORMS=${{ github.event.inputs.architecture }}
           TAG_NAME=${{ github.event.inputs.dockerImageTag }}
           TAG_NAME_WITH_LATEST=${{ github.event.inputs.dockerImageTagWithLatest }}

@@ -20,7 +20,7 @@ class SchedulerService(BaseService):
         bind = f'0.0.0.0:{CONFIG.get("SCHEDULER_HTTP_PORT", 6060)}'
         max_requests = 10240 if int(self.worker) > 1 else 0
         cmd = [
-            'gunicorn', 'lzkb.wsgi:application',
+            'gunicorn', 'nebula.wsgi:application',
             '-b', bind,
             '-k', 'gthread',
             '--threads', '200',

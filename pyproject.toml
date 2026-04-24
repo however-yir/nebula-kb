@@ -1,7 +1,7 @@
 [project]
-name = "lzkb"
+name = "nebula-kb"
 version = "2.0.0"
-description = "LZKB: 自主可控的企业级智能体与知识库平台"
+description = "NebulaKB: 知识运营中枢"
 authors = [{ name = "however-yir", email = "however-yir@example.com" }]
 requires-python = "~=3.11.0"
 readme = "README.md"

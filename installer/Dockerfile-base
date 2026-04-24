@@ -1,7 +1,8 @@
 FROM python:3.11-slim-trixie AS python-stage
 RUN python3 -m venv /opt/py3
 
-ARG LZKB_VECTOR_MODEL_IMAGE=ghcr.io/1panel-dev/maxkb-vector-model:v2.0.3
+ARG NEBULA_VECTOR_MODEL_IMAGE=nebulakb/vector-model:v2.0.3
+ARG LZKB_VECTOR_MODEL_IMAGE=${NEBULA_VECTOR_MODEL_IMAGE}
 FROM ${LZKB_VECTOR_MODEL_IMAGE} AS vector-model
 
 FROM postgres:17.9-trixie
@@ -18,7 +19,7 @@ ARG DEPENDENCIES="                    \
         redis-server                  \
         postgresql-17-pgvector        \
         postgresql-17-age"
-ARG FFMPEG_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/however-yir/LZKB/main/installer/get-ffmpeg-linux"
+ARG FFMPEG_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/however-yir/nebula-kb/main/installer/get-ffmpeg-linux"
 
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone && \
@@ -45,6 +46,13 @@ ENV PATH=/opt/py3/bin:$PATH \
     REDIS_PASSWORD=CHANGE_ME_REDIS_PASSWORD \
     LANG=en_US.UTF-8 \
     PYTHONUNBUFFERED=1 \
+    NEBULA_CONFIG_TYPE=ENV \
+    NEBULA_LOG_LEVEL=INFO \
+    NEBULA_SANDBOX=1 \
+    NEBULA_SANDBOX_HOME=/opt/maxkb-app/sandbox \
+    NEBULA_SANDBOX_PYTHON_PACKAGE_PATHS="/opt/py3/lib/python3.11/site-packages,/opt/maxkb-app/sandbox/python-packages,/opt/maxkb/python-packages" \
+    NEBULA_SANDBOX_PYTHON_BANNED_HOSTS="127.0.0.0/8,localhost,host.docker.internal,172.17.0.0/16,nebula,pgsql,redis,172.31.250.192/26,0.0.0.0/32,::/0" \
+    NEBULA_ADMIN_PATH=/admin \
     LZKB_CONFIG_TYPE=ENV \
     LZKB_LOG_LEVEL=INFO \
     LZKB_SANDBOX=1 \

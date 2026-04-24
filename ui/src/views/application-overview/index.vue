@@ -227,9 +227,9 @@ const permissionPrecise = computed(() => {
   return permissionMap['application'][apiType.value]
 })
 
-const apiUrl = window.location.origin + `${window.LZKB.chatPrefix}/api-doc/`
+const apiUrl = window.location.origin + `${window.NEBULA.chatPrefix}/api-doc/`
 
-const baseUrl = window.location.origin + `${window.LZKB.chatPrefix}/api/`
+const baseUrl = window.location.origin + `${window.NEBULA.chatPrefix}/api/`
 
 const APIKeyDialogRef = ref()
 const EmbedDialogRef = ref()
@@ -244,7 +244,7 @@ const urlParams = computed(() =>
 )
 const shareUrl = computed(
   () =>
-    `${window.location.origin}${window.LZKB.chatPrefix}/` +
+    `${window.location.origin}${window.NEBULA.chatPrefix}/` +
     accessToken.value?.access_token +
     urlParams.value,
 )

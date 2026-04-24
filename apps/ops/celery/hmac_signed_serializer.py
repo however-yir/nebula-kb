@@ -7,11 +7,14 @@ from importlib import import_module
 from kombu.serialization import register
 
 _local_secret_key = os.environ.get(
-    'LZKB_HMAC_SIGNED_SERIALIZER_SECRET_KEY',
+    'NEBULA_HMAC_SIGNED_SERIALIZER_SECRET_KEY',
     os.environ.get(
-        'MAXKB_HMAC_SIGNED_SERIALIZER_SECRET_KEY',
-        'default_hmac_signed_serializer_secret_key:'
-        + os.getenv('LZKB_VERSION', os.getenv('MAXKB_VERSION', socket.gethostname())),
+        'LZKB_HMAC_SIGNED_SERIALIZER_SECRET_KEY',
+        os.environ.get(
+            'MAXKB_HMAC_SIGNED_SERIALIZER_SECRET_KEY',
+            'default_hmac_signed_serializer_secret_key:'
+            + os.getenv('NEBULA_VERSION', os.getenv('LZKB_VERSION', os.getenv('MAXKB_VERSION', socket.gethostname()))),
+        ),
     ),
 )
 try:

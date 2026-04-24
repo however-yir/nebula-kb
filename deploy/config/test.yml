@@ -2,7 +2,7 @@ ENVIRONMENT: test
 DEBUG: false
 LOG_LEVEL: INFO
 SECRET_KEY: test-only-secret-key
-DATABASE_URL: sqlite:////tmp/lzkb-test.sqlite3
+DATABASE_URL: sqlite:////tmp/nebula-test.sqlite3
 REDIS_URL: redis://127.0.0.1:6379/0
 MODEL_SERVICE_HEALTHCHECK_ENABLED: false
 STORAGE_BACKEND: local

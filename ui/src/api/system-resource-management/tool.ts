@@ -147,7 +147,7 @@ const uploadSkillFile: (data: toolData, loading?: Ref<boolean>) => Promise<Resul
 }
 
 const generateCode: (data: any) => Promise<Result<any>> = (data: any) => {
-  const p = (window.LZKB?.prefix ? window.LZKB?.prefix : '/admin') + '/api'
+  const p = (window.NEBULA?.prefix ? window.NEBULA?.prefix : '/admin') + '/api'
   return postStream(`${p}${prefix}/generate_code`, data)
 }
 
@@ -193,7 +193,7 @@ const publish: (tool_id: string, loading?: Ref<boolean>) => Promise<Result<any>>
  * data
  */
 const debugToolWorkflow: (tool_id: string, data: any) => Promise<any> = (tool_id, data) => {
-  const p = (window.LZKB?.prefix ? window.LZKB?.prefix : '/admin') + '/api'
+  const p = (window.NEBULA?.prefix ? window.NEBULA?.prefix : '/admin') + '/api'
   return postStream(`${p}${prefix}/${tool_id}/debug`, data)
 }
 

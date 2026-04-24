@@ -157,11 +157,6 @@ const propsData = computed(() => {
 
 const attrs = useAttrs() as any
 const treeRef = ref<any>(null)
-const request_call = new Function(
-  'request',
-  'extra',
-  'return  request.post(extra.url,extra.body,{},extra.loading).then(extra.then);',
-)
 function renderTemplate(template: string, data: any) {
   return template.replace(/\$\{(\w+)\}/g, (match, key) => {
     return data[key] !== undefined ? data[key] : match
@@ -169,23 +164,25 @@ function renderTemplate(template: string, data: any) {
 }
 
 const loadNode: LoadFunction = (node, resolve)=> {
-  request_call(request, {
-    url: renderTemplate(
+  request
+    .post(
+      renderTemplate(
       '/workspace/${current_workspace_id}/knowledge/${current_knowledge_id}/datasource/tool/${current_tool_id}/' +
         attrs.fetch_list_function,
       { ...props.otherParams, ...(get_extra ? get_extra() : {}) },
     ),
-    body: { current_node: node.level == 0 ? undefined : node.data },
-    then: (res: any) => {
+      { current_node: node.level == 0 ? undefined : node.data },
+      {},
+      loading,
+    )
+    .then((res: any) => {
       resolve(res.data)
       res.data.forEach((childNode: any) => {
         if (childNode.is_exist) {
           treeRef.value?.setChecked(childNode.token, true, false)
         }
       })
-    },
-    loading: loading,
-  })
+    })
 }
 const props = withDefaults(
   defineProps<{ modelValue?: any; formField: FormField; otherParams: any }>(),

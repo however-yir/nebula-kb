@@ -163,7 +163,7 @@ const generate_prompt: (application_id:string, model_id:string, data: any) => Pr
   model_id,
   data
 ) => {
-  const prefix = (window.LZKB?.prefix ? window.LZKB?.prefix : '/admin') + '/api'
+  const prefix = (window.NEBULA?.prefix ? window.NEBULA?.prefix : '/admin') + '/api'
   return postStream(`${prefix}/system/resource/application/${application_id}/model/${model_id}/prompt_generate`, data)
 }
 
@@ -265,7 +265,7 @@ const importApplication: (data: any, loading?: Ref<boolean>) => Promise<Result<a
  * data
  */
 const chat: (chat_id: string, data: any) => Promise<any> = (chat_id, data) => {
-  const prefix = (window.LZKB?.prefix ? window.LZKB?.prefix : '/admin') + '/api'
+  const prefix = (window.NEBULA?.prefix ? window.NEBULA?.prefix : '/admin') + '/api'
   return postStream(`${prefix}/chat_message/${chat_id}`, data)
 }
 /**

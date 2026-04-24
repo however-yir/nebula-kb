@@ -1,5 +1,5 @@
 name: 'Bug Report'
-description: 'Report a bug in LZKB'
+description: 'Report a bug in NebulaKB'
 title: '[Bug] '
 body:
   - type: markdown
@@ -18,7 +18,7 @@ body:
     validations:
       required: true
     attributes:
-      label: 'LZKB Version'
+      label: 'NebulaKB Version'
       description: 'Open About dialog in the top-right corner and copy the version string.'
   - type: markdown
     attributes:

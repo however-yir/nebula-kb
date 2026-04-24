@@ -21,6 +21,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { renderSafeExpression } from '@/utils/safe-expression'
 const props = defineProps<{
   /**
    *表单渲染Item column
@@ -32,11 +33,6 @@ const props = defineProps<{
   row: any
 }>()
 const rowRef = ref<any>()
-
-function evalF(text: string, row: any) {
-  rowRef.value = row
-  return eval(text)
-}
 const props_info = computed(() => {
   return props.column.props_info ? props.column.props_info : {}
 })
@@ -49,7 +45,8 @@ const value_field = computed(() => {
 
 const value_html = (view_card_item: any) => {
   if (view_card_item.type === 'eval') {
-    return evalF(view_card_item.value_field, props.row)
+    rowRef.value = props.row
+    return renderSafeExpression(view_card_item.value_field, props.row)
   } else {
     return props.row[view_card_item.value_field]
   }

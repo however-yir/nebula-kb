@@ -1,39 +1,39 @@
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: lzkb-postgres
+    container_name: nebula-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${LZKB_DB_NAME:-lzkb}
-      POSTGRES_USER: ${LZKB_DB_USER:-root}
-      POSTGRES_PASSWORD: ${LZKB_DB_PASSWORD:-CHANGE_ME_DB_PASSWORD}
+      POSTGRES_DB: ${NEBULA_DB_NAME:-${LZKB_DB_NAME:-nebula}}
+      POSTGRES_USER: ${NEBULA_DB_USER:-${LZKB_DB_USER:-root}}
+      POSTGRES_PASSWORD: ${NEBULA_DB_PASSWORD:-${LZKB_DB_PASSWORD:-CHANGE_ME_DB_PASSWORD}}
     ports:
-      - "${LZKB_DB_PORT:-5432}:5432"
+      - "${NEBULA_DB_PORT:-${LZKB_DB_PORT:-5432}}:5432"
     volumes:
-      - lzkb_postgres_data:/var/lib/postgresql/data
+      - nebula_postgres_data:/var/lib/postgresql/data
       - ./deploy/postgres/initdb:/docker-entrypoint-initdb.d:ro
 
   redis:
     image: redis:7-alpine
-    container_name: lzkb-redis
+    container_name: nebula-redis
     restart: unless-stopped
-    command: ["redis-server", "--requirepass", "${LZKB_REDIS_PASSWORD:-CHANGE_ME_REDIS_PASSWORD}"]
+    command: ["redis-server", "--requirepass", "${NEBULA_REDIS_PASSWORD:-${LZKB_REDIS_PASSWORD:-CHANGE_ME_REDIS_PASSWORD}}"]
     ports:
-      - "${LZKB_REDIS_PORT:-6379}:6379"
+      - "${NEBULA_REDIS_PORT:-${LZKB_REDIS_PORT:-6379}}:6379"
     volumes:
-      - lzkb_redis_data:/data
+      - nebula_redis_data:/data
 
   ollama:
     image: ollama/ollama:latest
-    container_name: lzkb-ollama
+    container_name: nebula-ollama
     restart: unless-stopped
     profiles: ["ollama"]
     ports:
       - "11434:11434"
     volumes:
-      - lzkb_ollama_data:/root/.ollama
+      - nebula_ollama_data:/root/.ollama
 
 volumes:
-  lzkb_postgres_data:
-  lzkb_redis_data:
-  lzkb_ollama_data:
+  nebula_postgres_data:
+  nebula_redis_data:
+  nebula_ollama_data:

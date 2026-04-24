@@ -605,7 +605,7 @@ const getDefaultValue = () => {
 const form = ref<any>(getDefaultValue())
 const is_edit = ref<boolean>(false)
 const event_url = computed(() => {
-  return `${window.origin}${window.LZKB.prefix}/api/trigger/v1/webhook/${form.value.id}`
+  return `${window.origin}${window.NEBULA.prefix}/api/trigger/v1/webhook/${form.value.id}`
 })
 
 const lastPresetSetting = ref<any>(null)

@@ -27,7 +27,7 @@ export function filesize(size: number) {
 }
 
 // 头像
-export const defaultIcon = '/${window.LZKB.prefix}/favicon.ico'
+export const defaultIcon = `${window.NEBULA?.prefix || '/admin'}/favicon.ico`
 
 export function isAppIcon(url: string | undefined) {
   return url === defaultIcon ? '' : url
@@ -177,14 +177,14 @@ export function getNormalizedUrl(url: string) {
 
 export function getFileUrl(fileId?: string) {
   if (fileId) {
-    return `${window.LZKB.prefix}/oss/file/${fileId}`
+    return `${window.NEBULA.prefix}/oss/file/${fileId}`
   }
   return ''
 }
 
 export const resetUrl = (url: string, defaultUrl?: string) => {
   if (url && url.startsWith('./')) {
-    return `${window.LZKB.prefix}/${url.substring(2)}`
+    return `${window.NEBULA.prefix}/${url.substring(2)}`
   }
   return url ? url : defaultUrl ? defaultUrl : ''
 }

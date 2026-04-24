@@ -999,9 +999,9 @@ msgstr "工作空间ID"
 #: apps/application/serializers/application.py:459
 msgid ""
 "The community version supports up to 5 applications. If you need more "
-"applications, please contact us (https://github.com/however-yir/LZKB/issues)."
+"applications, please contact us (https://github.com/however-yir/nebula-kb/issues)."
 msgstr ""
-"社区版支持最多5个智能体，如需更多智能体，请联系我们（https://github.com/however-yir/LZKB/issues）。"
+"社区版支持最多5个智能体，如需更多智能体，请联系我们（https://github.com/however-yir/nebula-kb/issues）。"
 
 #: apps/application/serializers/application.py:471
 #: apps/common/handle/impl/qa/zip_parse_qa_handle.py:56
@@ -2195,8 +2195,8 @@ msgstr "文本转语音节点，文本内容不能为空"
 
 #: apps/common/utils/common.py:246
 #, python-brace-format
-msgid "Limit {count} exceeded, please contact us (https://github.com/however-yir/LZKB/issues)."
-msgstr "超过限制 {count}，请联系我们 (https://github.com/however-yir/LZKB/issues)."
+msgid "Limit {count} exceeded, please contact us (https://github.com/however-yir/nebula-kb/issues)."
+msgstr "超过限制 {count}，请联系我们 (https://github.com/however-yir/nebula-kb/issues)."
 
 #: apps/folders/models/folder.py:6 apps/folders/models/folder.py:17
 #: apps/folders/serializers/folder.py:98
@@ -2681,10 +2681,10 @@ msgstr "范围"
 #: apps/knowledge/serializers/knowledge.py:460
 msgid ""
 "The community version supports up to 50 knowledge bases. If you need more "
-"knowledge bases, please contact us (https://github.com/however-yir/LZKB/issues)."
+"knowledge bases, please contact us (https://github.com/however-yir/nebula-kb/issues)."
 msgstr ""
 "社区版支持最多50个知识库，如需更多知识库，请联系我们 (https://"
-"github.com/however-yir/LZKB/issues)."
+"github.com/however-yir/nebula-kb/issues)."
 
 #: apps/knowledge/serializers/knowledge.py:560
 msgid "sync type"
@@ -6814,9 +6814,9 @@ msgstr "邮箱或用户名"
 #: apps/users/serializers/user.py:226
 msgid ""
 "The community version supports up to 2 users. If you need more users, please "
-"contact us (https://github.com/however-yir/LZKB/issues)."
+"contact us (https://github.com/however-yir/nebula-kb/issues)."
 msgstr ""
-"社区版支持最多2个用户，如需更多用户，请联系我们（https://github.com/however-yir/LZKB/issues）。"
+"社区版支持最多2个用户，如需更多用户，请联系我们（https://github.com/however-yir/nebula-kb/issues）。"
 
 #: apps/users/serializers/user.py:270 apps/xpack/api/auth_config.py:31
 #: apps/xpack/api/chat_user.py:109 apps/xpack/serializers/chat_user.py:247

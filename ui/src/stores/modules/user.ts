@@ -6,6 +6,7 @@ import LoginApi from '@/api/user/login'
 import {useLocalStorage} from '@vueuse/core'
 
 import {localeConfigKey, getBrowserLang} from '@/locales/index'
+import { getStoredNebulaLocale } from '@/utils/nebula-runtime'
 import useThemeStore from './theme'
 import {defaultPlatformSetting} from '@/utils/theme'
 import useLoginStore from './login'
@@ -32,7 +33,7 @@ const useUserStore = defineStore('user', {
   }),
   actions: {
     getLanguage() {
-      return localStorage.getItem('LZKB-locale') || getBrowserLang()
+      return getStoredNebulaLocale() || getBrowserLang()
     },
     setWorkspaceId(workspace_id: string) {
       this.workspace_id = workspace_id

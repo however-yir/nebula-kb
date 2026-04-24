@@ -146,7 +146,7 @@ const props = defineProps({
 
 const emit = defineEmits(['addData'])
 
-const apiUrl = window.location.origin + `${window.LZKB.prefix}/api-doc/`
+const apiUrl = window.location.origin + `${window.NEBULA.prefix}/api-doc/`
 const SettingAPIKeyDialogRef = ref()
 const dialogVisible = ref<boolean>(false)
 const loading = ref(false)

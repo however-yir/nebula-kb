@@ -9,7 +9,7 @@ DEBUG = False
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "lzkb-tests",
+        "LOCATION": "nebula-tests",
     }
 }
 

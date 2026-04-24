@@ -1,20 +1,20 @@
-# NebulaKB - 知识中枢与检索自动化平台 | Knowledge Hub & Retrieval Automation Platform
+# NebulaKB - 知识运营中枢 | Knowledge Operations Hub
 
-[![Build](https://github.com/however-yir/LZKB/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/however-yir/LZKB/actions/workflows/build-and-push.yml)
-[![Docs](https://img.shields.io/badge/docs-README-0A7EFA)](https://github.com/however-yir/LZKB#readme)
+[![Build](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml)
+[![Docs](https://img.shields.io/badge/docs-docs.nebulakb.ai-0A7EFA)](https://docs.nebulakb.ai)
 [![License](https://img.shields.io/badge/license-GPL--3.0-16A34A)](./LICENSE)
-[![Status](https://img.shields.io/badge/status-active-2563EB)](https://github.com/however-yir/LZKB)
+[![Status](https://img.shields.io/badge/status-active-2563EB)](https://github.com/however-yir/nebula-kb)
 
 > Status: `active`
 >
 > Series: [local-ai-hub](https://github.com/however-yir/local-ai-hub) · [yourrag](https://github.com/however-yir/yourrag)
 
-项目聚焦知识沉淀、检索问答与本地化部署，适合作为企业或个人知识中台能力底座。
+项目聚焦知识接入、治理、检索、问答与质量反馈闭环，适合作为企业知识运营中枢。
 
 ## 项目快照
 
-- 定位：知识库平台，而不是通用聊天工作台。
-- 亮点：Django + PostgreSQL + Redis、多模型接入、知识运营、智能体工作流扩展。
+- 定位：知识运营中枢，而不是通用聊天工作台。
+- 亮点：Django + PostgreSQL + Redis、多模型接入、知识资产生命周期、检索链路可观测、质量评测闭环。
 - 最短运行路径：`python apps/manage.py migrate && python main.py dev web`
 - 系列分工：`Local AI Hub` 管工作台体验，`NebulaKB` 管知识平台，`YourRAG` 管企业级 RAG/Agent 交付。
 
@@ -23,7 +23,7 @@
 | Repo | 主要角色 | 部署形态 | 最适合的场景 |
 | --- | --- | --- | --- |
 | `Local AI Hub` | 本地 AI 工作台 | 自托管工作台 | 模型接入、团队日用、统一入口 |
-| `NebulaKB` | 知识库平台 | 本地优先平台 | 文档入库、知识运营、检索问答 |
+| `NebulaKB` | 知识运营中枢 | 本地优先平台 | 文档入库、知识治理、检索问答、质量闭环 |
 | `YourRAG` | 企业 RAG/Agent 平台 | 企业交付导向 | 私有化部署、RAG + Agent 交付 |
 
 ## 目录
@@ -56,7 +56,7 @@
 相对同系列仓库的职责边界：
 
 - `Local AI Hub` 更像工作台与统一入口。
-- `NebulaKB` 更像知识入库、知识运营与检索问答平台。
+- `NebulaKB` 更像知识入库、知识治理、检索问答与质量反馈闭环平台。
 - `YourRAG` 更偏企业级私有化交付与 Agent 组合能力。
 
 ## 3. 核心能力
@@ -73,7 +73,7 @@
 | 检索问答与运营 | `apps/chat`, `ui/` | 形成知识问答与后台运营闭环 |
 | 模型接入与切换 | `apps/models_provider`, `apps/local_model` | 对接本地或远端模型 |
 | 安装与部署 | `installer/` | 本地快速起服与依赖初始化 |
-| 应用扩展 | `apps/application`, `appstore/lzkb.json` | 面向后续插件化或应用化拓展 |
+| 应用扩展 | `apps/application`, `appstore/nebula.json` | 面向后续插件化或应用化拓展 |
 
 ### 3.2 模块职责矩阵
 
@@ -107,8 +107,8 @@
 1. 克隆仓库并进入目录：
 
 ```bash
-git clone https://github.com/however-yir/LZKB.git
-cd LZKB
+git clone https://github.com/however-yir/nebula-kb.git
+cd nebula-kb
 ```
 
 2. 安装依赖并初始化：

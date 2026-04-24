@@ -14,7 +14,7 @@ import './assets/markdown-iconfont.js'
 // 引入公共库中的语言配置
 import ZH_TW from '@vavt/cm-extension/dist/locale/zh-TW'
 defineOptions({ name: 'MdEditor' })
-const language = computed(() => localStorage.getItem('LZKB-locale') || getBrowserLang() || '')
+const language = computed(() => localStorage.getItem('NEBULA-locale') || getBrowserLang() || '')
 config({
   editorConfig: {
     languageUserDefined: {

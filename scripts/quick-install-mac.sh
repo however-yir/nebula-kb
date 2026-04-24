@@ -95,23 +95,52 @@ def set_if_missing_or_placeholder(key: str, value_factory):
             order.append(key)
 
 
-db_password_before = env.get("LZKB_DB_PASSWORD", "")
-redis_password_before = env.get("LZKB_REDIS_PASSWORD", "")
+def get_env(primary, legacy=None, default=""):
+    value = env.get(primary)
+    if value:
+        return value
+    if legacy:
+        value = env.get(legacy)
+        if value:
+            return value
+    return default
+
+
+def sync_legacy(primary, legacy):
+    if primary not in env:
+        return
+    value = env.get(legacy)
+    if value is None or value.strip() == "" or "CHANGE_ME_" in value:
+        env[legacy] = env[primary]
+        if legacy not in order:
+            order.append(legacy)
+
+
+db_password_before = get_env("NEBULA_DB_PASSWORD", "LZKB_DB_PASSWORD")
+redis_password_before = get_env("NEBULA_REDIS_PASSWORD", "LZKB_REDIS_PASSWORD")
 
 set_if_missing_or_placeholder("SECRET_KEY", lambda: secrets.token_urlsafe(48))
-set_if_missing_or_placeholder("LZKB_DB_PASSWORD", random_password)
-set_if_missing_or_placeholder("LZKB_REDIS_PASSWORD", random_password)
+if "NEBULA_DB_PASSWORD" not in env and "LZKB_DB_PASSWORD" in env:
+    env["NEBULA_DB_PASSWORD"] = env["LZKB_DB_PASSWORD"]
+    order.append("NEBULA_DB_PASSWORD")
+if "NEBULA_REDIS_PASSWORD" not in env and "LZKB_REDIS_PASSWORD" in env:
+    env["NEBULA_REDIS_PASSWORD"] = env["LZKB_REDIS_PASSWORD"]
+    order.append("NEBULA_REDIS_PASSWORD")
+set_if_missing_or_placeholder("NEBULA_DB_PASSWORD", random_password)
+set_if_missing_or_placeholder("NEBULA_REDIS_PASSWORD", random_password)
+sync_legacy("NEBULA_DB_PASSWORD", "LZKB_DB_PASSWORD")
+sync_legacy("NEBULA_REDIS_PASSWORD", "LZKB_REDIS_PASSWORD")
 
-db_user = env.get("LZKB_DB_USER", "root")
-db_host = env.get("LZKB_DB_HOST", "127.0.0.1")
-db_port = env.get("LZKB_DB_PORT", "5432")
-db_name = env.get("LZKB_DB_NAME", "lzkb")
-redis_host = env.get("LZKB_REDIS_HOST", "127.0.0.1")
-redis_port = env.get("LZKB_REDIS_PORT", "6379")
-redis_db = env.get("LZKB_REDIS_DB", "0")
+db_user = get_env("NEBULA_DB_USER", "LZKB_DB_USER", "root")
+db_host = get_env("NEBULA_DB_HOST", "LZKB_DB_HOST", "127.0.0.1")
+db_port = get_env("NEBULA_DB_PORT", "LZKB_DB_PORT", "5432")
+db_name = get_env("NEBULA_DB_NAME", "LZKB_DB_NAME", "nebula")
+redis_host = get_env("NEBULA_REDIS_HOST", "LZKB_REDIS_HOST", "127.0.0.1")
+redis_port = get_env("NEBULA_REDIS_PORT", "LZKB_REDIS_PORT", "6379")
+redis_db = get_env("NEBULA_REDIS_DB", "LZKB_REDIS_DB", "0")
 
-db_url = f"postgresql://{db_user}:{env['LZKB_DB_PASSWORD']}@{db_host}:{db_port}/{db_name}"
-redis_url = f"redis://:{env['LZKB_REDIS_PASSWORD']}@{redis_host}:{redis_port}/{redis_db}"
+db_url = f"postgresql://{db_user}:{env['NEBULA_DB_PASSWORD']}@{db_host}:{db_port}/{db_name}"
+redis_url = f"redis://:{env['NEBULA_REDIS_PASSWORD']}@{redis_host}:{redis_port}/{redis_db}"
 
 if "DATABASE_URL" not in env:
     env["DATABASE_URL"] = db_url
@@ -119,7 +148,7 @@ if "DATABASE_URL" not in env:
 elif "CHANGE_ME_DB_PASSWORD" in env["DATABASE_URL"] or (
     db_password_before
     and db_password_before in env["DATABASE_URL"]
-    and env["LZKB_DB_PASSWORD"] != db_password_before
+    and env["NEBULA_DB_PASSWORD"] != db_password_before
 ):
     env["DATABASE_URL"] = db_url
 
@@ -129,7 +158,7 @@ if "REDIS_URL" not in env:
 elif "CHANGE_ME_REDIS_PASSWORD" in env["REDIS_URL"] or (
     redis_password_before
     and redis_password_before in env["REDIS_URL"]
-    and env["LZKB_REDIS_PASSWORD"] != redis_password_before
+    and env["NEBULA_REDIS_PASSWORD"] != redis_password_before
 ):
     env["REDIS_URL"] = redis_url
 

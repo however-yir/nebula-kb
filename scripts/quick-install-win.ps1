@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 function Write-Step {
   param([string]$Message)
-  Write-Host "[LZKB] $Message" -ForegroundColor Cyan
+  Write-Host "[NebulaKB] $Message" -ForegroundColor Cyan
 }
 
 function Ensure-Command {
@@ -86,37 +86,72 @@ foreach ($line in $lines) {
   $order.Add($key)
 }
 
-$dbPasswordBefore = if ($map.Contains("LZKB_DB_PASSWORD")) { [string]$map["LZKB_DB_PASSWORD"] } else { "" }
-$redisPasswordBefore = if ($map.Contains("LZKB_REDIS_PASSWORD")) { [string]$map["LZKB_REDIS_PASSWORD"] } else { "" }
+function Get-EnvValue {
+  param([string]$Primary, [string]$Legacy, [string]$Default)
+  if ($map.Contains($Primary) -and -not [string]::IsNullOrWhiteSpace([string]$map[$Primary])) {
+    return [string]$map[$Primary]
+  }
+  if ($Legacy -and $map.Contains($Legacy) -and -not [string]::IsNullOrWhiteSpace([string]$map[$Legacy])) {
+    return [string]$map[$Legacy]
+  }
+  return $Default
+}
+
+function Sync-LegacyValue {
+  param([string]$Primary, [string]$Legacy)
+  if (-not $map.Contains($Primary)) {
+    return
+  }
+  if ((-not $map.Contains($Legacy)) -or [string]::IsNullOrWhiteSpace([string]$map[$Legacy]) -or [string]$map[$Legacy] -like "*CHANGE_ME_*") {
+    $map[$Legacy] = [string]$map[$Primary]
+    if (-not $order.Contains($Legacy)) { $order.Add($Legacy) }
+  }
+}
+
+$dbPasswordBefore = Get-EnvValue "NEBULA_DB_PASSWORD" "LZKB_DB_PASSWORD" ""
+$redisPasswordBefore = Get-EnvValue "NEBULA_REDIS_PASSWORD" "LZKB_REDIS_PASSWORD" ""
 
 if ((-not $map.Contains("SECRET_KEY")) -or [string]::IsNullOrWhiteSpace([string]$map["SECRET_KEY"]) -or [string]$map["SECRET_KEY"] -like "*CHANGE_ME_*") {
   $map["SECRET_KEY"] = New-SecretKey
   if (-not $order.Contains("SECRET_KEY")) { $order.Add("SECRET_KEY") }
 }
 
-if ((-not $map.Contains("LZKB_DB_PASSWORD")) -or [string]::IsNullOrWhiteSpace([string]$map["LZKB_DB_PASSWORD"]) -or [string]$map["LZKB_DB_PASSWORD"] -like "*CHANGE_ME_*") {
-  $map["LZKB_DB_PASSWORD"] = New-RandomString -Length 24
-  if (-not $order.Contains("LZKB_DB_PASSWORD")) { $order.Add("LZKB_DB_PASSWORD") }
+if ((-not $map.Contains("NEBULA_DB_PASSWORD")) -and $map.Contains("LZKB_DB_PASSWORD")) {
+  $map["NEBULA_DB_PASSWORD"] = [string]$map["LZKB_DB_PASSWORD"]
+  if (-not $order.Contains("NEBULA_DB_PASSWORD")) { $order.Add("NEBULA_DB_PASSWORD") }
 }
 
-if ((-not $map.Contains("LZKB_REDIS_PASSWORD")) -or [string]::IsNullOrWhiteSpace([string]$map["LZKB_REDIS_PASSWORD"]) -or [string]$map["LZKB_REDIS_PASSWORD"] -like "*CHANGE_ME_*") {
-  $map["LZKB_REDIS_PASSWORD"] = New-RandomString -Length 24
-  if (-not $order.Contains("LZKB_REDIS_PASSWORD")) { $order.Add("LZKB_REDIS_PASSWORD") }
+if ((-not $map.Contains("NEBULA_REDIS_PASSWORD")) -and $map.Contains("LZKB_REDIS_PASSWORD")) {
+  $map["NEBULA_REDIS_PASSWORD"] = [string]$map["LZKB_REDIS_PASSWORD"]
+  if (-not $order.Contains("NEBULA_REDIS_PASSWORD")) { $order.Add("NEBULA_REDIS_PASSWORD") }
 }
 
-$dbUser = if ($map.Contains("LZKB_DB_USER")) { [string]$map["LZKB_DB_USER"] } else { "root" }
-$dbHost = if ($map.Contains("LZKB_DB_HOST")) { [string]$map["LZKB_DB_HOST"] } else { "127.0.0.1" }
-$dbPort = if ($map.Contains("LZKB_DB_PORT")) { [string]$map["LZKB_DB_PORT"] } else { "5432" }
-$dbName = if ($map.Contains("LZKB_DB_NAME")) { [string]$map["LZKB_DB_NAME"] } else { "lzkb" }
-$redisHost = if ($map.Contains("LZKB_REDIS_HOST")) { [string]$map["LZKB_REDIS_HOST"] } else { "127.0.0.1" }
-$redisPort = if ($map.Contains("LZKB_REDIS_PORT")) { [string]$map["LZKB_REDIS_PORT"] } else { "6379" }
-$redisDb = if ($map.Contains("LZKB_REDIS_DB")) { [string]$map["LZKB_REDIS_DB"] } else { "0" }
+if ((-not $map.Contains("NEBULA_DB_PASSWORD")) -or [string]::IsNullOrWhiteSpace([string]$map["NEBULA_DB_PASSWORD"]) -or [string]$map["NEBULA_DB_PASSWORD"] -like "*CHANGE_ME_*") {
+  $map["NEBULA_DB_PASSWORD"] = New-RandomString -Length 24
+  if (-not $order.Contains("NEBULA_DB_PASSWORD")) { $order.Add("NEBULA_DB_PASSWORD") }
+}
 
-$dbUrl = "postgresql://$dbUser:$($map["LZKB_DB_PASSWORD"])@$dbHost:$dbPort/$dbName"
-$redisUrl = "redis://:$($map["LZKB_REDIS_PASSWORD"])@$redisHost:$redisPort/$redisDb"
+if ((-not $map.Contains("NEBULA_REDIS_PASSWORD")) -or [string]::IsNullOrWhiteSpace([string]$map["NEBULA_REDIS_PASSWORD"]) -or [string]$map["NEBULA_REDIS_PASSWORD"] -like "*CHANGE_ME_*") {
+  $map["NEBULA_REDIS_PASSWORD"] = New-RandomString -Length 24
+  if (-not $order.Contains("NEBULA_REDIS_PASSWORD")) { $order.Add("NEBULA_REDIS_PASSWORD") }
+}
+
+Sync-LegacyValue "NEBULA_DB_PASSWORD" "LZKB_DB_PASSWORD"
+Sync-LegacyValue "NEBULA_REDIS_PASSWORD" "LZKB_REDIS_PASSWORD"
+
+$dbUser = Get-EnvValue "NEBULA_DB_USER" "LZKB_DB_USER" "root"
+$dbHost = Get-EnvValue "NEBULA_DB_HOST" "LZKB_DB_HOST" "127.0.0.1"
+$dbPort = Get-EnvValue "NEBULA_DB_PORT" "LZKB_DB_PORT" "5432"
+$dbName = Get-EnvValue "NEBULA_DB_NAME" "LZKB_DB_NAME" "nebula"
+$redisHost = Get-EnvValue "NEBULA_REDIS_HOST" "LZKB_REDIS_HOST" "127.0.0.1"
+$redisPort = Get-EnvValue "NEBULA_REDIS_PORT" "LZKB_REDIS_PORT" "6379"
+$redisDb = Get-EnvValue "NEBULA_REDIS_DB" "LZKB_REDIS_DB" "0"
+
+$dbUrl = "postgresql://$dbUser:$($map["NEBULA_DB_PASSWORD"])@$dbHost:$dbPort/$dbName"
+$redisUrl = "redis://:$($map["NEBULA_REDIS_PASSWORD"])@$redisHost:$redisPort/$redisDb"
 
 $rewriteDbUrl = (-not $map.Contains("DATABASE_URL")) -or [string]$map["DATABASE_URL"] -like "*CHANGE_ME_DB_PASSWORD*"
-if (-not $rewriteDbUrl -and $dbPasswordBefore -and [string]$map["DATABASE_URL"] -like "*$dbPasswordBefore*" -and [string]$map["LZKB_DB_PASSWORD"] -ne $dbPasswordBefore) {
+if (-not $rewriteDbUrl -and $dbPasswordBefore -and [string]$map["DATABASE_URL"] -like "*$dbPasswordBefore*" -and [string]$map["NEBULA_DB_PASSWORD"] -ne $dbPasswordBefore) {
   $rewriteDbUrl = $true
 }
 if ($rewriteDbUrl) {
@@ -125,7 +160,7 @@ if ($rewriteDbUrl) {
 }
 
 $rewriteRedisUrl = (-not $map.Contains("REDIS_URL")) -or [string]$map["REDIS_URL"] -like "*CHANGE_ME_REDIS_PASSWORD*"
-if (-not $rewriteRedisUrl -and $redisPasswordBefore -and [string]$map["REDIS_URL"] -like "*$redisPasswordBefore*" -and [string]$map["LZKB_REDIS_PASSWORD"] -ne $redisPasswordBefore) {
+if (-not $rewriteRedisUrl -and $redisPasswordBefore -and [string]$map["REDIS_URL"] -like "*$redisPasswordBefore*" -and [string]$map["NEBULA_REDIS_PASSWORD"] -ne $redisPasswordBefore) {
   $rewriteRedisUrl = $true
 }
 if ($rewriteRedisUrl) {

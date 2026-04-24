@@ -4,16 +4,16 @@ import os
 
 from celery import Celery
 from kombu import Exchange, Queue
-from lzkb import settings
+from nebula import settings
 from .heartbeat import *
 from .hmac_signed_serializer import register_hmac_signed_serializer
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lzkb.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nebula.settings')
 
 register_hmac_signed_serializer()
 
-app = Celery('LZKB')
+app = Celery('NebulaKB')
 
 configs = {k: v for k, v in settings.__dict__.items() if k.startswith('CELERY')}
 configs['worker_concurrency'] = 5

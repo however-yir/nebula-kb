@@ -193,7 +193,7 @@ const loginHandle = () => {
         login
           .asyncLdapLogin(loginForm.value)
           .then(() => {
-            locale.value = localStorage.getItem('LZKB-locale') || getBrowserLang() || 'en-US'
+            locale.value = localStorage.getItem('NEBULA-locale') || getBrowserLang() || 'en-US'
             router.push({name: 'home'})
           })
           .catch(() => {
@@ -209,7 +209,7 @@ const loginHandle = () => {
         login
           .asyncLogin({encryptedData: encryptedBase64, username: loginForm.value.username})
           .then(() => {
-            locale.value = localStorage.getItem('LZKB-locale') || getBrowserLang() || 'en-US'
+            locale.value = localStorage.getItem('NEBULA-locale') || getBrowserLang() || 'en-US'
             localStorage.setItem('workspace_id', 'default')
             router.push({name: 'home'})
           })

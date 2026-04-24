@@ -63,7 +63,7 @@ REST_FRAMEWORK = {
 }
 STATICFILES_DIRS = [(os.path.join(PROJECT_DIR, 'ui', 'dist'))]
 STATIC_ROOT = os.path.join(BASE_DIR.parent, 'static')
-ROOT_URLCONF = 'lzkb.urls'
+ROOT_URLCONF = 'nebula.urls'
 APPS_DIR = os.path.join(PROJECT_DIR, 'apps')
 
 TEMPLATES = [
@@ -124,7 +124,7 @@ SPECTACULAR_SETTINGS = {
         }
     }
 }
-WSGI_APPLICATION = 'lzkb.wsgi.application'
+WSGI_APPLICATION = 'nebula.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -188,6 +188,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 edition = 'CE'
 
-if os.environ.get('LZKB_REDIS_SENTINEL_SENTINELS') is not None or os.environ.get(
+if os.environ.get('NEBULA_REDIS_SENTINEL_SENTINELS') is not None or os.environ.get('LZKB_REDIS_SENTINEL_SENTINELS') is not None or os.environ.get(
         'MAXKB_REDIS_SENTINEL_SENTINELS') is not None:
     DJANGO_REDIS_CONNECTION_FACTORY = "django_redis.pool.SentinelConnectionFactory"

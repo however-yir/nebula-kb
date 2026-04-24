@@ -5,11 +5,12 @@ import type { Ref } from 'vue'
 import type { Result } from '@/request/Result'
 import useStore from '@/stores'
 import router from '@/router'
+import { getNebulaPrefix } from '@/utils/nebula-runtime'
 
 import { ref, type WritableComputedRef } from 'vue'
 
 const axiosConfig = {
-  baseURL: (window.LZKB?.prefix ? window.LZKB?.prefix : '/admin') + '/api',
+  baseURL: getNebulaPrefix('/admin') + '/api',
   withCredentials: true,
   timeout: 1800000, // 30分钟 timeout
   headers: {},

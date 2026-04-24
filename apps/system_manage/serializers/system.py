@@ -37,7 +37,7 @@ class SystemProfileResponseSerializer(serializers.Serializer):
 class SystemProfileSerializer(serializers.Serializer):
     @staticmethod
     def profile():
-        version = os.environ.get('LZKB_VERSION', os.environ.get('MAXKB_VERSION'))
+        version = os.environ.get('NEBULA_VERSION', os.environ.get('LZKB_VERSION', os.environ.get('MAXKB_VERSION')))
         license_is_valid = DatabaseModelManage.get_model('license_is_valid') or (lambda: False)
         return {'version': version, 'edition': settings.edition,
                 'license_is_valid': license_is_valid() if license_is_valid() is not None else False,

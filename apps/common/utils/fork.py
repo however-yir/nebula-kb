@@ -196,4 +196,4 @@ class Fork:
 def handler(base_url, response: Fork.Response):
     maxkb_logger.info(base_url.url, base_url.tag.text if base_url.tag else None, response.content)
 
-# ForkManage('https://github.com/however-yir/LZKB/discussions', ['.md-content']).fork(3, set(), handler)
+# ForkManage('https://github.com/however-yir/nebula-kb/discussions', ['.md-content']).fork(3, set(), handler)

@@ -12,6 +12,7 @@ urlpatterns = [
     path('workspace/<str:workspace_id>/resource_mapping/<str:resource>/<str:resource_id>/<int:current_page>/<int:page_size>', views.ResourceMappingView.as_view()),
     path('workspace/<str:workspace_id>/audit_log/<int:current_page>/<int:page_size>', views.AuditLogView.as_view()),
     path('workspace/<str:workspace_id>/operation_metrics', views.WorkspaceOperationMetricsView.as_view()),
+    path('workspace/<str:workspace_id>/knowledge_ops', views.KnowledgeOpsDashboardView.as_view()),
     path('email_setting', views.SystemSetting.Email.as_view()),
     path('profile', views.SystemProfile.as_view()),
     path('valid/<str:valid_type>/<int:valid_count>', views.Valid.as_view())

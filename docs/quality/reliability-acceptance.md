@@ -1,6 +1,6 @@
-# LZKB Reliability Acceptance Plan
+# NebulaKB Reliability Acceptance Plan
 
-本计划用于把 LZKB 从“能用”推进到“可靠”。执行优先级是：先锁定最小验收闭环，再用四层测试体系覆盖高风险模块，最后用 CI、发布清单和非功能测试让风险在发布前可见。
+本计划用于把 NebulaKB 从“能用”推进到“可靠”。执行优先级是：先锁定最小验收闭环，再用四层测试体系覆盖高风险模块，最后用 CI、发布清单和非功能测试让风险在发布前可见。
 
 ## 1. 最小验收闭环
 

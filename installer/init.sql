@@ -1,5 +1,5 @@
-CREATE DATABASE "lzkb";
+CREATE DATABASE "nebula";
 
-\c "lzkb";
+\c "nebula";
 
 CREATE EXTENSION "vector";

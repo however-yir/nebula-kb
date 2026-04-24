@@ -47,7 +47,7 @@ export const defaultPlatformSetting = {
   showForum: true,
   forumUrl: t('layout.forumUrl'),
   showProject: true,
-  projectUrl: 'https://github.com/however-yir/LZKB',
+  projectUrl: 'https://github.com/however-yir/nebula-kb',
 }
 
 export function hexToRgba(hex?: string, alpha?: number) {

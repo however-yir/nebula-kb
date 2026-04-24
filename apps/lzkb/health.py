@@ -32,7 +32,7 @@ def _check_database():
 
 def _check_cache():
     cache = caches['default']
-    key = 'lzkb:readyz'
+    key = 'nebula:readyz'
     cache.set(key, 'ok', timeout=5)
     if cache.get(key) != 'ok':
         raise RuntimeError('cache write/read probe failed')

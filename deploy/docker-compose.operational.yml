@@ -3,9 +3,9 @@ services:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     volumes:
-      - lzkb_postgres_data:/var/lib/postgresql/data
+      - nebula_postgres_data:/var/lib/postgresql/data
       - ./postgres/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -17,10 +17,10 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
     volumes:
-      - lzkb_redis_data:/data
+      - nebula_redis_data:/data
     healthcheck:
       test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
       interval: 10s
@@ -31,10 +31,10 @@ services:
     image: minio/minio:latest
     restart: unless-stopped
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     command: ["server", "/data", "--console-address", ":9001"]
     volumes:
-      - lzkb_object_data:/data
+      - nebula_object_data:/data
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/ready"]
       interval: 10s
@@ -47,19 +47,19 @@ services:
       object-storage:
         condition: service_healthy
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     entrypoint: >
       /bin/sh -c "
-      mc alias set lzkb http://object-storage:9000 \"$${MINIO_ROOT_USER}\" \"$${MINIO_ROOT_PASSWORD}\" &&
-      mc mb --ignore-existing lzkb/$${STORAGE_BUCKET:-lzkb}
+      mc alias set nebula http://object-storage:9000 \"$${MINIO_ROOT_USER}\" \"$${MINIO_ROOT_PASSWORD}\" &&
+      mc mb --ignore-existing nebula/$${STORAGE_BUCKET:-nebula}
       "
     restart: "no"
 
   local-model:
-    image: ${LZKB_IMAGE:-ghcr.io/however-yir/lzkb:latest}
+    image: ${NEBULA_IMAGE:-${LZKB_IMAGE:-nebulakb/nebula-kb:latest}}
     restart: unless-stopped
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     command: ["./scripts/run-service.sh", "local_model"]
     depends_on:
       postgres:
@@ -75,13 +75,13 @@ services:
       retries: 20
 
   web:
-    image: ${LZKB_IMAGE:-ghcr.io/however-yir/lzkb:latest}
+    image: ${NEBULA_IMAGE:-${LZKB_IMAGE:-nebulakb/nebula-kb:latest}}
     restart: unless-stopped
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     command: ["./scripts/run-service.sh", "web"]
     ports:
-      - "${LZKB_WEB_PORT:-8080}:8080"
+      - "${NEBULA_WEB_PORT:-${LZKB_WEB_PORT:-8080}}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,10 +98,10 @@ services:
       retries: 20
 
   worker:
-    image: ${LZKB_IMAGE:-ghcr.io/however-yir/lzkb:latest}
+    image: ${NEBULA_IMAGE:-${LZKB_IMAGE:-nebulakb/nebula-kb:latest}}
     restart: unless-stopped
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     command: ["./scripts/run-service.sh", "worker"]
     depends_on:
       postgres:
@@ -119,10 +119,10 @@ services:
       retries: 20
 
   scheduler:
-    image: ${LZKB_IMAGE:-ghcr.io/however-yir/lzkb:latest}
+    image: ${NEBULA_IMAGE:-${LZKB_IMAGE:-nebulakb/nebula-kb:latest}}
     restart: unless-stopped
     env_file:
-      - ${LZKB_ENV_FILE:-./env/dev.env}
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
     command: ["./scripts/run-service.sh", "scheduler"]
     depends_on:
       postgres:
@@ -140,6 +140,6 @@ services:
       retries: 20
 
 volumes:
-  lzkb_postgres_data:
-  lzkb_redis_data:
-  lzkb_object_data:
+  nebula_postgres_data:
+  nebula_redis_data:
+  nebula_object_data:

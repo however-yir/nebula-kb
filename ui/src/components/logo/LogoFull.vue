@@ -36,7 +36,7 @@
         KNOWLEDGE OS
       </text>
     </svg>
-    <img v-else src="@/assets/logo/LZKB-logo.svg" :height="height" alt="NebulaKB" />
+    <img v-else src="@/assets/logo/NebulaKB-logo.svg" :height="height" alt="NebulaKB" />
   </template>
 </template>
 <script setup lang="ts">

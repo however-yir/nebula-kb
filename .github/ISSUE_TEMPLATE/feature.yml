@@ -1,5 +1,5 @@
 name: 'Feature Request'
-description: 'Suggest a new feature for LZKB'
+description: 'Suggest a new feature for NebulaKB'
 title: '[Feature] '
 body:
   - type: markdown
@@ -9,7 +9,7 @@ body:
     validations:
       required: true
     attributes:
-      label: 'LZKB Version'
+      label: 'NebulaKB Version'
       description: 'Open About dialog in the top-right corner and copy the version string.'
   - type: markdown
     attributes:

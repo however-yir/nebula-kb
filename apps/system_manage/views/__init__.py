@@ -13,3 +13,4 @@ from .valid import *
 from .resource_mapping import *
 from .log_management import *
 from .operation_metrics import *
+from .knowledge_ops import *

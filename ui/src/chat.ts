@@ -25,6 +25,9 @@ import mermaid from 'mermaid'
 
 import highlight from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
+import { getNebulaRuntime, getStoredNebulaLocale } from '@/utils/nebula-runtime'
+
+getNebulaRuntime()
 
 config({
   editorExtensions: {
@@ -102,7 +105,7 @@ const locale_map: any = {
   'en-US': enUs,
 }
 app.use(ElementPlus, {
-  locale: locale_map[localStorage.getItem('LZKB-locale') || navigator.language || 'en-US'],
+  locale: locale_map[getStoredNebulaLocale() || navigator.language || 'en-US'],
 })
 app.use(directives)
 app.use(router)

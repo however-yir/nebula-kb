@@ -222,7 +222,7 @@ const urlParams = computed(() =>
 )
 const shareUrl = computed(
   () =>
-    `${window.location.origin}${window.LZKB.chatPrefix}/` +
+    `${window.location.origin}${window.NEBULA.chatPrefix}/` +
     detail.value?.access_token +
     urlParams.value,
 )

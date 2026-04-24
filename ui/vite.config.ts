@@ -136,6 +136,15 @@ export default defineConfig((conf: any) => {
       outDir: `dist${ENV.VITE_BASE_PATH}`,
       rollupOptions: {
         input: ENV.VITE_ENTRY,
+        output: {
+          manualChunks: {
+            'vendor-vue': ['vue', 'vue-router', 'pinia', 'vue-i18n', '@vueuse/core'],
+            'vendor-element': ['element-plus', '@element-plus/icons-vue'],
+            'vendor-markdown': ['md-editor-v3', 'marked', 'highlight.js', 'katex', 'mermaid'],
+            'vendor-workflow': ['@logicflow/core', '@logicflow/extension', '@antv/layout'],
+            'vendor-charts': ['echarts'],
+          },
+        },
       },
     },
     resolve: {

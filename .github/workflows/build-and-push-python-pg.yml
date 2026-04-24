@@ -27,7 +27,7 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/lzkb-base
+          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/nebulakb/base
           DOCKER_PLATFORMS=${{ github.event.inputs.architecture }}
           TAG_NAME=python3.11-pg17.9-20260326
           DOCKER_IMAGE_TAGS="--tag ${DOCKER_IMAGE}:${TAG_NAME}"

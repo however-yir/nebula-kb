@@ -1,20 +1,20 @@
 # Security Policy / 安全策略
 
-如果你发现 LZKB 的安全问题，请不要公开提交 Issue。
+如果你发现 NebulaKB 的安全问题，请不要公开提交 Issue。
 
 请通过以下渠道私下联系维护者：
 
-- Email: `security@lzkb.dev`
-- GitHub Security Advisories: `https://github.com/however-yir/LZKB/security/advisories`
-- 备选渠道（普通问题，不含漏洞细节）: `https://github.com/however-yir/LZKB/issues`
+- Email: `security@nebulakb.ai`
+- GitHub Security Advisories: `https://github.com/however-yir/nebula-kb/security/advisories`
+- 备选渠道（普通问题，不含漏洞细节）: `https://github.com/however-yir/nebula-kb/issues`
 
-When you discover a security vulnerability in LZKB, please do not report it publicly first.
+When you discover a security vulnerability in NebulaKB, please do not report it publicly first.
 
 Private reporting channels:
 
-- Email: `security@lzkb.dev`
-- GitHub Security Advisories: `https://github.com/however-yir/LZKB/security/advisories`
-- Fallback (non-sensitive communication only): `https://github.com/however-yir/LZKB/issues`
+- Email: `security@nebulakb.ai`
+- GitHub Security Advisories: `https://github.com/however-yir/nebula-kb/security/advisories`
+- Fallback (non-sensitive communication only): `https://github.com/however-yir/nebula-kb/issues`
 
 ## Disclosure timeline / 披露流程
 

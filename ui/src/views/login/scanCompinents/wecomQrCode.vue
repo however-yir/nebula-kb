@@ -26,7 +26,7 @@ const init = async () => {
     agentId: props.config.agent_id,
     redirectUri: props.config.callback_url,
   }
-  let lang = localStorage.getItem('LZKB-locale') || getBrowserLang() || 'en-US'
+  let lang = localStorage.getItem('NEBULA-locale') || getBrowserLang() || 'en-US'
   if (lang === 'en-US') {
     lang = 'en'
   } else {

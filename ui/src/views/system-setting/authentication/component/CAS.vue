@@ -126,7 +126,7 @@ function getDetail() {
       form.value = res.data
     }
     if (!form.value.config.redirectUrl) {
-        form.value.config.redirectUrl = window.location.origin + window.LZKB.prefix + '/api/cas'
+        form.value.config.redirectUrl = window.location.origin + window.NEBULA.prefix + '/api/cas'
       }
   })
 }

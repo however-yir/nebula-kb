@@ -1,4 +1,4 @@
-# LZKB 模块边界冻结
+# NebulaKB 模块边界冻结
 
 本轮目标是结构化可维护，不重写业务。模块边界先冻结，后续改造只允许在明确归属内演进，跨域调用通过 services / repositories / policies 进入。
 
@@ -28,4 +28,3 @@
 - 超过 800 行的文件按域优先拆分；每次拆分必须保留最小回归路径。
 - 新 API 先补契约和前后端确认，再写 view/serializer/service。
 - 跨域访问不得直接穿透到对方 model 细节；先在所属域沉淀 service/repository。
-

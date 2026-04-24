@@ -1,7 +1,9 @@
-const DEFAULT_PROJECT_URL = 'https://github.com/however-yir/LZKB'
+import { getNebulaRuntime } from '@/utils/nebula-runtime'
+
+const DEFAULT_PROJECT_URL = 'https://github.com/however-yir/nebula-kb'
 
 function getRuntimeLink(key: string, fallback: string): string {
-  const config = window.LZKB as Record<string, string | undefined> | undefined
+  const config = getNebulaRuntime() as unknown as Record<string, string | undefined>
   const value = config?.[key]
   if (typeof value === 'string' && value.trim().length > 0) {
     return value
@@ -11,9 +13,11 @@ function getRuntimeLink(key: string, fallback: string): string {
 
 export const externalLinks = {
   projectUrl: getRuntimeLink('projectUrl', DEFAULT_PROJECT_URL),
-  helpUrl: getRuntimeLink('helpUrl', `${DEFAULT_PROJECT_URL}/wiki`),
+  helpUrl: getRuntimeLink('helpUrl', 'https://docs.nebulakb.ai'),
   contactUrl: getRuntimeLink('contactUrl', `${DEFAULT_PROJECT_URL}/issues`),
-  pricingUrl: getRuntimeLink('pricingUrl', `${DEFAULT_PROJECT_URL}#readme`),
+  pricingUrl: getRuntimeLink('pricingUrl', 'https://nebulakb.ai/pricing'),
+  officialSiteUrl: getRuntimeLink('officialSiteUrl', 'https://nebulakb.ai'),
+  docsUrl: getRuntimeLink('docsUrl', 'https://docs.nebulakb.ai'),
 }
 
 export function openExternalLink(url: string) {

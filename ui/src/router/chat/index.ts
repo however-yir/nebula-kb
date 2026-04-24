@@ -10,9 +10,10 @@ import {
 } from 'vue-router'
 import useStore from '@/stores'
 import { routes } from '@/router/chat/routes'
+import { getNebulaPrefix } from '@/utils/nebula-runtime'
 NProgress.configure({ showSpinner: false, speed: 500, minimum: 0.3 })
 const router = createRouter({
-  history: createWebHistory(window.LZKB?.prefix ? window.LZKB?.prefix : import.meta.env.BASE_URL),
+  history: createWebHistory(getNebulaPrefix(import.meta.env.BASE_URL)),
   routes: routes,
 })
 

@@ -1,13 +1,13 @@
-# LZKB file-based configuration template
-# Use with: LZKB_CONFIG_TYPE=FILE and copy to config.yml
+# NebulaKB file-based configuration template
+# Use with: NEBULA_CONFIG_TYPE=FILE and copy to config.yml
 
 ENVIRONMENT: dev
 SECRET_KEY: CHANGE_ME_DJANGO_SECRET_KEY
 TOKEN_EXPIRE: 900
-DATABASE_URL: postgresql://root:CHANGE_ME_DB_PASSWORD@127.0.0.1:5432/lzkb
+DATABASE_URL: postgresql://root:CHANGE_ME_DB_PASSWORD@127.0.0.1:5432/nebula
 REDIS_URL: redis://:CHANGE_ME_REDIS_PASSWORD@127.0.0.1:6379/0
 
-DB_NAME: lzkb
+DB_NAME: nebula
 DB_HOST: 127.0.0.1
 DB_PORT: 5432
 DB_USER: root
@@ -49,13 +49,14 @@ AUTH_COOKIE_SAMESITE: Lax
 
 # Brand & links
 APP_NAME: NebulaKB
-APPSTORE_URL: https://raw.githubusercontent.com/however-yir/LZKB/main/appstore/lzkb.json
-PROJECT_URL: https://github.com/however-yir/LZKB
-HELP_URL: https://github.com/however-yir/LZKB/wiki
-PRICING_URL: https://github.com/however-yir/LZKB#readme
-CONTACT_URL: https://github.com/however-yir/LZKB/issues
-OFFICIAL_SITE_URL: https://github.com/however-yir/LZKB
-CHAT_FLOAT_ICON: LZKB.gif
+APPSTORE_URL: https://raw.githubusercontent.com/however-yir/nebula-kb/main/appstore/nebula.json
+PROJECT_URL: https://github.com/however-yir/nebula-kb
+HELP_URL: https://docs.nebulakb.ai
+DOCS_URL: https://docs.nebulakb.ai
+PRICING_URL: https://nebulakb.ai/pricing
+CONTACT_URL: https://github.com/however-yir/nebula-kb/issues
+OFFICIAL_SITE_URL: https://nebulakb.ai
+CHAT_FLOAT_ICON: NebulaKB.gif
 
 # Ollama
 OLLAMA_BASE_URL: http://127.0.0.1:11434

@@ -39,6 +39,6 @@ export default {
     daysValid: 'Days valid',
   },
   copyright: 'Copyright © 2026 NebulaKB Contributors.',
-  userManualUrl: 'https://github.com/however-yir/LZKB/wiki',
-  forumUrl: 'https://github.com/however-yir/LZKB/discussions',
+  userManualUrl: 'https://github.com/however-yir/nebula-kb/wiki',
+  forumUrl: 'https://github.com/however-yir/nebula-kb/discussions',
 }
