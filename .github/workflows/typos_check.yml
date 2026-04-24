@@ -28,6 +28,12 @@ jobs:
           "ui/src/workflow/common/template.ts",
           "apps/models_provider/impl/tencent_model_provider/model/stt.py",
         ]
+
+        [default.extend-words]
+        RTO = "RTO"
+        rto = "rto"
+        RPO = "RPO"
+        rpo = "rpo"
         EOF
     - name: Check spelling
       uses: crate-ci/typos@master
