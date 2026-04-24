@@ -48,7 +48,7 @@ AUTH_COOKIE_SECURE: false
 AUTH_COOKIE_SAMESITE: Lax
 
 # Brand & links
-APP_NAME: LZKB
+APP_NAME: NebulaKB
 APPSTORE_URL: https://raw.githubusercontent.com/however-yir/LZKB/main/appstore/lzkb.json
 PROJECT_URL: https://github.com/however-yir/LZKB
 HELP_URL: https://github.com/however-yir/LZKB/wiki

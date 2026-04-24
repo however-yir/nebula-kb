@@ -37,7 +37,7 @@ export const defaultSetting = {
   icon: '',
   loginLogo: '',
   loginImage: '',
-  title: 'LZKB',
+  title: 'NebulaKB',
   slogan: t('theme.defaultSlogan'),
 }
 

@@ -21,7 +21,7 @@ logger = logging.getLogger('lzkb.conf')
 class Config(dict):
     defaults = {
         # 应用品牌与外链
-        "APP_NAME": "LZKB",
+        "APP_NAME": "NebulaKB",
         "APPSTORE_URL": "https://raw.githubusercontent.com/however-yir/LZKB/main/appstore/lzkb.json",
         "PROJECT_URL": "https://github.com/however-yir/LZKB",
         "HELP_URL": "https://github.com/however-yir/LZKB/wiki",
@@ -236,7 +236,7 @@ class Config(dict):
         return self.get('LOG_LEVEL', 'DEBUG')
 
     def get_app_name(self):
-        return self.get('APP_NAME', 'LZKB')
+        return self.get('APP_NAME', 'NebulaKB')
 
     def get_appstore_url(self):
         return self.get('APPSTORE_URL', self.defaults['APPSTORE_URL'])

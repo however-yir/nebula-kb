@@ -38,7 +38,7 @@ export default {
     neverExpires: 'Never expires',
     daysValid: 'Days valid',
   },
-  copyright: 'Copyright © 2026 LZKB Contributors.',
+  copyright: 'Copyright © 2026 NebulaKB Contributors.',
   userManualUrl: 'https://github.com/however-yir/LZKB/wiki',
   forumUrl: 'https://github.com/however-yir/LZKB/discussions',
 }

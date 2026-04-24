@@ -46,7 +46,7 @@ export default {
     modeName: {
       label: 'Model Name',
       placeholder: 'Set a name for the base model',
-      tooltip: 'Custom model name in LZKB',
+      tooltip: 'Custom model name in NebulaKB',
       requiredMessage: 'Model name cannot be empty',
     },
     permissionType: {

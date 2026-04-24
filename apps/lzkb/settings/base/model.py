@@ -108,7 +108,7 @@ TEMPLATES = [
      },
 ]
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'LZKB API',
+    'TITLE': 'NebulaKB API',
     'DESCRIPTION': _('Intelligent customer service platform'),
     'VERSION': 'v2',
     'SERVE_INCLUDE_SCHEMA': False,

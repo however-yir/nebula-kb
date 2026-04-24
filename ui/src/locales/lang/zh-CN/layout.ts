@@ -38,7 +38,7 @@ export default {
     neverExpires: '永不过期',
     daysValid: '天有效',
   },
-  copyright: '版权所有 © 2026 LZKB Contributors',
+  copyright: '版权所有 © 2026 NebulaKB Contributors',
   userManualUrl: 'https://github.com/however-yir/LZKB/wiki',
   forumUrl: 'https://github.com/however-yir/LZKB/discussions',
 }

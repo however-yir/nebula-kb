@@ -44,7 +44,7 @@ export default {
     modeName: {
       label: '模型名称',
       placeholder: '请给基础模型设置一个名称',
-      tooltip: 'LZKB 中自定义的模型名称',
+      tooltip: 'NebulaKB 中自定义的模型名称',
       requiredMessage: '模型名称不能为空',
     },
     permissionType: {

@@ -1,6 +1,6 @@
 export default {
   title: '外观设置',
-  defaultSlogan: '强大易用的企业级智能体平台',
+  defaultSlogan: '面向团队知识运营的自动化中枢',
   platformDisplayTheme: '平台显示主题',
   customTheme: '自定义主题',
   platformLoginSettings: '平台登录设置',
@@ -25,8 +25,8 @@ export default {
   websiteSlogan: '欢迎语',
   websiteSloganPlaceholder: '请输入欢迎语',
   websiteSloganTip: '产品 Logo 下的欢迎语',
-  logoDefaultTip: '默认为 LZKB 登录界面，支持自定义设置',
-  defaultTip: '默认为 LZKB 平台界面，支持自定义设置',
+  logoDefaultTip: '默认为 NebulaKB 登录界面，支持自定义设置',
+  defaultTip: '默认为 NebulaKB 平台界面，支持自定义设置',
   platformSetting: '平台设置',
   showUserManual: '显示用户手册',
   showForum: '显示论坛求助',

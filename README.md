@@ -1,4 +1,4 @@
-# LZKB - 本地知识库与检索增强平台 | Local Knowledge Base & Retrieval Platform
+# NebulaKB - 知识中枢与检索自动化平台 | Knowledge Hub & Retrieval Automation Platform
 
 [![Build](https://github.com/however-yir/LZKB/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/however-yir/LZKB/actions/workflows/build-and-push.yml)
 [![Docs](https://img.shields.io/badge/docs-README-0A7EFA)](https://github.com/however-yir/LZKB#readme)
@@ -6,13 +6,6 @@
 [![Status](https://img.shields.io/badge/status-active-2563EB)](https://github.com/however-yir/LZKB)
 
 > Status: `active`
->
-> Upstream family: `MaxKB`
-
-> **非官方声明（Non-Affiliation）**  
-> 本仓库为社区维护的衍生/二次开发版本，与上游项目及其权利主体不存在官方关联、授权背书或从属关系。  
-> **商标声明（Trademark Notice）**  
-> 相关项目名称、Logo 与商标归其各自权利人所有。本仓库仅用于说明兼容/来源，不主张任何商标权利。
 >
 > Series: [local-ai-hub](https://github.com/however-yir/local-ai-hub) · [yourrag](https://github.com/however-yir/yourrag)
 
@@ -23,14 +16,14 @@
 - 定位：知识库平台，而不是通用聊天工作台。
 - 亮点：Django + PostgreSQL + Redis、多模型接入、知识运营、智能体工作流扩展。
 - 最短运行路径：`python apps/manage.py migrate && python main.py dev web`
-- 系列分工：`Local AI Hub` 管工作台体验，`LZKB` 管知识平台，`YourRAG` 管企业级 RAG/Agent 交付。
+- 系列分工：`Local AI Hub` 管工作台体验，`NebulaKB` 管知识平台，`YourRAG` 管企业级 RAG/Agent 交付。
 
 ## AI 平台分工矩阵
 
 | Repo | 主要角色 | 部署形态 | 最适合的场景 |
 | --- | --- | --- | --- |
 | `Local AI Hub` | 本地 AI 工作台 | 自托管工作台 | 模型接入、团队日用、统一入口 |
-| `LZKB` | 知识库平台 | 本地优先平台 | 文档入库、知识运营、检索问答 |
+| `NebulaKB` | 知识库平台 | 本地优先平台 | 文档入库、知识运营、检索问答 |
 | `YourRAG` | 企业 RAG/Agent 平台 | 企业交付导向 | 私有化部署、RAG + Agent 交付 |
 
 ## 目录
@@ -63,7 +56,7 @@
 相对同系列仓库的职责边界：
 
 - `Local AI Hub` 更像工作台与统一入口。
-- `LZKB` 更像知识入库、知识运营与检索问答平台。
+- `NebulaKB` 更像知识入库、知识运营与检索问答平台。
 - `YourRAG` 更偏企业级私有化交付与 Agent 组合能力。
 
 ## 3. 核心能力
