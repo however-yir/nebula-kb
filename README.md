@@ -1,6 +1,7 @@
 # NebulaKB - 知识运营中枢 | Knowledge Operations Hub
 
 [![Build](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml)
+[![Tests](https://github.com/however-yir/nebula-kb/actions/workflows/nebulakb-tests.yml/badge.svg)](https://github.com/however-yir/nebula-kb/actions/workflows/nebulakb-tests.yml)
 [![Docs](https://img.shields.io/badge/docs-docs.nebulakb.ai-0A7EFA)](https://docs.nebulakb.ai)
 [![License](https://img.shields.io/badge/license-GPL--3.0-16A34A)](./LICENSE)
 [![Status](https://img.shields.io/badge/status-active-2563EB)](https://github.com/however-yir/nebula-kb)
