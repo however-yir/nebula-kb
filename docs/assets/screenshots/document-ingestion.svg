@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">NebulaKB 文档入库截图</title>
+  <desc id="desc">文档入库流程，展示上传、解析、切片、索引和失败原因。</desc>
+  <rect width="1280" height="720" fill="#f5f7fb"/>
+  <rect x="0" y="0" width="1280" height="74" fill="#12323f"/>
+  <text x="42" y="47" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800">NebulaKB</text>
+  <text x="278" y="132" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800">文档入库</text>
+  <text x="278" y="162" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="15">从上传到索引可追踪，失败文档进入治理队列。</text>
+
+  <rect x="278" y="194" width="380" height="390" rx="8" fill="#ffffff"/>
+  <text x="306" y="236" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">上传文档</text>
+  <rect x="306" y="268" width="324" height="148" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-dasharray="8 6"/>
+  <text x="382" y="330" fill="#2563eb" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800">拖拽文件或选择上传</text>
+  <text x="366" y="362" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">支持 PDF、Markdown、TXT、DOCX</text>
+  <text x="306" y="458" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">目标知识库</text>
+  <rect x="306" y="474" width="324" height="42" rx="6" fill="#f8fafc" stroke="#dbe3ef"/>
+  <text x="326" y="501" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="14">客服政策库</text>
+  <rect x="306" y="536" width="128" height="38" rx="6" fill="#2563eb"/>
+  <text x="336" y="560" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">开始入库</text>
+
+  <rect x="690" y="194" width="540" height="390" rx="8" fill="#ffffff"/>
+  <text x="718" y="236" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">入库任务</text>
+  <g font-family="Inter, Arial, sans-serif" font-size="14">
+    <circle cx="730" cy="292" r="12" fill="#22c55e"/>
+    <text x="758" y="297" fill="#0f172a" font-weight="800">上传完成</text>
+    <text x="928" y="297" fill="#64748b">product-faq.md</text>
+    <line x1="730" y1="306" x2="730" y2="352" stroke="#cbd5e1" stroke-width="2"/>
+    <circle cx="730" cy="366" r="12" fill="#22c55e"/>
+    <text x="758" y="371" fill="#0f172a" font-weight="800">解析成功</text>
+    <text x="928" y="371" fill="#64748b">12 个章节</text>
+    <line x1="730" y1="380" x2="730" y2="426" stroke="#cbd5e1" stroke-width="2"/>
+    <circle cx="730" cy="440" r="12" fill="#22c55e"/>
+    <text x="758" y="445" fill="#0f172a" font-weight="800">切片完成</text>
+    <text x="928" y="445" fill="#64748b">36 个 chunk</text>
+    <line x1="730" y1="454" x2="730" y2="500" stroke="#cbd5e1" stroke-width="2"/>
+    <circle cx="730" cy="514" r="12" fill="#22c55e"/>
+    <text x="758" y="519" fill="#0f172a" font-weight="800">索引成功</text>
+    <text x="928" y="519" fill="#64748b">pgvector / simple store</text>
+  </g>
+  <rect x="718" y="608" width="512" height="54" rx="8" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="742" y="640" fill="#9a3412" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">解析失败样例：扫描件缺少文本层，已进入待处理队列。</text>
+</svg>

@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 from django.test import SimpleTestCase
 
 from knowledge.models import SearchMode
+from knowledge.services.asset_lifecycle_demo import KnowledgeAssetPlatform
 from knowledge.vector.base_vector import normalize_for_embedding
 from knowledge.vector.pg_vector import PGVector
 
@@ -44,8 +45,8 @@ class AcceptSearchHandler:
 
 class KnowledgeRetrievalTests(SimpleTestCase):
     def test_normalize_for_embedding_removes_emoji_and_extra_spaces(self):
-        text = "hello   world 😄\nfrom\tLZKB"
-        self.assertEqual(normalize_for_embedding(text), "hello world from LZKB")
+        text = "hello   world 😄\nfrom\tNebulaKB"
+        self.assertEqual(normalize_for_embedding(text), "hello world from NebulaKB")
 
     def test_pgvector_hit_test_uses_supported_handler(self):
         expected = [{"paragraph_id": "p1", "similarity": 0.91, "comprehensive_score": 0.93}]
@@ -137,3 +138,105 @@ class KnowledgeRetrievalTests(SimpleTestCase):
             FakeEmbedding(),
         )
         self.assertEqual(result, [])
+
+
+class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
+    def setUp(self):
+        self.platform = KnowledgeAssetPlatform()
+        self.tenant_a = "tenant-a"
+        self.tenant_b = "tenant-b"
+        self.kb = self.platform.create_knowledge_base(
+            tenant_id=self.tenant_a,
+            knowledge_base_id="kb-service",
+            name="客服政策库",
+            owner="ops-a",
+        )
+        self.platform.create_knowledge_base(
+            tenant_id=self.tenant_b,
+            knowledge_base_id="kb-private",
+            name="隔离知识库",
+            owner="ops-b",
+        )
+        self.content = """
+# 入库治理 SOP
+
+## 解析失败处理
+
+如果扫描件缺少文本层、文件损坏或格式不受支持，文档状态必须标记为 failed，负责人需要在 2 个工作日内补充 OCR 版本。
+
+## 引用返回
+
+问答答案必须返回引用，引用至少包含文档标题、切片编号和命中摘要。
+"""
+
+    def test_file_upload_creates_document_record(self):
+        document = self.platform.upload_document(
+            self.tenant_a, self.kb.id, "import-sop.md", self.content
+        )
+
+        self.assertEqual(document.status, "uploaded")
+        self.assertEqual(document.tenant_id, self.tenant_a)
+        self.assertEqual(document.knowledge_base_id, self.kb.id)
+
+    def test_parse_failure_records_error(self):
+        document = self.platform.upload_document(
+            self.tenant_a, self.kb.id, "broken.txt", "[PARSE_ERROR]"
+        )
+        parsed = self.platform.parse_document(self.tenant_a, document.id)
+
+        self.assertEqual(parsed.status, "failed")
+        self.assertEqual(parsed.error, "parser could not extract text layer")
+        self.assertEqual(parsed.chunks, [])
+
+    def test_index_success_after_parse(self):
+        document = self.platform.ingest_document(
+            self.tenant_a, self.kb.id, "import-sop.md", self.content
+        )
+
+        self.assertEqual(document.status, "indexed")
+        self.assertGreaterEqual(len(document.chunks), 2)
+        self.assertTrue(all(chunk.indexed_at is not None for chunk in document.chunks))
+
+    def test_permission_isolation_between_tenants(self):
+        self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
+
+        with self.assertRaises(PermissionError):
+            self.platform.ask(self.tenant_b, self.kb.id, "解析失败后怎么办？")
+
+    def test_retrieval_hit_returns_answer_with_citations(self):
+        self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
+
+        answer = self.platform.ask(self.tenant_a, self.kb.id, "解析失败后应该如何处理？")
+
+        self.assertIsNone(answer.fallback_reason)
+        self.assertGreaterEqual(len(answer.hits), 1)
+        self.assertGreaterEqual(len(answer.citations), 1)
+        self.assertTrue(answer.citations[0].startswith("import-sop.md#"))
+        self.assertIn("根据知识库引用", answer.answer)
+
+    def test_empty_result_has_fallback(self):
+        self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
+
+        answer = self.platform.ask(self.tenant_a, self.kb.id, "火星基地餐饮报销规则是什么？")
+
+        self.assertEqual(answer.fallback_reason, "empty_result")
+        self.assertEqual(answer.citations, [])
+        self.assertIn("未找到可靠知识", answer.answer)
+
+    def test_feedback_record_and_low_quality_review(self):
+        feedback = self.platform.submit_feedback(
+            tenant_id=self.tenant_a,
+            question="解析失败后应该如何处理？",
+            answer="缺少 SLA 的答案",
+            rating=2,
+            reason="没有明确负责人和处理时限。",
+        )
+
+        low_quality = self.platform.low_quality_answers(self.tenant_a)
+        self.assertEqual([record.id for record in low_quality], [feedback.id])
+
+        closed = self.platform.close_feedback(
+            self.tenant_a, feedback.id, owner="knowledge-ops"
+        )
+        self.assertEqual(closed.status, "closed")
+        self.assertEqual(closed.owner, "knowledge-ops")

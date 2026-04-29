@@ -13,8 +13,6 @@ jobs:
     steps:
     - name: Checkout Actions Repository
       uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref_name }}
     - name: Create config file
       run: |
         cat <<EOF > typo-check-config.toml

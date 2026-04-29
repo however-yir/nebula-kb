@@ -17,7 +17,7 @@ jobs:
         with:
           script: |
             const body = [
-              'Thanks for opening this PR to LZKB.',
+              'Thanks for opening this PR to NebulaKB.',
               '',
               'Please make sure to:',
               '- include test/verification notes;',

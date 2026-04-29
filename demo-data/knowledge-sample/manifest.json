@@ -1,0 +1,37 @@
+{
+  "tenant_id": "tenant-demo",
+  "knowledge_base": {
+    "id": "kb-operations",
+    "name": "知识运营样例库",
+    "owner": "knowledge-ops"
+  },
+  "documents": [
+    "01-import-governance.md",
+    "02-search-feedback.md",
+    "03-operations-metrics.md"
+  ],
+  "broken_document": "99-broken-scan.txt",
+  "questions": [
+    {
+      "text": "解析失败后应该如何处理？",
+      "expected_citation_contains": "01-import-governance.md"
+    },
+    {
+      "text": "问答答案为什么必须返回引用？",
+      "expected_citation_contains": "02-search-feedback.md"
+    },
+    {
+      "text": "低质答案率如何计算？",
+      "expected_citation_contains": "03-operations-metrics.md"
+    },
+    {
+      "text": "火星基地餐饮报销规则是什么？",
+      "expected_citation_contains": null
+    }
+  ],
+  "feedback": {
+    "question": "解析失败后应该如何处理？",
+    "rating": 2,
+    "reason": "答案说明了失败状态，但没有明确负责人和 SLA。"
+  }
+}

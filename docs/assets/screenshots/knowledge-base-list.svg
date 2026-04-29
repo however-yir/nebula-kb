@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">NebulaKB 知识库列表截图</title>
+  <desc id="desc">知识库列表，展示业务域、文档数、命中率、负责人和治理状态。</desc>
+  <rect width="1280" height="720" fill="#f6f8fb"/>
+  <rect x="0" y="0" width="1280" height="74" fill="#12323f"/>
+  <text x="42" y="47" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800">NebulaKB</text>
+  <text x="278" y="132" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800">知识库列表</text>
+  <text x="278" y="162" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="15">按业务域管理知识资产，持续跟踪质量和更新责任。</text>
+  <rect x="278" y="192" width="952" height="440" rx="8" fill="#ffffff"/>
+  <rect x="302" y="218" width="320" height="38" rx="6" fill="#f1f5f9"/>
+  <text x="324" y="242" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="14">搜索知识库、负责人、业务域</text>
+  <rect x="1082" y="218" width="124" height="38" rx="6" fill="#2563eb"/>
+  <text x="1110" y="242" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">新建知识库</text>
+  <line x1="302" y1="286" x2="1206" y2="286" stroke="#e2e8f0"/>
+  <text x="302" y="318" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">名称</text>
+  <text x="550" y="318" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">业务域</text>
+  <text x="700" y="318" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">文档</text>
+  <text x="820" y="318" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">命中率</text>
+  <text x="955" y="318" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">负责人</text>
+  <text x="1110" y="318" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13">状态</text>
+
+  <g font-family="Inter, Arial, sans-serif" font-size="14">
+    <text x="302" y="366" fill="#0f172a" font-weight="800">客服政策库</text>
+    <text x="550" y="366" fill="#334155">客服中心</text>
+    <text x="700" y="366" fill="#334155">128</text>
+    <text x="820" y="366" fill="#15803d" font-weight="800">86.2%</text>
+    <text x="955" y="366" fill="#334155">Mia</text>
+    <rect x="1110" y="344" width="64" height="28" rx="14" fill="#dcfce7"/>
+    <text x="1125" y="363" fill="#15803d" font-size="13" font-weight="700">健康</text>
+    <line x1="302" y1="392" x2="1206" y2="392" stroke="#e2e8f0"/>
+
+    <text x="302" y="440" fill="#0f172a" font-weight="800">产品手册库</text>
+    <text x="550" y="440" fill="#334155">产品运营</text>
+    <text x="700" y="440" fill="#334155">76</text>
+    <text x="820" y="440" fill="#b45309" font-weight="800">71.4%</text>
+    <text x="955" y="440" fill="#334155">Chen</text>
+    <rect x="1110" y="418" width="78" height="28" rx="14" fill="#fef3c7"/>
+    <text x="1124" y="437" fill="#b45309" font-size="13" font-weight="700">待更新</text>
+    <line x1="302" y1="466" x2="1206" y2="466" stroke="#e2e8f0"/>
+
+    <text x="302" y="514" fill="#0f172a" font-weight="800">运营指标库</text>
+    <text x="550" y="514" fill="#334155">数据运营</text>
+    <text x="700" y="514" fill="#334155">42</text>
+    <text x="820" y="514" fill="#15803d" font-weight="800">82.4%</text>
+    <text x="955" y="514" fill="#334155">Alex</text>
+    <rect x="1110" y="492" width="64" height="28" rx="14" fill="#dbeafe"/>
+    <text x="1125" y="511" fill="#2563eb" font-size="13" font-weight="700">复核</text>
+    <line x1="302" y1="540" x2="1206" y2="540" stroke="#e2e8f0"/>
+
+    <text x="302" y="588" fill="#0f172a" font-weight="800">工单知识库</text>
+    <text x="550" y="588" fill="#334155">售后支持</text>
+    <text x="700" y="588" fill="#334155">91</text>
+    <text x="820" y="588" fill="#dc2626" font-weight="800">63.8%</text>
+    <text x="955" y="588" fill="#334155">Nora</text>
+    <rect x="1110" y="566" width="78" height="28" rx="14" fill="#fee2e2"/>
+    <text x="1124" y="585" fill="#dc2626" font-size="13" font-weight="700">需治理</text>
+  </g>
+</svg>

@@ -1,4 +1,4 @@
-# NebulaKB - 知识运营中枢 | Knowledge Operations Hub
+# NebulaKB - 知识资产生命周期平台 | Knowledge Operations Hub
 
 [![Build](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml)
 [![Tests](https://github.com/however-yir/nebula-kb/actions/workflows/nebulakb-tests.yml/badge.svg)](https://github.com/however-yir/nebula-kb/actions/workflows/nebulakb-tests.yml)
@@ -10,14 +10,48 @@
 >
 > Matrix: [knowledgeops-agent](https://github.com/however-yir/knowledgeops-agent) · [tianji-ai-agent](https://github.com/however-yir/tianji-ai-agent) · [nebula-kb](https://github.com/however-yir/nebula-kb) · [forgepilot-studio](https://github.com/however-yir/forgepilot-studio) · [however-microservices-lab](https://github.com/however-yir/however-microservices-lab)
 
-项目聚焦知识接入、治理、检索、问答与质量反馈闭环，适合作为企业知识运营中枢。
+NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而是把知识资产的入库、治理、检索、反馈、回看和运营后台串成一条可演示、可测试、可度量的工作流。
+
+> 定位一句话：NebulaKB 负责让知识资产持续变好，knowledgeops-agent 负责提供 Spring AI 企业后端工程基线。
+
+![NebulaKB 运营后台](docs/assets/screenshots/admin-dashboard.svg)
 
 ## 项目快照
 
-- 定位：知识运营中枢，而不是通用聊天工作台。
+- 定位：知识资产生命周期平台，而不是通用聊天工作台。
 - 亮点：Django + PostgreSQL + Redis、多模型接入、知识资产生命周期、检索链路可观测、质量评测闭环。
 - 最短运行路径：`python apps/manage.py migrate && python main.py dev web`
 - 作品矩阵角色：`NebulaKB` 负责知识资产运营层，和企业 RAG 后端、业务 Agent、AI 工程执行平台、云原生微服务实验室形成互补。
+
+## 与 knowledgeops-agent 的边界
+
+| 维度 | NebulaKB | knowledgeops-agent |
+|---|---|---|
+| 主定位 | 知识资产生命周期平台 | 企业级 Spring AI RAG 后端平台 |
+| 关键用户 | 知识运营、客服质检、内容治理、业务管理员 | 后端工程师、AI 平台工程师、架构负责人 |
+| 关键链路 | 文档入库、解析、切片、索引、检索问答、反馈闭环、低质答案回看 | Spring AI 接入、租户隔离、异步任务、鉴权审计、可观测、部署基线 |
+| 产品表面 | 运营后台、知识库列表、文档入库、问答反馈、质量指标 | API、Spring Boot 服务、鉴权、队列、向量库、监控栈 |
+| 成功标准 | 知识命中率提升、低质答案率下降、未命中问题可治理 | 后端能力完整、接口稳定、部署和观测可验证 |
+
+## 产品截图
+
+| 运营后台 | 知识库列表 |
+|---|---|
+| ![运营后台截图](docs/assets/screenshots/admin-dashboard.svg) | ![知识库列表截图](docs/assets/screenshots/knowledge-base-list.svg) |
+
+| 文档入库 | 问答反馈 |
+|---|---|
+| ![文档入库截图](docs/assets/screenshots/document-ingestion.svg) | ![问答反馈截图](docs/assets/screenshots/qa-feedback.svg) |
+
+## 生命周期验证资产
+
+| 阶段 | 平台能力 | 验证资产 |
+|---|---|---|
+| 入库 | 文件上传、来源登记、知识库归属、租户边界 | `demo-data/knowledge-sample/`、`apps/knowledge/tests.py` |
+| 治理 | 解析状态、失败原因、切片结果、待更新标记 | `apps/knowledge/services/asset_lifecycle_demo.py` |
+| 检索 | 命中排序、引用返回、空结果兜底 | `scripts/demo_lifecycle.py` |
+| 反馈 | 人工评分、低质答案沉淀、闭环状态 | `docs/demo-script.md` |
+| 运营 | 知识命中率、低质答案率、未命中问题、热门知识、待更新知识 | `docs/observability.md` |
 
 ## AI 工程作品矩阵
 
