@@ -14,7 +14,7 @@ NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而
 
 > 定位一句话：NebulaKB 负责让知识资产持续变好，knowledgeops-agent 负责提供 Spring AI 企业后端工程基线。
 
-![NebulaKB 运营后台](docs/assets/screenshots/admin-dashboard.svg)
+![NebulaKB demo](docs/assets/screenshots/demo.gif)
 
 ## 项目快照
 
