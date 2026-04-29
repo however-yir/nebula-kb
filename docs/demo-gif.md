@@ -44,4 +44,4 @@ The script captures six frames and writes:
 docs/assets/screenshots/demo.gif
 ```
 
-Frame PNGs are written to `tmp/demo-gif-frames/`, which is ignored by git.
+Frame PNG files are written to `tmp/demo-gif-frames/`, which is ignored by git.
