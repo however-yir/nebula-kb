@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">NebulaKB 运营后台截图</title>
+  <desc id="desc">知识资产运营后台，展示命中率、低质答案率、未命中问题和反馈闭环状态。</desc>
+  <defs>
+    <linearGradient id="header" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#102a43"/>
+      <stop offset="0.52" stop-color="#1f4e5f"/>
+      <stop offset="1" stop-color="#2f6f4e"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="#f5f7fb"/>
+  <rect x="0" y="0" width="1280" height="82" fill="url(#header)"/>
+  <text x="42" y="52" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700">NebulaKB</text>
+  <text x="190" y="52" fill="#d7e8ef" font-family="Inter, Arial, sans-serif" font-size="16">知识资产生命周期平台</text>
+  <rect x="1045" y="24" width="160" height="34" rx="6" fill="#ffffff" fill-opacity="0.14"/>
+  <text x="1070" y="46" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="14">运营工作台</text>
+
+  <rect x="28" y="106" width="210" height="574" rx="8" fill="#ffffff" filter="url(#shadow)"/>
+  <text x="54" y="148" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700">导航</text>
+  <rect x="48" y="174" width="154" height="38" rx="6" fill="#e8f2ff"/>
+  <text x="66" y="198" fill="#2451a6" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">运营总览</text>
+  <text x="66" y="246" fill="#526173" font-family="Inter, Arial, sans-serif" font-size="14">知识库</text>
+  <text x="66" y="294" fill="#526173" font-family="Inter, Arial, sans-serif" font-size="14">文档入库</text>
+  <text x="66" y="342" fill="#526173" font-family="Inter, Arial, sans-serif" font-size="14">问答反馈</text>
+  <text x="66" y="390" fill="#526173" font-family="Inter, Arial, sans-serif" font-size="14">指标看板</text>
+  <text x="66" y="438" fill="#526173" font-family="Inter, Arial, sans-serif" font-size="14">治理任务</text>
+
+  <text x="278" y="136" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800">知识运营总览</text>
+  <text x="278" y="164" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="15">把入库质量、检索效果和反馈闭环放在同一张运营桌面上。</text>
+
+  <g filter="url(#shadow)">
+    <rect x="278" y="194" width="220" height="118" rx="8" fill="#ffffff"/>
+    <text x="302" y="226" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="14">知识命中率</text>
+    <text x="302" y="270" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="800">82.4%</text>
+    <text x="406" y="270" fill="#15803d" font-family="Inter, Arial, sans-serif" font-size="14">+6.8%</text>
+    <rect x="302" y="288" width="160" height="8" rx="4" fill="#e2e8f0"/>
+    <rect x="302" y="288" width="132" height="8" rx="4" fill="#22c55e"/>
+
+    <rect x="522" y="194" width="220" height="118" rx="8" fill="#ffffff"/>
+    <text x="546" y="226" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="14">低质答案率</text>
+    <text x="546" y="270" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="800">4.7%</text>
+    <text x="638" y="270" fill="#b45309" font-family="Inter, Arial, sans-serif" font-size="14">待压降</text>
+    <rect x="546" y="288" width="160" height="8" rx="4" fill="#e2e8f0"/>
+    <rect x="546" y="288" width="38" height="8" rx="4" fill="#f59e0b"/>
+
+    <rect x="766" y="194" width="220" height="118" rx="8" fill="#ffffff"/>
+    <text x="790" y="226" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="14">未命中问题</text>
+    <text x="790" y="270" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="800">37</text>
+    <text x="850" y="270" fill="#dc2626" font-family="Inter, Arial, sans-serif" font-size="14">本周</text>
+    <rect x="790" y="288" width="160" height="8" rx="4" fill="#e2e8f0"/>
+    <rect x="790" y="288" width="74" height="8" rx="4" fill="#ef4444"/>
+
+    <rect x="1010" y="194" width="220" height="118" rx="8" fill="#ffffff"/>
+    <text x="1034" y="226" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="14">反馈闭环</text>
+    <text x="1034" y="270" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="800">68%</text>
+    <text x="1126" y="270" fill="#2563eb" font-family="Inter, Arial, sans-serif" font-size="14">处理中</text>
+    <rect x="1034" y="288" width="160" height="8" rx="4" fill="#e2e8f0"/>
+    <rect x="1034" y="288" width="109" height="8" rx="4" fill="#3b82f6"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="278" y="342" width="575" height="300" rx="8" fill="#ffffff"/>
+    <text x="302" y="380" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">待处理运营事项</text>
+    <line x1="302" y1="405" x2="829" y2="405" stroke="#e2e8f0"/>
+    <text x="302" y="440" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700">低质答案回看</text>
+    <text x="650" y="440" fill="#b45309" font-family="Inter, Arial, sans-serif" font-size="14">12 条</text>
+    <text x="302" y="488" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700">待更新知识</text>
+    <text x="650" y="488" fill="#2563eb" font-family="Inter, Arial, sans-serif" font-size="14">9 篇</text>
+    <text x="302" y="536" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700">解析失败文档</text>
+    <text x="650" y="536" fill="#dc2626" font-family="Inter, Arial, sans-serif" font-size="14">3 个</text>
+    <text x="302" y="584" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700">热门知识需复核</text>
+    <text x="650" y="584" fill="#15803d" font-family="Inter, Arial, sans-serif" font-size="14">5 篇</text>
+
+    <rect x="882" y="342" width="348" height="300" rx="8" fill="#ffffff"/>
+    <text x="906" y="380" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">知识热度</text>
+    <rect x="906" y="418" width="242" height="18" rx="4" fill="#bfdbfe"/>
+    <text x="906" y="460" fill="#334155" font-family="Inter, Arial, sans-serif" font-size="14">入库治理 SOP</text>
+    <rect x="906" y="484" width="198" height="18" rx="4" fill="#bbf7d0"/>
+    <text x="906" y="526" fill="#334155" font-family="Inter, Arial, sans-serif" font-size="14">问答反馈规则</text>
+    <rect x="906" y="550" width="155" height="18" rx="4" fill="#fed7aa"/>
+    <text x="906" y="592" fill="#334155" font-family="Inter, Arial, sans-serif" font-size="14">指标口径说明</text>
+  </g>
+</svg>

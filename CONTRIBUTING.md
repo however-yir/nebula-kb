@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to **LZKB**.
+Thanks for contributing to **NebulaKB**.
 
 ## Before you start
 
@@ -37,7 +37,7 @@ npm run dev
 
 Please use the issue templates and include:
 
-- LZKB version
+- NebulaKB version
 - Steps to reproduce
 - Expected vs actual behavior
 - Logs or screenshots (with sensitive data redacted)

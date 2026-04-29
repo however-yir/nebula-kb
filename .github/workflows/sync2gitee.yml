@@ -14,5 +14,5 @@ jobs:
           dst: 'gitee/however-yir'
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
           dst_token: ${{ secrets.GITEE_TOKEN }}
-          static_list: 'LZKB'
+          static_list: 'nebula-kb'
           force_update: true
