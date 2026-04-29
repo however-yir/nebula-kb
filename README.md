@@ -8,7 +8,7 @@
 
 > Status: `active`
 >
-> Series: [local-ai-hub](https://github.com/however-yir/local-ai-hub) · [yourrag](https://github.com/however-yir/yourrag)
+> Matrix: [knowledgeops-agent](https://github.com/however-yir/knowledgeops-agent) · [tianji-ai-agent](https://github.com/however-yir/tianji-ai-agent) · [nebula-kb](https://github.com/however-yir/nebula-kb) · [forgepilot-studio](https://github.com/however-yir/forgepilot-studio) · [however-microservices-lab](https://github.com/however-yir/however-microservices-lab)
 
 项目聚焦知识接入、治理、检索、问答与质量反馈闭环，适合作为企业知识运营中枢。
 
@@ -17,15 +17,28 @@
 - 定位：知识运营中枢，而不是通用聊天工作台。
 - 亮点：Django + PostgreSQL + Redis、多模型接入、知识资产生命周期、检索链路可观测、质量评测闭环。
 - 最短运行路径：`python apps/manage.py migrate && python main.py dev web`
-- 系列分工：`Local AI Hub` 管工作台体验，`NebulaKB` 管知识平台，`YourRAG` 管企业级 RAG/Agent 交付。
+- 作品矩阵角色：`NebulaKB` 负责知识资产运营层，和企业 RAG 后端、业务 Agent、AI 工程执行平台、云原生微服务实验室形成互补。
 
-## AI 平台分工矩阵
+## AI 工程作品矩阵
 
-| Repo | 主要角色 | 部署形态 | 最适合的场景 |
-| --- | --- | --- | --- |
-| `Local AI Hub` | 本地 AI 工作台 | 自托管工作台 | 模型接入、团队日用、统一入口 |
-| `NebulaKB` | 知识运营中枢 | 本地优先平台 | 文档入库、知识治理、检索问答、质量闭环 |
-| `YourRAG` | 企业 RAG/Agent 平台 | 企业交付导向 | 私有化部署、RAG + Agent 交付 |
+NebulaKB 属于 however-yir AI 工程作品矩阵中的“知识运营中枢”项目。这组主项目覆盖企业 RAG、业务 Agent、知识治理、AI 工程执行平台和云原生微服务集成五类方向。
+
+| Repo | 定位 | 核心场景 | 技术重点 |
+|---|---|---|---|
+| [`knowledgeops-agent`](https://github.com/however-yir/knowledgeops-agent) | 企业级 Spring AI RAG 平台 | 企业知识问答、权限治理、可观测部署 | Spring AI、RAG、JWT/RBAC、异步入库、Observability |
+| [`tianji-ai-agent`](https://github.com/however-yir/tianji-ai-agent) | 业务 Agent 工程案例 | 课程咨询、课程推荐、购买流程、多智能体路由 | Java、Spring AI、Tool Calling、MCP、SSE、多模态 |
+| [`nebula-kb`](https://github.com/however-yir/nebula-kb) | 知识运营中枢 | 知识入库、知识治理、检索问答、反馈闭环 | Django、PostgreSQL、Redis、知识资产生命周期 |
+| [`forgepilot-studio`](https://github.com/however-yir/forgepilot-studio) | AI 工程执行工作台 | AI 编程任务、执行编排、审计回放、团队工作台 | Python、FastAPI、React、Runtime Sandbox、MCP |
+| [`however-microservices-lab`](https://github.com/however-yir/however-microservices-lab) | 云原生微服务 + AI 集成实验室 | 多语言微服务、Kubernetes、gRPC、AI 服务接入 | Go、Python、Java、Node.js、C#、K8s、Ollama/Gemini |
+
+在这组作品中，`NebulaKB` 负责知识资产运营层：从文档接入、解析、切片、索引、检索，到问答反馈和知识质量优化。
+
+## 同系列相关项目
+
+| Repo | 角色 | 与 NebulaKB 的关系 |
+|---|---|---|
+| [`local-ai-hub`](https://github.com/however-yir/local-ai-hub) | 本地 AI 工作台与统一入口 | 更偏模型接入、本地工具台和团队日常使用入口 |
+| [`yourrag`](https://github.com/however-yir/yourrag) | 企业 RAG / Agent 交付参考 | 更偏私有化交付方案和 RAG + Agent 组合实践 |
 
 ## 目录
 
@@ -54,11 +67,14 @@
 - 作为团队内部协作与知识沉淀的载体。
 - 作为后续扩展和二次开发的起点。
 
-相对同系列仓库的职责边界：
+相对主作品矩阵与同系列项目的职责边界：
 
-- `Local AI Hub` 更像工作台与统一入口。
 - `NebulaKB` 更像知识入库、知识治理、检索问答与质量反馈闭环平台。
-- `YourRAG` 更偏企业级私有化交付与 Agent 组合能力。
+- `knowledgeops-agent` 更偏企业级 Spring AI RAG 后端、安全治理与可观测基线。
+- `tianji-ai-agent` 更偏业务 Agent 流程、Tool Calling、多智能体路由和课程业务闭环。
+- `forgepilot-studio` 更偏 AI 工程执行、任务编排、审计回放和团队工作台。
+- `however-microservices-lab` 更偏云原生微服务、多语言服务治理、Kubernetes 和 AI 服务集成。
+- `local-ai-hub` 与 `yourrag` 作为同系列相关项目，分别偏本地 AI 工作台和企业 RAG/Agent 交付参考。
 
 ## 3. 核心能力
 
