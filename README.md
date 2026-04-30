@@ -10,6 +10,8 @@
 >
 > Matrix: [knowledgeops-agent](https://github.com/however-yir/knowledgeops-agent) · [tianji-ai-agent](https://github.com/however-yir/tianji-ai-agent) · [nebula-kb](https://github.com/however-yir/nebula-kb) · [forgepilot-studio](https://github.com/however-yir/forgepilot-studio) · [however-microservices-lab](https://github.com/however-yir/however-microservices-lab)
 
+**NebulaKB** is a local-first knowledge asset lifecycle platform for teams that need measurable knowledge quality — combining document ingestion, semantic indexing (pgvector), retrieval-augmented Q&A, human feedback loops, and an operations dashboard. Built with Django, PostgreSQL, and Redis. For the enterprise Spring AI RAG backend, see [knowledgeops-agent](https://github.com/however-yir/knowledgeops-agent).
+
 NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而是把知识资产的入库、治理、检索、反馈、回看和运营后台串成一条可演示、可测试、可度量的工作流。
 
 > 定位一句话：NebulaKB 负责让知识资产持续变好，knowledgeops-agent 负责提供 Spring AI 企业后端工程基线。
@@ -55,7 +57,7 @@ NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而
 
 ## AI 工程作品矩阵
 
-NebulaKB 属于 however-yir AI 工程作品矩阵中的“知识运营中枢”项目。这组主项目覆盖企业 RAG、业务 Agent、知识治理、AI 工程执行平台和云原生微服务集成五类方向。
+NebulaKB 属于 however-yir AI 工程作品矩阵中的"知识运营中枢"项目。这组主项目覆盖企业 RAG、业务 Agent、知识治理、AI 工程执行平台和云原生微服务集成五类方向。
 
 | Repo | 定位 | 核心场景 | 技术重点 |
 |---|---|---|---|
