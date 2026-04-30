@@ -55,19 +55,9 @@ NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而
 | 反馈 | 人工评分、低质答案沉淀、闭环状态 | `docs/demo-script.md` |
 | 运营 | 知识命中率、低质答案率、未命中问题、热门知识、待更新知识 | `docs/observability.md` |
 
-## AI 工程作品矩阵
+## 矩阵角色
 
-NebulaKB 属于 however-yir AI 工程作品矩阵中的"知识运营中枢"项目。这组主项目覆盖企业 RAG、业务 Agent、知识治理、AI 工程执行平台和云原生微服务集成五类方向。
-
-| Repo | 定位 | 核心场景 | 技术重点 |
-|---|---|---|---|
-| [`knowledgeops-agent`](https://github.com/however-yir/knowledgeops-agent) | 企业级 Spring AI RAG 平台 | 企业知识问答、权限治理、可观测部署 | Spring AI、RAG、JWT/RBAC、异步入库、Observability |
-| [`tianji-ai-agent`](https://github.com/however-yir/tianji-ai-agent) | 业务 Agent 工程案例 | 课程咨询、课程推荐、购买流程、多智能体路由 | Java、Spring AI、Tool Calling、MCP、SSE、多模态 |
-| [`nebula-kb`](https://github.com/however-yir/nebula-kb) | 知识运营中枢 | 知识入库、知识治理、检索问答、反馈闭环 | Django、PostgreSQL、Redis、知识资产生命周期 |
-| [`forgepilot-studio`](https://github.com/however-yir/forgepilot-studio) | AI 工程执行工作台 | AI 编程任务、执行编排、审计回放、团队工作台 | Python、FastAPI、React、Runtime Sandbox、MCP |
-| [`however-microservices-lab`](https://github.com/however-yir/however-microservices-lab) | 云原生微服务 + AI 集成实验室 | 多语言微服务、Kubernetes、gRPC、AI 服务接入 | Go、Python、Java、Node.js、C#、K8s、Ollama/Gemini |
-
-在这组作品中，`NebulaKB` 负责知识资产运营层：从文档接入、解析、切片、索引、检索，到问答反馈和知识质量优化。
+NebulaKB 是 however-yir AI 工程作品矩阵中的“知识运营中枢”，负责展示知识资产从文档接入、解析、切片、索引、检索，到问答反馈、低质答案回看和知识质量优化的生命周期闭环。完整项目矩阵见 [docs/project-matrix.md](docs/project-matrix.md)，面试讲解提纲见 [docs/interview-notes.md](docs/interview-notes.md)。
 
 ## 同系列相关项目
 
@@ -93,7 +83,7 @@ NebulaKB 属于 however-yir AI 工程作品矩阵中的"知识运营中枢"项�
 
 ## 1. 项目概述
 
-本仓库以工程化可维护为目标，强调文档清晰、结构稳定、可持续迭代。
+本仓库围绕知识资产生命周期组织代码和文档：知识进入系统后，要能被解析、切片、索引、检索、反馈、回看和持续治理。它的价值不只是“能问答”，而是把知识命中率、低质答案、待更新知识和运营后台放到同一条可演示链路里。
 
 ## 2. 目标与场景
 
@@ -249,6 +239,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\quick-install-win.ps1
 2. 小步提交并保持提交目标单一。
 3. 本地完成构建与测试后再推送。
 4. 通过 Pull Request 完成评审与合并。
+
+本地验证入口：
+
+```bash
+python apps/manage.py check
+python apps/manage.py test apps.knowledge
+python scripts/demo_lifecycle.py
+cd ui && npm ci && npm run type-check && npm run build
+```
 
 ### 8.1 评测与验收路径
 

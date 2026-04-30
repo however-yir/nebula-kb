@@ -189,3 +189,7 @@ tmp/
 .runtime/
 config.yml
 .SANDBOX_BANNED_HOSTS
+
+# Local copy/conflict artifacts
+* 2
+* 2.*
