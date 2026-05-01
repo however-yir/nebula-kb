@@ -45,7 +45,7 @@ dependencies = [
     "tencentcloud-sdk-python==3.1.85",
     "xinference-client==1.7.1.post1",
     "anthropic==0.97.0",
-    "dashscope==1.25.7",
+    "dashscope==1.25.17",
     "celery[sqlalchemy]==5.6.3",
     "django-celery-beat==2.9.0",
     "celery-once==3.0.1",
