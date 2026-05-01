@@ -260,7 +260,10 @@ def create_knowledge_index(knowledge_id=None, document_id=None):
         dims = result[0]['dims']
         # 超过2000维度不创建索引，pgvector hnsw索引不支持超过2000维度
         if dims < 2000:
-            sql = f"""CREATE INDEX "embedding_hnsw_idx_{k_id}" ON embedding USING hnsw ((embedding::vector({dims})) vector_cosine_ops) WHERE knowledge_id = '{k_id}'"""
+            from lzkb.const import CONFIG
+            hnsw_m = int(CONFIG.get('HNSW_M', 16))
+            hnsw_ef = int(CONFIG.get('HNSW_EF_CONSTRUCTION', 200))
+            sql = f"""CREATE INDEX "embedding_hnsw_idx_{k_id}" ON embedding USING hnsw ((embedding::vector({dims})) vector_cosine_ops) WITH (m = {hnsw_m}, ef_construction = {hnsw_ef}) WHERE knowledge_id = '{k_id}'"""
             update_execute(sql, [])
             maxkb_logger.info(f'Created index for knowledge ID: {k_id}')
 

@@ -9,7 +9,7 @@ class CeleryBaseService(BaseService):
     def __init__(self, queue, num=10, **kwargs):
         super().__init__(**kwargs)
         self.queue = queue
-        self.num = num
+        self.num = int(os.environ.get('CELERY_WORKER_CONCURRENCY', num))
 
     @property
     def cmd(self):
@@ -37,6 +37,7 @@ class CeleryBaseService(BaseService):
             '--heartbeat-interval', '10',
             '-n', f'{self.queue}@{server_hostname}',
             '--without-mingle',
+            '--events',
         ]
         return cmd
 

@@ -84,6 +84,24 @@ class Config(dict):
         "MODEL_SERVICE_HEALTHCHECK_ENABLED": True,
         "MODEL_SERVICE_HEALTHCHECK_TIMEOUT": 3,
         "STORAGE_HEALTHCHECK_TIMEOUT": 3,
+        # HNSW vector index
+        "HNSW_M": 16,
+        "HNSW_EF_CONSTRUCTION": 200,
+        "HNSW_EF_SEARCH": 40,
+        # Retrieval cache
+        "CACHE_RETRIEVAL_ENABLED": True,
+        "CACHE_RETRIEVAL_TTL": 300,
+        # Gunicorn
+        "GUNICORN_WORKERS": 0,
+        "GUNICORN_THREADS": 200,
+        "GUNICORN_TIMEOUT": 30,
+        # Celery
+        "CELERY_WORKER_CONCURRENCY": 5,
+        # PgBouncer
+        "DB_USE_PGBOUNCER": False,
+        "DB_PGBOUNCER_PORT": 6432,
+        # LLM fallback
+        "LLM_FALLBACK_ENABLED": False,
     }
 
     def get_debug(self) -> bool:

@@ -143,3 +143,35 @@ volumes:
   nebula_postgres_data:
   nebula_redis_data:
   nebula_object_data:
+
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    restart: unless-stopped
+    env_file:
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
+    environment:
+      PGBOUNCER_DATABASE: "${NEBULA_DB_NAME:-nebula}"
+      PGBOUNCER_PORT: "6432"
+      PGBOUNCER_AUTH_TYPE: md5
+    ports:
+      - "${NEBULA_PGBOUNCER_PORT:-6432}:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  flower:
+    image: ${NEBULA_IMAGE:-${LZKB_IMAGE:-nebulakb/nebula-kb:latest}}
+    restart: unless-stopped
+    env_file:
+      - ${NEBULA_ENV_FILE:-${LZKB_ENV_FILE:-./env/dev.env}}
+    command: ["celery", "-A", "ops", "flower", "--port=5555"]
+    ports:
+      - "${NEBULA_FLOWER_PORT:-5555}:5555"
+    depends_on:
+      redis:
+        condition: service_healthy

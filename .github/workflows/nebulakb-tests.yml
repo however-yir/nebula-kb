@@ -157,7 +157,7 @@ jobs:
       NEBULA_ENABLE_FORCE_GC: "0"
       NEBULA_LANGUAGE_CODE: zh-CN
       NEBULA_TIME_ZONE: Asia/Shanghai
-      COVERAGE_FAIL_UNDER: "40"
+      COVERAGE_FAIL_UNDER: "60"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
 
     steps:
@@ -231,7 +231,8 @@ jobs:
             "cohere==5.17.0" \
             "jieba==0.42.1" \
             "pylint==3.3.7" \
-            "pycryptodome==3.23.0"
+            "pycryptodome==3.23.0" \
+            "django-prometheus==2.4.0"
 
       - name: Wait For Postgres (matrix postgres only)
         if: matrix.db_backend == 'postgres'
@@ -280,7 +281,7 @@ jobs:
       NEBULA_ENABLE_FORCE_GC: "0"
       NEBULA_LANGUAGE_CODE: zh-CN
       NEBULA_TIME_ZONE: Asia/Shanghai
-      COVERAGE_FAIL_UNDER: "40"
+      COVERAGE_FAIL_UNDER: "60"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
     steps:
       - name: Checkout Repository
@@ -353,7 +354,8 @@ jobs:
             "cohere==5.17.0" \
             "jieba==0.42.1" \
             "pylint==3.3.7" \
-            "pycryptodome==3.23.0"
+            "pycryptodome==3.23.0" \
+            "django-prometheus==2.4.0"
 
       - name: Run Coverage
         run: bash scripts/quality-gate.sh coverage
@@ -386,3 +388,38 @@ jobs:
 
       - name: Run dependency audit
         run: pip-audit --progress-spinner off
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci --no-audit
+        working-directory: ui
+
+      - name: Run Frontend Tests
+        run: npm test
+        working-directory: ui
+
+  helm-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Helm Chart
+        run: helm lint deploy/helm/nebula-kb

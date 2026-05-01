@@ -7,6 +7,7 @@ from ..const import PROJECT_DIR, CONFIG, LOG_DIR
 NEBULA_LOG_FILE = os.path.join(LOG_DIR, 'nebula.log')
 DRF_EXCEPTION_LOG_FILE = os.path.join(LOG_DIR, 'drf_exception.log')
 UNEXPECTED_EXCEPTION_LOG_FILE = os.path.join(LOG_DIR, 'unexpected_exception.log')
+AUDIT_LOG_FILE = os.path.join(LOG_DIR, 'audit.log')
 LOG_LEVEL = CONFIG.get_log_level()
 
 LOGGING = {
@@ -124,6 +125,21 @@ LOGGING = {
         'common.event': {
             'handlers': ['console', 'file'],
             'level': "DEBUG",
+            'propagate': False,
+        },
+        'nebula.audit': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'nebula.backup': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'nebula.llm': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
             'propagate': False,
         },
     }

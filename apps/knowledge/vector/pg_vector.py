@@ -103,6 +103,17 @@ class PGVector(BaseVectorStore):
               exclude_document_id_list: list[str],
               exclude_paragraph_list: list[str], is_active: bool, top_n: int, similarity: float,
               search_mode: SearchMode):
+        from django.core.cache import cache
+        from lzkb.const import CONFIG
+        import hashlib, json
+
+        cache_enabled = CONFIG.get('CACHE_RETRIEVAL_ENABLED', True)
+        if cache_enabled and query_embedding:
+            cache_key = self._get_cache_key(knowledge_id_list, query_embedding, top_n, similarity, search_mode)
+            cached = cache.get(cache_key)
+            if cached is not None:
+                return cached
+
         exclude_dict = {}
         if knowledge_id_list is None or len(knowledge_id_list) == 0:
             return []
@@ -114,9 +125,28 @@ class PGVector(BaseVectorStore):
         if exclude_paragraph_list is not None and len(exclude_paragraph_list) > 0:
             query_set = query_set.exclude(paragraph_id__in=exclude_paragraph_list)
         query_set = query_set.exclude(**exclude_dict)
+        result = None
         for search_handle in search_handle_list:
             if search_handle.support(search_mode):
-                return search_handle.handle(query_set, query_text, query_embedding, top_n, similarity, search_mode)
+                result = search_handle.handle(query_set, query_text, query_embedding, top_n, similarity, search_mode)
+                break
+
+        if cache_enabled and result is not None and query_embedding:
+            ttl = int(CONFIG.get('CACHE_RETRIEVAL_TTL', 300))
+            cache.set(cache_key, result, timeout=ttl)
+        return result
+
+    @staticmethod
+    def _get_cache_key(knowledge_id_list, query_embedding, top_n, similarity, search_mode):
+        import hashlib, json
+        key_data = json.dumps({
+            'k': sorted(knowledge_id_list or []),
+            'e': query_embedding[:5] if query_embedding else [],
+            'n': top_n,
+            's': similarity,
+            'm': str(search_mode),
+        }, sort_keys=True)
+        return f"nebula:retrieval:{hashlib.md5(key_data.encode()).hexdigest()}"
 
     def update_by_source_id(self, source_id: str, instance: Dict):
         QuerySet(Embedding).filter(source_id=source_id).update(**instance)
