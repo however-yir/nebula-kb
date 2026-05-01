@@ -107,6 +107,12 @@ NebulaKB 是 however-yir AI 工程作品矩阵中的“知识运营中枢”，�
 - 支持知识入库、索引、检索与问答闭环。
 - 支持本地化部署与可控的数据边界。
 - 支持持续扩展知识源与应用场景。
+- **安全加固**：SECRET_KEY 生产环境强制校验、DRF 速率限制、SSO (OIDC/SAML) 接入、审计日志脱敏、安全响应头。
+- **可观测性**：Prometheus 指标暴露、OpenTelemetry 链路追踪、Grafana 预置仪表盘、Celery Flower 监控。
+- **数据库运维**：自动化备份（Celery 任务 + cron 脚本）、PgBouncer 连接池、HNSW 索引可调参数。
+- **CI/CD**：60% 覆盖率门禁、Vitest 前端测试、Helm Chart、Docker 非 root 运行。
+- **性能优化**：检索结果缓存、Gunicorn 可配 workers/threads、Celery 并发可配、LLM Fallback 降级。
+- **API 版本化**：`/api/v1/` 前缀路由、知识版本管理、批量导入导出。
 
 ### 3.1 典型用例
 
@@ -131,10 +137,12 @@ NebulaKB 是 however-yir AI 工程作品矩阵中的“知识运营中枢”，�
 
 ## 4. 技术栈
 
-- Python
-- Django
-- PostgreSQL
-- Redis
+- **后端**：Python 3.11 · Django 5.2 · DRF · Celery · django-prometheus
+- **数据**：PostgreSQL + pgvector · Redis · django-redis 缓存
+- **AI/LLM**：LangChain · LangGraph · OpenAI / Anthropic / DeepSeek / Ollama / DashScope 等多模型接入
+- **前端**：Vue 3 · Vite · Vitest
+- **部署**：Docker · Helm (Kubernetes) · PgBouncer · Gunicorn
+- **CI/CD**：GitHub Actions · coverage 60% 门禁 · pip-audit 依赖审计 · Helm lint
 
 ## 5. 仓库结构
 
@@ -254,8 +262,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\quick-install-win.ps1
 ```bash
 python apps/manage.py check
 python apps/manage.py test apps.knowledge
+cd ui && npm ci && npm test && npm run type-check && npm run build
+bash scripts/quality-gate.sh all          # 覆盖率 + lint + 结构检查
+helm lint deploy/helm/nebula-kb           # Helm Chart 校验
 python scripts/demo_lifecycle.py
-cd ui && npm ci && npm run type-check && npm run build
 ```
 
 ### 8.1 评测与验收路径
@@ -273,7 +283,33 @@ cd ui && npm ci && npm run type-check && npm run build
 
 ## 10. 路线图
 
-建议按以下顺序推进：
+### 已完成 (v2.0.0)
+
+- [x] SECRET_KEY 生产环境强制校验
+- [x] DRF 速率限制 (Anon/User/KnowledgeSearch)
+- [x] SSO 框架 (OIDC/SAML Provider 模型)
+- [x] 审计日志中间件（敏感字段脱敏）
+- [x] 安全响应头中间件
+- [x] django-prometheus 指标暴露
+- [x] OpenTelemetry 链路追踪中间件
+- [x] Grafana 预置仪表盘 + 数据源配置
+- [x] Celery Flower 服务
+- [x] 自动化备份任务 + cron 脚本
+- [x] PgBouncer 连接池服务
+- [x] HNSW 索引参数可配置
+- [x] CI 覆盖率门禁 60%
+- [x] Vitest 前端测试框架
+- [x] Helm Chart (Kubernetes 部署)
+- [x] Docker 非 root 用户运行
+- [x] 检索结果缓存
+- [x] Gunicorn workers/threads 可配置
+- [x] Celery 并发可配置
+- [x] LLM Fallback 降级管理器
+- [x] API v1 路由前缀
+- [x] 知识版本管理序列化器
+- [x] 批量导入导出序列化器
+
+### 后续规划
 
 1. 稳定主流程与关键接口。
 2. 优化模块边界与可观测性。

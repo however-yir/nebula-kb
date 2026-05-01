@@ -16,7 +16,9 @@ register_hmac_signed_serializer()
 app = Celery('NebulaKB')
 
 configs = {k: v for k, v in settings.__dict__.items() if k.startswith('CELERY')}
-configs['worker_concurrency'] = 5
+configs['worker_concurrency'] = int(os.environ.get('CELERY_WORKER_CONCURRENCY', 5))
+configs['worker_prefetch_multiplier'] = 1
+configs['worker_send_task_events'] = True
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
 # app.config_from_object('django.conf:settings', namespace='CELERY')

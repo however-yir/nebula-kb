@@ -16,19 +16,23 @@ class GunicornService(BaseService):
     def cmd(self):
         print("\n- Start Gunicorn WSGI HTTP Server")
 
+        from lzkb.const import CONFIG
         log_format = '%(h)s %(t)s %(L)ss "%(r)s" %(s)s %(b)s '
         bind = f'{HTTP_HOST}:{HTTP_PORT}'
+        threads = int(CONFIG.get('GUNICORN_THREADS', 200))
+        timeout = int(CONFIG.get('GUNICORN_TIMEOUT', 30))
         max_requests = 10240 if int(self.worker) > 1 else 0
         cmd = [
             'gunicorn', 'nebula.wsgi:application',
             '-b', bind,
             '-k', 'gthread',
-            '--threads', '200',
+            '--threads', str(threads),
             '-w', str(self.worker),
             '--max-requests', str(max_requests),
             '--max-requests-jitter', '2048',
-            '--timeout', '30',
+            '--timeout', str(timeout),
             '--graceful-timeout', '300',
+            '--keepalive', '5',
             '--access-logformat', log_format,
             '--access-logfile', '/dev/null',
             '--error-logfile', '-'

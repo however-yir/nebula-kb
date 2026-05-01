@@ -1,0 +1,64 @@
+replicaCount: 1
+
+image:
+  repository: nebulakb/nebula-kb
+  tag: latest
+  pullPolicy: IfNotPresent
+
+web:
+  enabled: true
+  port: 8080
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+
+worker:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+
+scheduler:
+  enabled: true
+  port: 6060
+
+flower:
+  enabled: false
+  port: 5555
+
+ingress:
+  enabled: false
+  className: ""
+  host: nebulakb.local
+  tls: false
+
+env:
+  NEBULA_ENVIRONMENT: "prod"
+  NEBULA_LOG_LEVEL: "INFO"
+
+secrets:
+  SECRET_KEY: ""
+  NEBULA_DB_PASSWORD: ""
+  NEBULA_REDIS_PASSWORD: ""
+
+postgresql:
+  enabled: true
+  auth:
+    database: nebula
+    username: root
+
+redis:
+  enabled: true
+
+persistence:
+  enabled: true
+  size: 10Gi

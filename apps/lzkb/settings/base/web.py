@@ -18,7 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = CONFIG.get("SECRET_KEY") or 'django-insecure-zm^1_^i5)3gp^&0io6zg72&z!a*d=9kf9o2%uft+27l)+t(#3e'
+_DEFAULT_INSECURE_KEY = 'django-insecure-zm^1_^i5)3gp^&0io6zg72&z!a*d=9kf9o2%uft+27l)+t(#3e'
+SECRET_KEY = CONFIG.get("SECRET_KEY")
+if not SECRET_KEY:
+    if CONFIG.get_environment() == 'prod':
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured("SECRET_KEY must be set in production environment")
+    SECRET_KEY = _DEFAULT_INSECURE_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = CONFIG.get_debug()
@@ -37,6 +43,7 @@ CSRF_TRUSTED_ORIGINS = _split_config_list(CONFIG.get("CSRF_TRUSTED_ORIGINS"))
 # Application definition
 
 INSTALLED_APPS = [
+    'django_prometheus',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -60,23 +67,36 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'common.middleware.audit.AuditLogMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.common.CommonMiddleware',
     'common.middleware.gzip.GZipMiddleware',
+    'common.middleware.security_headers.SecurityHeadersMiddleware',
+    'common.middleware.tracing.OTelTracingMiddleware',
     'common.middleware.chat_headers_middleware.ChatHeadersMiddleware',
     'common.middleware.cross_domain_middleware.CrossDomainMiddleware',
     'common.middleware.doc_headers_middleware.DocHeadersMiddleware',
-
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'common.exception.handle_exception.handle_exception',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_AUTHENTICATION_CLASSES': ['common.auth.authenticate.AnonymousAuthentication']
+    'DEFAULT_AUTHENTICATION_CLASSES': ['common.auth.authenticate.AnonymousAuthentication'],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'common.auth.throttle.AnonRateThrottleCustom',
+        'common.auth.throttle.UserRateThrottleCustom',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/min',
+        'user': '300/min',
+        'knowledge_search': '30/min',
+    },
 }
 STATICFILES_DIRS = [(os.path.join(PROJECT_DIR, 'ui', 'dist'))]
 STATIC_ROOT = os.path.join(BASE_DIR.parent, 'static')

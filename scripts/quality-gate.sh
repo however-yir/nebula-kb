@@ -53,7 +53,7 @@ export LZKB_ENABLE_FORCE_GC="${LZKB_ENABLE_FORCE_GC:-${NEBULA_ENABLE_FORCE_GC}}"
 export LZKB_LANGUAGE_CODE="${LZKB_LANGUAGE_CODE:-${NEBULA_LANGUAGE_CODE}}"
 export LZKB_TIME_ZONE="${LZKB_TIME_ZONE:-${NEBULA_TIME_ZONE}}"
 
-COVERAGE_FAIL_UNDER="${COVERAGE_FAIL_UNDER:-40}"
+COVERAGE_FAIL_UNDER="${COVERAGE_FAIL_UNDER:-44}"
 CORE_COVERAGE_SOURCE="${CORE_COVERAGE_SOURCE:-apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage}"
 
 usage() {
@@ -73,7 +73,7 @@ Gates:
 
 Environment:
   PYTHON_BIN              Python executable override
-  COVERAGE_FAIL_UNDER     Coverage threshold, default 40
+  COVERAGE_FAIL_UNDER     Coverage threshold, default 44
   CORE_COVERAGE_SOURCE    Comma-separated coverage source paths
 USAGE
 }

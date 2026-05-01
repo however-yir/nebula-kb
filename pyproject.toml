@@ -60,6 +60,7 @@ dependencies = [
     "pydub==0.25.1",
     "pysilk==0.0.1",
     "gunicorn==23.0.0",
+    "django-prometheus==2.4.0",
     "python-daemon==3.1.2",
     "websockets==15.0.1",
     "pylint==3.3.7",

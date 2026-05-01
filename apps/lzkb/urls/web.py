@@ -39,6 +39,7 @@ urlpatterns = [
     path('healthz/', healthz, name='healthz-slash'),
     path('readyz', readyz, name='readyz'),
     path('readyz/', readyz, name='readyz-slash'),
+    path('', include('django_prometheus.urls')),
     path(admin_api_prefix, include("users.urls")),
     path(admin_api_prefix, include("tools.urls")),
     path(admin_api_prefix, include("models_provider.urls")),
@@ -52,6 +53,16 @@ urlpatterns = [
     path(chat_api_prefix, include("chat.urls")),
     path(f'{admin_ui_prefix[1:]}/', include('oss.retrieval_urls')),
     path(f'{chat_ui_prefix[1:]}/', include('oss.retrieval_urls')),
+    # API v1 (mirrors existing admin/api routes)
+    path('api/v1/', include("users.urls")),
+    path('api/v1/', include("tools.urls")),
+    path('api/v1/', include("models_provider.urls")),
+    path('api/v1/', include("folders.urls")),
+    path('api/v1/', include("knowledge.urls")),
+    path('api/v1/', include("system_manage.urls")),
+    path('api/v1/', include("application.urls")),
+    path('api/v1/', include("trigger.urls")),
+    path('api/v1/', include("oss.urls")),
 ]
 init_doc(urlpatterns, chat_urlpatterns)
 

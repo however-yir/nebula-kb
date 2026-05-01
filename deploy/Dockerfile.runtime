@@ -50,6 +50,10 @@ RUN chmod +x scripts/*.sh && \
       /opt/maxkb-app/model/tokenizer/openai-tiktoken-cl100k-base && \
     python apps/manage.py compilemessages
 
+RUN groupadd -r nebula && useradd -r -g nebula -d /opt/maxkb-app -s /sbin/nologin nebula && \
+    chown -R nebula:nebula /opt/maxkb-app /opt/nebula /opt/maxkb
+USER nebula
+
 EXPOSE 8080 8081 6060 11636
 
 ENTRYPOINT ["./scripts/run-service.sh"]
