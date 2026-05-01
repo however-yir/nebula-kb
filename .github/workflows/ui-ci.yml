@@ -6,6 +6,7 @@ on:
     paths: ['ui/**']
   pull_request:
     paths: ['ui/**']
+  workflow_dispatch:
 
 jobs:
   ui-check:
