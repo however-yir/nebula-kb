@@ -12,7 +12,7 @@ jobs:
     continue-on-error: true
     steps:
     - name: Checkout Actions Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Create config file
       run: |
         cat <<EOF > typo-check-config.toml

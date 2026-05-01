@@ -127,7 +127,7 @@ NebulaKB 是 however-yir AI 工程作品矩阵中的“知识运营中枢”，�
 | `apps/models_provider` | 模型提供方接入层 |
 | `apps/common` / `apps/system_manage` | 平台公共与系统管理能力 |
 | `installer/` | 本地部署、数据库与 Redis 启动辅助 |
-| `ui/` | 管理后台与交互前端 |
+| `ui/` | 管理后台与问答前端（Vue 3 + Vite + TypeScript + Ant Design） |
 
 ## 4. 技术栈
 
@@ -169,6 +169,15 @@ python apps/manage.py migrate
 
 ```bash
 python main.py dev web
+```
+
+### 启动前端
+
+```bash
+cd ui
+npm ci
+npm run dev      # 管理后台 (http://localhost:5173)
+npm run chat     # 问答界面 (http://localhost:5174)
 ```
 
 ### 6.1 本地依赖一键准备（PostgreSQL / Redis / 可选 Ollama）
