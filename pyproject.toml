@@ -16,7 +16,7 @@ dependencies = [
     "uuid-utils==0.14.0",
     "captcha==0.7.1",
     "pytz==2025.2",
-    "psutil==7.0.0",
+    "psutil==7.2.2",
     "cffi==1.17.1",
     "beautifulsoup4==4.13.4",
     "jieba==0.42.1",
