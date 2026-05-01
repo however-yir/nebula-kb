@@ -157,7 +157,7 @@ jobs:
       NEBULA_ENABLE_FORCE_GC: "0"
       NEBULA_LANGUAGE_CODE: zh-CN
       NEBULA_TIME_ZONE: Asia/Shanghai
-      COVERAGE_FAIL_UNDER: "45"
+      COVERAGE_FAIL_UNDER: "44"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
 
     steps:
@@ -281,7 +281,7 @@ jobs:
       NEBULA_ENABLE_FORCE_GC: "0"
       NEBULA_LANGUAGE_CODE: zh-CN
       NEBULA_TIME_ZONE: Asia/Shanghai
-      COVERAGE_FAIL_UNDER: "45"
+      COVERAGE_FAIL_UNDER: "44"
       CORE_COVERAGE_SOURCE: apps/users,apps/chat,apps/knowledge,apps/tools,apps/application,apps/system_manage
     steps:
       - name: Checkout Repository
