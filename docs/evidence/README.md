@@ -8,6 +8,7 @@ This pack collects the shortest public proof path for reviewing the knowledge op
 - Test workflow: `.github/workflows/nebulakb-tests.yml`
 - UI workflow: `.github/workflows/ui-ci.yml`
 - Container workflows: `.github/workflows/build-and-push.yml`
+- Baseline release: `AI Matrix Baseline 2026.05`
 - Release: `Health Baseline (2026-04-12)`
 
 ## Product And Architecture Evidence
@@ -28,4 +29,3 @@ This pack collects the shortest public proof path for reviewing the knowledge op
 - Run a QA request and confirm feedback can be captured.
 - Review the operations dashboard screenshots and observability notes.
 - Open the latest GitHub Actions run and confirm the test/UI workflows are green.
-
