@@ -24,6 +24,7 @@ NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而
 - 亮点：Django + PostgreSQL + Redis、多模型接入、知识资产生命周期、检索链路可观测、质量评测闭环。
 - 最短运行路径：`python apps/manage.py migrate && python main.py dev web`
 - 作品矩阵角色：`NebulaKB` 负责知识资产运营层，和企业 RAG 后端、业务 Agent、AI 工程执行平台、云原生微服务实验室形成互补。
+- 证据索引：[docs/evidence/README.md](docs/evidence/README.md)
 
 ## 与 knowledgeops-agent 的边界
 
