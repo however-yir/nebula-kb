@@ -57,7 +57,7 @@ NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而
 
 ## 矩阵角色
 
-NebulaKB 是 however-yir AI 工程作品矩阵中的“知识运营中枢”，负责展示知识资产从文档接入、解析、切片、索引、检索，到问答反馈、低质答案回看和知识质量优化的生命周期闭环。完整项目矩阵见 [docs/project-matrix.md](docs/project-matrix.md)，面试讲解提纲见 [docs/interview-notes.md](docs/interview-notes.md)。
+NebulaKB 是 however-yir AI 工程作品矩阵中的“知识运营中枢”，负责展示知识资产从文档接入、解析、切片、索引、检索，到问答反馈、低质答案回看和知识质量优化的生命周期闭环。完整项目矩阵见 [docs/project-matrix.md](docs/project-matrix.md)。
 
 ## 同系列相关项目
 
