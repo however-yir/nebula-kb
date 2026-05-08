@@ -32,6 +32,12 @@ _process_limit_timeout_seconds = int(CONFIG.get("SANDBOX_PYTHON_PROCESS_LIMIT_TI
 _process_limit_cpu_cores = min(max(int(CONFIG.get("SANDBOX_PYTHON_PROCESS_LIMIT_CPU_CORES", '1')), 1), len(os.sched_getaffinity(0))) if sys.platform.startswith("linux") else os.cpu_count()  # 只支持linux，window和mac不支持
 _process_limit_mem_mb = int(CONFIG.get("SANDBOX_PYTHON_PROCESS_LIMIT_MEM_MB", '256'))
 
+if not _enable_sandbox:
+    maxkb_logger.warning(
+        "SANDBOX is disabled (SANDBOX=0). User tool code executes as the current OS user. "
+        "Set SANDBOX=1 in production for security."
+    )
+
 class ToolExecutor:
 
     def __init__(self):
@@ -51,13 +57,13 @@ class ToolExecutor:
             return
         maxkb_logger.info("Init sandbox dir.")
         try:
-            os.system("chmod -R g-rwx /dev/shm /dev/mqueue")
-            os.system("chmod o-rwx /run/postgresql")
+            subprocess.run(["chmod", "-R", "g-rwx", "/dev/shm", "/dev/mqueue"], check=False)
+            subprocess.run(["chmod", "o-rwx", "/run/postgresql"], check=False)
         except Exception as e:
             maxkb_logger.warning(f'Exception: {e}', exc_info=True)
             pass
         if CONFIG.get("SANDBOX_TMP_DIR_ENABLED", '0') == "1":
-            os.system("chmod g+rwx /tmp")
+            subprocess.run(["chmod", "g+rwx", "/tmp"], check=False)
         # 初始化sandbox配置文件
         sandbox_lib_path = os.path.dirname(f'{_sandbox_path}/lib/sandbox.so')
         sandbox_conf_file_path = f'{sandbox_lib_path}/.sandbox.conf'
@@ -79,7 +85,7 @@ class ToolExecutor:
             f.write(f"SANDBOX_PYTHON_ALLOW_DL_OPEN={allow_dl_open}\n")
             f.write(f"SANDBOX_PYTHON_ALLOW_SUBPROCESS={allow_subprocess}\n")
             f.write(f"SANDBOX_PYTHON_ALLOW_SYSCALL={allow_syscall}\n")
-        os.system(f"chmod -R 550 {_sandbox_path}")
+        subprocess.run(["chmod", "-R", "550", _sandbox_path], check=False)
 
     try:
         init_sandbox_dir()

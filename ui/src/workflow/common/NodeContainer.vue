@@ -498,11 +498,15 @@ const clearSelectOn = () => {
 // 高亮选中关键字
 
 const highlightedStepName = (contentText: string) => {
-  let res = contentText
   if (keyWord.value === '') {
-    return res
+    return contentText.replace(/</g, '&lt;').replace(/>/g, '&gt;')
   } else {
-    const wordsArray = contentText.split('')
+    const escaped = contentText
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+    const wordsArray = escaped.split('')
     for (let i = 0; i < wordsArray.length; i++) {
       if (keyWord.value.includes(wordsArray[i])) {
         wordsArray[i] = currentKeyWord.value
@@ -510,8 +514,7 @@ const highlightedStepName = (contentText: string) => {
           : `<span style='background: #FFC60A;'>${wordsArray[i]}</span>`
       }
     }
-    res = wordsArray.join('')
-    return res
+    return wordsArray.join('')
   }
 }
 onMounted(() => {
