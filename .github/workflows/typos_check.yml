@@ -481,6 +481,15 @@ jobs:
         Iz = "Iz"
         ba = "ba"
         Ba = "Ba"
+        opf = "opf"
+        OPF = "OPF"
+        caculate = "caculate"
+        achivement = "achivement"
+        spaning = "spaning"
+        splited = "splited"
+        Nam = "Nam"
+        rela = "rela"
+        setis = "setis"
         EOF
     - name: Check spelling
       uses: crate-ci/typos@master
