@@ -25,5 +25,13 @@ export default defineConfigWithVueTs(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['off'],
     }
+  },
+  // Gradual type tightening for API layer and stores
+  {
+    name: 'app/strict-types',
+    files: ['src/api/**/*.ts', 'src/stores/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+    }
   }
 )
