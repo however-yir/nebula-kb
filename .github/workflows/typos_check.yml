@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v6
     - name: Create config file
       run: |
-        cat <<EOF > typo-check-config.toml
+        cat <<'EOF' > typo-check-config.toml
         [files]
         extend-exclude = [
           "**/*_svg",
@@ -25,6 +25,36 @@ jobs:
           "ui/src/components/dynamics-form/items/model/provider-data.ts",
           "ui/src/workflow/common/template.ts",
           "apps/models_provider/impl/tencent_model_provider/model/stt.py",
+          # Minified / vendor JS
+          "**/*.min.js",
+          "**/*.min.js.map",
+          "**/pdfjs-dist/**",
+          "**/externals.d.ts",
+          "engines/yourrag/web/public/iconfont.js",
+          # C/C++ third-party libraries
+          "engines/yourrag/internal/cpp/re2/**",
+          "engines/yourrag/internal/cpp/stemmer/**",
+          "engines/yourrag/internal/cpp/opencc/**",
+          "engines/yourrag/internal/cpp/darts/**",
+          "engines/yourrag/internal/cpp/pcre2posix.h",
+          "engines/yourrag/internal/cpp/analyzer.h",
+          "engines/yourrag/internal/cpp/main.cpp",
+          # SVG assets
+          "**/*.svg",
+          # Locale / translation files
+          "**/locales/**",
+          "**/i18n/**",
+          # Data files
+          "**/*.csv",
+          "**/res/*.json",
+          # Agent template JSON (contains domain-specific prompts)
+          "engines/yourrag/agent/templates/**",
+          "engines/yourrag/agent/test/**",
+          # README translations
+          "**/README_tr.md",
+          "**/README_fr.md",
+          "**/README_id.md",
+          "**/README_pt_br.md",
         ]
 
         [default.extend-words]
