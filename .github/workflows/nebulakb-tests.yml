@@ -371,7 +371,6 @@ jobs:
   dependency-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -394,17 +393,17 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: ui/package.json
+          cache-dependency-path: ui/package-lock.json
 
       - name: Install Dependencies
-        run: npm install --no-audit
+        run: npm ci
         working-directory: ui
 
       - name: Run Frontend Tests
@@ -416,7 +415,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
