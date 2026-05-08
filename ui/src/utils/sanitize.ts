@@ -7,9 +7,9 @@ const defaultAllowedTags = [
   'img', 'sup', 'sub', 'hr', 'details', 'summary',
 ]
 
-export function safeHtml(dirty: string, options?: sanitizeHtml.IOptions): string {
+export function safeHtml(dirty: string, options?: Record<string, unknown>): string {
   return sanitizeHtml(dirty, {
-    allowedTags: options?.allowedTags ?? defaultAllowedTags,
+    allowedTags: (options?.allowedTags as string[]) ?? defaultAllowedTags,
     allowedAttributes: {
       a: ['href', 'target', 'rel'],
       img: ['src', 'alt', 'width', 'height'],
@@ -19,7 +19,7 @@ export function safeHtml(dirty: string, options?: sanitizeHtml.IOptions): string
       pre: ['class'],
       td: ['style', 'colspan', 'rowspan'],
       th: ['style', 'colspan', 'rowspan'],
-      ...(options?.allowedAttributes ?? {}),
+      ...((options?.allowedAttributes as Record<string, string[]>) ?? {}),
     },
     allowedSchemes: ['http', 'https', 'mailto'],
     ...options,
@@ -35,7 +35,8 @@ export function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;')
 }
 
-export function safeMarked(markdown: string): Promise<string> {
-  const { marked } = require('marked')
-  return Promise.resolve(marked(markdown)).then((raw: string) => safeHtml(raw))
+export async function safeMarked(markdown: string): Promise<string> {
+  const { marked } = await import('marked')
+  const raw = await marked.parse(markdown)
+  return safeHtml(raw)
 }
