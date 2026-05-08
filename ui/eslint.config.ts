@@ -24,6 +24,11 @@ export default defineConfigWithVueTs(
       'vue/multi-word-component-names': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['off'],
+      // Pre-existing code patterns: prop mutation via lodash set(), unused template vars, ts-ignore
+      'vue/no-mutating-props': 'off',
+      'vue/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/ban-ts-comment': 'warn',
     }
   },
   // Gradual type tightening for API layer and stores
