@@ -442,7 +442,7 @@
               </h5>
               <div class="p-8-12 border-t-dashed lighter">
                 <p class="mb-8 color-secondary">{{ $t('chat.executionDetails.audioFile') }}:</p>
-                <div v-if="data.answer" v-html="data.answer"></div>
+                <div v-if="data.answer" v-html="safeHtml(data.answer)"></div>
               </div>
             </div>
           </template>
@@ -1338,6 +1338,7 @@
 </template>
 <script setup lang="ts">
 import {ref, computed, type PropType} from 'vue'
+import {safeHtml} from '@/utils/sanitize'
 import ParagraphCard
   from '@/components/ai-chat/component/knowledge-source-component/ParagraphCard.vue'
 import DynamicsForm from '@/components/dynamics-form/index.vue'
