@@ -58,7 +58,6 @@ jobs:
           # Documentation with code examples
           "engines/yourrag/docs/**",
         ]
-
         [default.extend-words]
         RTO = "RTO"
         rto = "rto"
@@ -94,11 +93,9 @@ jobs:
         sampel = "sampel"
         seach = "seach"
         Seach = "Seach"
-        chunck = "chunck"
         retrival = "retrival"
         configration = "configration"
         reqest = "reqest"
-        sampel = "sampel"
         previos = "previos"
         datatime = "datatime"
         curosr = "curosr"
