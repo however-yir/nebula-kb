@@ -1,0 +1,16 @@
+YourRAG - NOTICE
+
+This project is a derivative work based on the open-source RAGFlow project.
+
+Upstream project:
+- Name: RAGFlow
+- Repository: https://github.com/infiniflow/ragflow
+- License: Apache License 2.0
+
+Changes in this fork include (but are not limited to):
+- Branding and product identity customization
+- Default security and deployment configuration hardening
+- Documentation rewrite for private deployment use cases
+- Packaging metadata adjustments for independent distribution
+
+All original copyrights and notices from upstream are retained where required.

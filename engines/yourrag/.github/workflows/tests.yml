@@ -1,0 +1,111 @@
+name: yourrag-ci
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  python-checks:
+    name: Python Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.8"
+
+      - name: Install dependencies
+        run: uv sync --python 3.12 --group test
+
+      - name: Ruff lint
+        run: uvx --from ruff ruff check
+
+      - name: Python tests
+        run: uv run python run_tests.py
+
+  go-checks:
+    name: Go Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Go vet
+        run: go vet ./internal/...
+
+      - name: Go test (core)
+        run: go test ./internal/common ./internal/util ./internal/utility
+
+      - name: Go test (handlers + services)
+        run: go test ./internal/handler/... ./internal/service/... -count=1 -timeout 120s
+        continue-on-error: true
+
+  web-checks:
+    name: Web Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+      - name: ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Web build
+        run: |
+          npm run build

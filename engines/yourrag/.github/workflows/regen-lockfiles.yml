@@ -1,0 +1,49 @@
+name: Regenerate Lockfiles
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libldap2-dev libsasl2-dev libffi-dev libssl-dev
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Regenerate uv.lock
+        run: uv lock
+
+      - name: Setup Node.js for web
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Regenerate package-lock.json
+        working-directory: web
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Commit lockfiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add uv.lock web/package-lock.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: regenerate lockfiles after dependency updates"
+          git push
