@@ -1,0 +1,53 @@
+# OpenTelemetry observability stack for yourrag
+# Usage: docker compose -f docker-compose.otel.yml up -d
+# Access Grafana at http://localhost:3000 (admin/admin)
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.115.0
+    command: ["--config=/etc/otelcol-config.yaml"]
+    volumes:
+      - ./otel-config.yaml:/etc/otelcol-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    networks:
+      - ragflow
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+    networks:
+      - ragflow
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../grafana:/etc/grafana/provisioning/dashboards:ro
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - ragflow
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  ragflow:
+    driver: bridge

@@ -1,0 +1,51 @@
+name: SBOM Generation
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Generate SBOM (Python)
+        run: syft dir:. -o spdx-json=sbom-python.spdx.json
+
+      - name: Generate SBOM (Docker)
+        if: github.event_name == 'push'
+        run: |
+          syft ${GITHUB_REPOSITORY}:${GITHUB_REF_NAME} -o spdx-json=sbom-docker.spdx.json || echo "Docker image not found, skipping"
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom-*.spdx.json
+          retention-days: 90
+
+      - name: Security scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"

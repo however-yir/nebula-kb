@@ -1,0 +1,19 @@
+<svg width="960" height="240" viewBox="0 0 960 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="960" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B7285"/>
+      <stop offset="1" stop-color="#2F9E44"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="944" height="224" rx="28" fill="url(#g)"/>
+  <rect x="24" y="24" width="912" height="192" rx="20" fill="white" fill-opacity="0.08"/>
+  <g fill="white">
+    <path d="M132 72h32l46 96 46-96h31l-65 128h-25L132 72z"/>
+    <path d="M314 72h31v128h-31V72z"/>
+    <path d="M390 72h30l55 79V72h31v128h-26l-59-83v83h-31V72z"/>
+    <path d="M554 72h31v98h55v30h-86V72z"/>
+    <path d="M684 72h92v28h-61v22h56v27h-56v23h62v28h-93V72z"/>
+    <path d="M806 72h58c34 0 56 19 56 48 0 20-10 34-28 42l31 38h-39l-24-31h-23v31h-31V72zm55 71c17 0 28-8 28-21 0-13-11-21-28-21h-24v42h24z"/>
+  </g>
+  <text x="80" y="215" fill="white" fill-opacity="0.9" font-size="26" font-family="Arial, sans-serif">Private RAG + Agent Platform</text>
+</svg>

@@ -1,0 +1,27 @@
+[project]
+name = "yourrag-cli"
+version = "0.24.0"
+description = "Admin Service client for YourRAG. Provides user management and system monitoring."
+authors = [{ name = "Your Team", email = "dev@yourrag.local" }]
+license = { text = "Apache License, Version 2.0" }
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "requests>=2.30.0,<3.0.0",
+    "beartype>=0.20.0,<1.0.0",
+    "pycryptodomex>=3.10.0",
+    "lark>=1.1.0",
+    "requests-toolbelt>=1.0.0",
+]
+
+[dependency-groups]
+test = [
+    "pytest>=8.3.5",
+    "requests>=2.32.3",
+]
+
+[tool.setuptools]
+py-modules = ["ragflow_cli", "parser", "http_client", "ragflow_client", "user"]
+
+[project.scripts]
+yourrag-cli = "ragflow_cli:main"

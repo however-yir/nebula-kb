@@ -1,0 +1,88 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Request Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(yourrag_http_requests_total[5m])",
+          "legendFormat": "{{method}} {{path}} {{status}}"
+        }
+      ],
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }
+    },
+    {
+      "title": "P95 Latency (seconds)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(yourrag_http_request_duration_seconds_sum[5m]) / rate(yourrag_http_request_duration_seconds_count[5m])",
+          "legendFormat": "{{method}} {{path}}"
+        }
+      ],
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }
+    },
+    {
+      "title": "Memory Usage (MB)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "yourrag_process_resident_memory_bytes / 1024 / 1024",
+          "legendFormat": "RSS (MB)"
+        }
+      ],
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": { "unit": "decbytes", "thresholds": { "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 2147483648}, {"color": "red", "value": 4294967296}]}}
+      }
+    },
+    {
+      "title": "CPU Usage (%)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "targets": [
+        {
+          "expr": "yourrag_process_cpu_percent",
+          "legendFormat": "CPU %"
+        }
+      ],
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }
+    },
+    {
+      "title": "Open File Descriptors",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "targets": [
+        {
+          "expr": "yourrag_process_open_fds",
+          "legendFormat": "FDs"
+        }
+      ],
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["yourrag", "observability"],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {}
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "YourRAG Overview",
+  "uid": "yourrag-overview"
+}

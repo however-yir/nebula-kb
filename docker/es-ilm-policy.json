@@ -1,0 +1,53 @@
+{
+  "policy": {
+    "description": "yourrag ILM policy: hot (7d) → warm (30d) → cold (90d) → delete (365d)",
+    "phases": {
+      "hot": {
+        "min_age": "0ms",
+        "actions": {
+          "rollover": {
+            "max_age": "7d",
+            "max_primary_shard_size": "50gb"
+          },
+          "set_priority": {
+            "priority": 100
+          }
+        }
+      },
+      "warm": {
+        "min_age": "7d",
+        "actions": {
+          "shrink": {
+            "number_of_shards": 1
+          },
+          "forcemerge": {
+            "max_num_segments": 1
+          },
+          "set_priority": {
+            "priority": 50
+          },
+          "allocate": {
+            "number_of_replicas": 0
+          }
+        }
+      },
+      "cold": {
+        "min_age": "90d",
+        "actions": {
+          "set_priority": {
+            "priority": 0
+          },
+          "allocate": {
+            "number_of_replicas": 0
+          }
+        }
+      },
+      "delete": {
+        "min_age": "365d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}
