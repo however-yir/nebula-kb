@@ -61,15 +61,18 @@ usage() {
 Usage: bash scripts/quality-gate.sh [gate ...]
 
 Gates:
-  smoke        Django configuration and repository smoke check
-  unit         Unit tests for auth/token/tool logic
-  integration  Integration tests for login, retrieval, and tool connection
-  api          API regression surface for chat and application modules
-  auth         Authentication and token regression tests
-  permission   Permission module regression/import checks
-  coverage     Coverage gate for high-risk modules
-  release      Run the fixed release gate set
-  all          Run smoke, unit, integration, api, auth, permission, coverage
+  smoke              Django configuration and repository smoke check
+  unit               Unit tests for auth/token/tool logic
+  integration        Integration tests for login, retrieval, and tool connection
+  api                API regression surface for chat and application modules
+  auth               Authentication and token regression tests
+  permission         Permission module regression/import checks
+  coverage           Coverage gate for high-risk modules
+  frontend-lint      Frontend ESLint check
+  frontend-typecheck Frontend TypeScript type check
+  frontend-test      Frontend vitest tests
+  release            Run the fixed release gate set
+  all                Run smoke, unit, integration, api, auth, permission, coverage, frontend gates
 
 Environment:
   PYTHON_BIN              Python executable override
@@ -137,12 +140,29 @@ run_coverage() {
     "${PYTHON}" -m coverage report --fail-under="${COVERAGE_FAIL_UNDER}")
 }
 
+run_frontend_lint() {
+  echo "==> frontend-lint"
+  (cd "${ROOT_DIR}/ui" && npm run lint)
+}
+
+run_frontend_typecheck() {
+  echo "==> frontend-typecheck"
+  (cd "${ROOT_DIR}/ui" && npm run type-check)
+}
+
+run_frontend_test() {
+  echo "==> frontend-test"
+  (cd "${ROOT_DIR}/ui" && npm test)
+}
+
 run_release() {
   run_smoke
   run_api
   run_auth
   run_permission
   run_coverage
+  run_frontend_lint
+  run_frontend_typecheck
 }
 
 if [[ $# -eq 0 ]]; then
@@ -176,6 +196,15 @@ for gate in "$@"; do
     coverage)
       run_coverage
       ;;
+    frontend-lint)
+      run_frontend_lint
+      ;;
+    frontend-typecheck)
+      run_frontend_typecheck
+      ;;
+    frontend-test)
+      run_frontend_test
+      ;;
     release)
       run_release
       ;;
@@ -187,6 +216,9 @@ for gate in "$@"; do
       run_auth
       run_permission
       run_coverage
+      run_frontend_lint
+      run_frontend_typecheck
+      run_frontend_test
       ;;
     *)
       echo "Unknown gate: ${gate}" >&2
