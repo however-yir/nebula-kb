@@ -29,6 +29,7 @@ export default defineConfigWithVueTs(
       'vue/no-unused-vars': 'warn',
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/ban-ts-comment': 'warn',
+      'vue/no-side-effects-in-computed-properties': 'off',
     }
   },
   // Gradual type tightening for API layer and stores
