@@ -11,7 +11,10 @@ import re
 import zipfile
 from typing import List
 
+import uuid as stdlib_uuid
+
 import uuid_utils.compat as uuid
+from django.db import connection
 from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -240,6 +243,14 @@ def get_knowledge_operation_object(knowledge_id: str):
     return {}
 
 
+def _validate_uuid(value, field_name='id'):
+    """Validate that value is a proper UUID to prevent SQL injection."""
+    try:
+        stdlib_uuid.UUID(str(value))
+    except (ValueError, AttributeError):
+        raise AppApiException(400, _(f'Invalid {field_name}: must be a valid UUID'))
+
+
 def create_knowledge_index(knowledge_id=None, document_id=None):
     if knowledge_id is None and document_id is None:
         raise AppApiException(500, _('Knowledge ID or Document ID must be provided'))
@@ -250,11 +261,14 @@ def create_knowledge_index(knowledge_id=None, document_id=None):
         document = QuerySet(Document).filter(id=document_id).first()
         k_id = document.knowledge_id
 
-    sql = f"SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = 'embedding_hnsw_idx_{k_id}'"
-    index = sql_execute(sql, [])
+    _validate_uuid(k_id, 'knowledge_id')
+    idx_name = f'embedding_hnsw_idx_{k_id}'
+
+    sql = "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = %s"
+    index = sql_execute(sql, [idx_name])
     if not index:
-        sql = f"SELECT vector_dims(embedding) AS dims FROM embedding WHERE knowledge_id = '{k_id}' LIMIT 1"
-        result = sql_execute(sql, [])
+        sql = "SELECT vector_dims(embedding) AS dims FROM embedding WHERE knowledge_id = %s LIMIT 1"
+        result = sql_execute(sql, [k_id])
         if len(result) == 0:
             return
         dims = result[0]['dims']
@@ -263,8 +277,9 @@ def create_knowledge_index(knowledge_id=None, document_id=None):
             from lzkb.const import CONFIG
             hnsw_m = int(CONFIG.get('HNSW_M', 16))
             hnsw_ef = int(CONFIG.get('HNSW_EF_CONSTRUCTION', 200))
-            sql = f"""CREATE INDEX "embedding_hnsw_idx_{k_id}" ON embedding USING hnsw ((embedding::vector({dims})) vector_cosine_ops) WITH (m = {hnsw_m}, ef_construction = {hnsw_ef}) WHERE knowledge_id = '{k_id}'"""
-            update_execute(sql, [])
+            quoted_idx = connection.ops.quote_name(idx_name)
+            sql = f'CREATE INDEX {quoted_idx} ON embedding USING hnsw ((embedding::vector(%s)) vector_cosine_ops) WITH (m = %s, ef_construction = %s) WHERE knowledge_id = %s'
+            update_execute(sql, [dims, hnsw_m, hnsw_ef, k_id])
             maxkb_logger.info(f'Created index for knowledge ID: {k_id}')
 
 
@@ -278,10 +293,14 @@ def drop_knowledge_index(knowledge_id=None, document_id=None):
         document = QuerySet(Document).filter(id=document_id).first()
         k_id = document.knowledge_id
 
-    sql = f"SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = 'embedding_hnsw_idx_{k_id}'"
-    index = sql_execute(sql, [])
+    _validate_uuid(k_id, 'knowledge_id')
+    idx_name = f'embedding_hnsw_idx_{k_id}'
+
+    sql = "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = %s"
+    index = sql_execute(sql, [idx_name])
     if index:
-        sql = f'DROP INDEX "embedding_hnsw_idx_{k_id}"'
+        quoted_idx = connection.ops.quote_name(idx_name)
+        sql = f'DROP INDEX {quoted_idx}'
         update_execute(sql, [])
         maxkb_logger.info(f'Dropped index for knowledge ID: {k_id}')
 

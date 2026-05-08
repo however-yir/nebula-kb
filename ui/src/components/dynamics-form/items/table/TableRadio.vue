@@ -40,7 +40,7 @@
             <TableColumn :column="column" :row="scope.row"></TableColumn>
           </template>
           <template v-else-if="column.type === 'eval'">
-            <span v-html="evalF(column.property, scope.row)"></span
+            <span v-html="safeHtml(evalF(column.property, scope.row))"></span
           ></template>
           <template v-else>
             <span>{{ scope.row[column.property] }}</span></template
@@ -65,6 +65,7 @@ import type { ElTable } from 'element-plus'
 import _ from 'lodash'
 import TableColumn from '@/components/dynamics-form/items/table/TableColumn.vue'
 import { renderSafeExpression } from '@/utils/safe-expression'
+import { safeHtml } from '@/utils/safeHtml'
 const filterText = ref<string>('')
 const props = defineProps<{
   formValue?: any

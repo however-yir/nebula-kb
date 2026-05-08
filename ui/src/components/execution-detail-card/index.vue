@@ -442,7 +442,7 @@
               </h5>
               <div class="p-8-12 border-t-dashed lighter">
                 <p class="mb-8 color-secondary">{{ $t('chat.executionDetails.audioFile') }}:</p>
-                <div v-if="data.answer" v-html="data.answer"></div>
+                <div v-if="data.answer" v-html="safeHtml(data.answer)"></div>
               </div>
             </div>
           </template>
@@ -1348,6 +1348,7 @@ import {arraySort} from '@/utils/array'
 import ExecutionDetailCard from '@/components/execution-detail-card/index.vue'
 import MdRenderer from '@/components/markdown/MdRenderer.vue'
 import {t} from '@/locales'
+import {safeHtml} from '@/utils/safeHtml'
 
 const props = defineProps({
   data: {

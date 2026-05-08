@@ -244,6 +244,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed, watch, provide } from 'vue'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import { saveAs } from 'file-saver'
 import chatAPI from '@/api/chat/chat'
 import useStore from '@/stores'
@@ -529,7 +530,7 @@ async function exportHTML(): Promise<void> {
       return `# ${record.problem_text}\n\n${answerText}\n\n`
     })
     .join('\n')
-  const htmlContent: any = marked(markdownContent)
+  const htmlContent: any = DOMPurify.sanitize(marked(markdownContent) as string)
 
   const blob: Blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' })
   saveAs(blob, suggestedName)

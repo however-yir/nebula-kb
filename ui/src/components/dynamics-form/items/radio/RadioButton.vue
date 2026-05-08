@@ -1,13 +1,14 @@
 <template>
   <el-radio-group v-bind="$attrs">
     <el-radio-button v-for="(item, index) in option_list" :key="index" :label="item[valueField]">
-      <div v-html="label(item)"></div>
+      <div v-html="safeHtml(label(item))"></div>
     </el-radio-button>
   </el-radio-group>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { FormField } from '@/components/dynamics-form/type'
+import { safeHtml } from '@/utils/safeHtml'
 import _ from 'lodash'
 
 const props = defineProps<{
