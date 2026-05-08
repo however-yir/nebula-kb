@@ -180,6 +180,17 @@ def is_valid_uuid(s):
         return False
 
 
+def validate_uuid_or_raise(value, field_name='id'):
+    """Strict UUID format validation to prevent SQL injection in raw queries."""
+    _uuid_pattern = re.compile(
+        r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+        re.IGNORECASE
+    )
+    if not _uuid_pattern.match(str(value)):
+        raise AppApiException(400, f'Invalid {field_name} format')
+    return str(value)
+
+
 def write_image(zip_path: str, image_list: List[str]):
     for image in image_list:
         search = re.search(r"\(.*\)", image)
@@ -245,16 +256,17 @@ def create_knowledge_index(knowledge_id=None, document_id=None):
         raise AppApiException(500, _('Knowledge ID or Document ID must be provided'))
 
     if knowledge_id is not None:
-        k_id = knowledge_id
+        k_id = validate_uuid_or_raise(knowledge_id, 'knowledge_id')
     else:
         document = QuerySet(Document).filter(id=document_id).first()
-        k_id = document.knowledge_id
+        k_id = validate_uuid_or_raise(document.knowledge_id, 'knowledge_id')
 
-    sql = f"SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = 'embedding_hnsw_idx_{k_id}'"
-    index = sql_execute(sql, [])
+    safe_index_name = f'embedding_hnsw_idx_{k_id}'
+    sql = "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = %s"
+    index = sql_execute(sql, [safe_index_name])
     if not index:
-        sql = f"SELECT vector_dims(embedding) AS dims FROM embedding WHERE knowledge_id = '{k_id}' LIMIT 1"
-        result = sql_execute(sql, [])
+        sql = "SELECT vector_dims(embedding) AS dims FROM embedding WHERE knowledge_id = %s LIMIT 1"
+        result = sql_execute(sql, [k_id])
         if len(result) == 0:
             return
         dims = result[0]['dims']
@@ -263,8 +275,9 @@ def create_knowledge_index(knowledge_id=None, document_id=None):
             from lzkb.const import CONFIG
             hnsw_m = int(CONFIG.get('HNSW_M', 16))
             hnsw_ef = int(CONFIG.get('HNSW_EF_CONSTRUCTION', 200))
-            sql = f"""CREATE INDEX "embedding_hnsw_idx_{k_id}" ON embedding USING hnsw ((embedding::vector({dims})) vector_cosine_ops) WITH (m = {hnsw_m}, ef_construction = {hnsw_ef}) WHERE knowledge_id = '{k_id}'"""
-            update_execute(sql, [])
+            # DDL 无法使用参数化占位符，k_id 已通过 UUID 校验确保安全
+            sql = f'CREATE INDEX "{safe_index_name}" ON embedding USING hnsw ((embedding::vector({dims})) vector_cosine_ops) WITH (m = {hnsw_m}, ef_construction = {hnsw_ef}) WHERE knowledge_id = %s'
+            update_execute(sql, [k_id])
             maxkb_logger.info(f'Created index for knowledge ID: {k_id}')
 
 
@@ -273,15 +286,16 @@ def drop_knowledge_index(knowledge_id=None, document_id=None):
         raise AppApiException(500, _('Knowledge ID or Document ID must be provided'))
 
     if knowledge_id is not None:
-        k_id = knowledge_id
+        k_id = validate_uuid_or_raise(knowledge_id, 'knowledge_id')
     else:
         document = QuerySet(Document).filter(id=document_id).first()
-        k_id = document.knowledge_id
+        k_id = validate_uuid_or_raise(document.knowledge_id, 'knowledge_id')
 
-    sql = f"SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = 'embedding_hnsw_idx_{k_id}'"
-    index = sql_execute(sql, [])
+    safe_index_name = f'embedding_hnsw_idx_{k_id}'
+    sql = "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'embedding' AND indexname = %s"
+    index = sql_execute(sql, [safe_index_name])
     if index:
-        sql = f'DROP INDEX "embedding_hnsw_idx_{k_id}"'
+        sql = f'DROP INDEX "{safe_index_name}"'
         update_execute(sql, [])
         maxkb_logger.info(f'Dropped index for knowledge ID: {k_id}')
 
