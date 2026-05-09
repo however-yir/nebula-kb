@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/however-yir/nebula-kb/actions/workflows/build-and-push.yml)
 [![Tests](https://github.com/however-yir/nebula-kb/actions/workflows/nebulakb-tests.yml/badge.svg)](https://github.com/however-yir/nebula-kb/actions/workflows/nebulakb-tests.yml)
-[![Docs](https://img.shields.io/badge/docs-docs.nebulakb.ai-0A7EFA)](https://docs.nebulakb.ai)
+[![Docs](https://img.shields.io/badge/docs-文档-0A7EFA)](./docs/)
 [![License](https://img.shields.io/badge/license-GPL--3.0-16A34A)](./LICENSE)
 [![Status](https://img.shields.io/badge/status-active-2563EB)](https://github.com/however-yir/nebula-kb)
 
@@ -65,7 +65,7 @@ NebulaKB 是 however-yir AI 工程作品矩阵中的“知识运营中枢”，�
 | Repo | 角色 | 与 NebulaKB 的关系 |
 |---|---|---|
 | [`local-ai-hub`](https://github.com/however-yir/local-ai-hub) | 本地 AI 工作台与统一入口 | 更偏模型接入、本地工具台和团队日常使用入口 |
-| [`yourrag`](https://github.com/however-yir/yourrag) | 企业 RAG / Agent 交付参考 | 更偏私有化交付方案和 RAG + Agent 组合实践 |
+| `yourrag` | 企业 RAG / Agent 交付参考 | 更偏私有化交付方案和 RAG + Agent 组合实践，核心引擎内嵌于 [`engines/yourrag/`](engines/yourrag/) |
 
 ## 目录
 
