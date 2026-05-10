@@ -23,7 +23,7 @@
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@logicflow/core": "^1.2.27",
-    "@logicflow/extension": "^1.2.27",
+    "@logicflow/extension": "^2.2.1",
     "@vavt/cm-extension": "^1.9.1",
     "@vueuse/core": "^13.3.0",
     "axios": "^1.8.4",
