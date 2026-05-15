@@ -27,7 +27,7 @@ dependencies = [
     "langchain-community==0.4.1",
     "langchain-deepseek==1.0.1",
     "langchain-google-genai==4.2.1",
-    "langchain-mcp-adapters==0.2.1",
+    "langchain-mcp-adapters==0.2.2",
     "mcp==1.19.0",
     "langchain-huggingface==1.2.1",
     "langchain-ollama==1.0.1",
