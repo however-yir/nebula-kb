@@ -82,7 +82,7 @@
     "prettier": "3.5.3",
     "sass": "^1.86.3",
     "sass-loader": "^16.0.5",
-    "typescript": "~5.8.0",
+    "typescript": "~6.0.3",
     "unplugin-vue-define-options": "^3.0.0-beta.8",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2",
