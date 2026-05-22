@@ -6,6 +6,8 @@
 [![License](https://img.shields.io/badge/license-GPL--3.0-16A34A)](./LICENSE)
 [![Status](https://img.shields.io/badge/status-active-2563EB)](https://github.com/however-yir/nebula-kb)
 
+> **Matrix role:** `nebula-kb` owns the knowledge asset lifecycle: ingestion, governance, retrieval quality, feedback loops, and operations dashboards. For the Spring AI backend platform layer, see [`knowledgeops-agent`](https://github.com/however-yir/knowledgeops-agent).
+>
 > Status: `active`
 >
 > Matrix: [knowledgeops-agent](https://github.com/however-yir/knowledgeops-agent) · [tianji-ai-agent](https://github.com/however-yir/tianji-ai-agent) · [nebula-kb](https://github.com/however-yir/nebula-kb) · [forgepilot-studio](https://github.com/however-yir/forgepilot-studio) · [however-microservices-lab](https://github.com/however-yir/however-microservices-lab)
