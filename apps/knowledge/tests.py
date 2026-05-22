@@ -240,3 +240,81 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
         )
         self.assertEqual(closed.status, "closed")
         self.assertEqual(closed.owner, "knowledge-ops")
+
+    def test_negative_feedback_creates_governance_task_and_health_metrics(self):
+        self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
+        answer = self.platform.ask(self.tenant_a, self.kb.id, "解析失败后应该如何处理？")
+        self.platform.ask(self.tenant_a, self.kb.id, "火星基地餐饮报销规则是什么？")
+
+        feedback = self.platform.submit_feedback(
+            tenant_id=self.tenant_a,
+            knowledge_base_id=self.kb.id,
+            question=answer.question,
+            answer=answer.answer,
+            citations=answer.citations,
+            rating=2,
+            reason="答案缺少负责人和 SLA。",
+            owner="ops-a",
+        )
+
+        tasks = self.platform.list_governance_tasks(self.tenant_a, knowledge_base_id=self.kb.id)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(feedback.governance_task_id, tasks[0].id)
+        self.assertEqual(tasks[0].question, answer.question)
+        self.assertEqual(tasks[0].answer, answer.answer)
+        self.assertEqual(tasks[0].citations, answer.citations)
+        self.assertEqual(tasks[0].reason, "答案缺少负责人和 SLA。")
+        self.assertEqual(tasks[0].owner, "ops-a")
+        self.assertEqual(tasks[0].status, "open")
+
+        metrics = self.platform.metrics(self.tenant_a)
+        self.assertEqual(metrics["knowledge_hit_rate"], 0.5)
+        self.assertEqual(metrics["low_quality_answer_rate"], 1)
+        self.assertEqual(metrics["unanswered_question_count"], 1)
+        self.assertEqual(metrics["pending_feedback_count"], 1)
+        self.assertEqual(metrics["stale_knowledge_count"], 0)
+        self.assertEqual(metrics["governance_tasks"][0]["id"], tasks[0].id)
+
+        by_kb = self.platform.metrics_by_knowledge_base(self.tenant_a)
+        self.assertEqual(by_kb[0]["knowledge_base_id"], self.kb.id)
+        self.assertEqual(by_kb[0]["pending_feedback_count"], 1)
+
+    def test_low_quality_answers_supports_knowledge_reason_and_status_filters(self):
+        other_kb = self.platform.create_knowledge_base(
+            tenant_id=self.tenant_a,
+            knowledge_base_id="kb-billing",
+            name="计费政策库",
+            owner="billing-ops",
+        )
+        first = self.platform.submit_feedback(
+            tenant_id=self.tenant_a,
+            knowledge_base_id=self.kb.id,
+            question="解析失败后应该如何处理？",
+            answer="缺少负责人",
+            citations=["import-sop.md#1"],
+            rating=2,
+            reason="负责人缺失",
+        )
+        self.platform.submit_feedback(
+            tenant_id=self.tenant_a,
+            knowledge_base_id=other_kb.id,
+            question="计费规则是什么？",
+            answer="缺少引用",
+            citations=[],
+            rating=1,
+            reason="引用缺失",
+        )
+        self.platform.close_feedback(self.tenant_a, first.id, owner="ops-a")
+
+        self.assertEqual(
+            [record.id for record in self.platform.low_quality_answers(self.tenant_a, knowledge_base_id=self.kb.id)],
+            [first.id],
+        )
+        self.assertEqual(
+            [record.reason for record in self.platform.low_quality_answers(self.tenant_a, reason="引用")],
+            ["引用缺失"],
+        )
+        self.assertEqual(
+            [record.id for record in self.platform.low_quality_answers(self.tenant_a, status="closed")],
+            [first.id],
+        )

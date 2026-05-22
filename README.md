@@ -40,6 +40,8 @@ NebulaKB 面向知识运营团队，不是泛泛的知识库或 RAG 示例，而
 
 ## 产品截图
 
+![Knowledge Health Dashboard](docs/assets/screenshots/knowledge-health-dashboard.svg)
+
 | 运营后台 | 知识库列表 |
 |---|---|
 | ![运营后台截图](docs/assets/screenshots/admin-dashboard.svg) | ![知识库列表截图](docs/assets/screenshots/knowledge-base-list.svg) |

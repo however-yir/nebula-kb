@@ -14,6 +14,7 @@ This pack collects the shortest public proof path for reviewing the knowledge op
 ## Product And Architecture Evidence
 
 - Demo GIF: `docs/assets/screenshots/demo.gif`
+- Knowledge Health Dashboard: `docs/assets/screenshots/knowledge-health-dashboard.svg`
 - Admin dashboard: `docs/assets/screenshots/admin-dashboard.svg`
 - Knowledge base list: `docs/assets/screenshots/knowledge-base-list.svg`
 - Document ingestion: `docs/assets/screenshots/document-ingestion.svg`
