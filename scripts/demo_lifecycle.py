@@ -44,33 +44,56 @@ def main() -> None:
     print(f"   FAIL {broken_filename}: status={broken.status}, reason={broken.error}")
 
     print("\n2. Retrieval Q&A with citations and empty-result fallback")
-    last_answer = None
+    answers_by_question = {}
     for item in manifest["questions"]:
         answer = platform.ask(kb.tenant_id, kb.id, item["text"])
-        last_answer = answer
+        answers_by_question[item["text"]] = answer
         print(f"   Q: {item['text']}")
         print(f"   A: {answer.answer}")
         print(f"   Citations: {', '.join(answer.citations) if answer.citations else 'none'}")
         if answer.fallback_reason:
             print(f"   Fallback: {answer.fallback_reason}")
 
-    print("\n3. Human feedback and low-quality answer review")
+    print("\n3. Health metrics before feedback")
+    before_feedback = platform.metrics(kb.tenant_id)
+    print(json.dumps(before_feedback, ensure_ascii=False, indent=2))
+
+    print("\n4. Negative feedback creates a governance task")
     feedback_spec = manifest["feedback"]
+    rated_answer = answers_by_question.get(feedback_spec["question"])
     feedback = platform.submit_feedback(
         tenant_id=kb.tenant_id,
+        knowledge_base_id=kb.id,
         question=feedback_spec["question"],
-        answer=last_answer.answer if last_answer else "",
+        answer=rated_answer.answer if rated_answer else "",
+        citations=rated_answer.citations if rated_answer else [],
         rating=feedback_spec["rating"],
         reason=feedback_spec["reason"],
+        owner=kb.owner,
     )
     print(f"   Feedback {feedback.id}: rating={feedback.rating}, status={feedback.status}")
-    print(f"   Low-quality answers: {len(platform.low_quality_answers(kb.tenant_id))}")
+    print(f"   Low-quality answers: {len(platform.low_quality_answers(kb.tenant_id, knowledge_base_id=kb.id))}")
+    task = platform.list_governance_tasks(kb.tenant_id, knowledge_base_id=kb.id)[0]
+    print(
+        "   Governance task: "
+        f"id={task.id}, owner={task.owner}, status={task.status}, "
+        f"question={task.question}, citations={', '.join(task.citations) if task.citations else 'none'}"
+    )
+
+    print("\n5. Health metrics after feedback")
+    after_feedback = platform.metrics(kb.tenant_id)
+    print(json.dumps(after_feedback, ensure_ascii=False, indent=2))
+
     platform.close_feedback(kb.tenant_id, feedback.id, owner="knowledge-ops")
     print(f"   Feedback {feedback.id} closed by {feedback.owner}")
 
-    print("\n4. Operations metrics snapshot")
-    metrics = platform.metrics(kb.tenant_id)
-    print(json.dumps(metrics, ensure_ascii=False, indent=2))
+    print("\n6. Knowledge-base health dashboard")
+    dashboard = platform.metrics_by_knowledge_base(kb.tenant_id)
+    print(json.dumps(dashboard, ensure_ascii=False, indent=2))
+
+    print("\n7. Health metrics after governance closure")
+    after_closure = platform.metrics(kb.tenant_id)
+    print(json.dumps(after_closure, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

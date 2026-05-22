@@ -22,6 +22,73 @@
       </div>
     </section>
 
+    <section class="ops-section health-dashboard">
+      <div class="section-title">
+        <h2>Knowledge Health Dashboard</h2>
+        <el-tag type="success">按知识库维度</el-tag>
+      </div>
+      <el-table :data="knowledgeHealth" size="small">
+        <el-table-column prop="name" label="知识库" min-width="150" />
+        <el-table-column prop="owner" label="Owner" width="110" />
+        <el-table-column prop="knowledge_hit_rate" label="知识命中率" width="120" />
+        <el-table-column prop="low_quality_answer_rate" label="低质回答率" width="120" />
+        <el-table-column prop="unanswered_question_count" label="未命中问题" width="120" />
+        <el-table-column prop="pending_feedback_count" label="待处理反馈" width="120" />
+        <el-table-column prop="stale_knowledge_count" label="过期知识" width="100" />
+        <el-table-column label="状态" width="110">
+          <template #default="{ row }">
+            <el-tag :type="healthStatusType(row.status)">
+              {{ healthStatusLabel(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+    </section>
+
+    <section class="ops-section low-quality-section">
+      <div class="section-title">
+        <h2>低质答案回看</h2>
+        <el-tag type="warning">{{ filteredLowQualityReviews.length }} 条</el-tag>
+      </div>
+      <div class="review-filters">
+        <el-select v-model="lowQualityFilters.knowledge_base_id" clearable placeholder="知识库">
+          <el-option
+            v-for="kb in knowledgeHealth"
+            :key="kb.knowledge_base_id"
+            :label="kb.name"
+            :value="kb.knowledge_base_id"
+          />
+        </el-select>
+        <el-select v-model="lowQualityFilters.reason" clearable placeholder="原因">
+          <el-option v-for="reason in lowQualityReasons" :key="reason" :label="reason" :value="reason" />
+        </el-select>
+        <el-select v-model="lowQualityFilters.status" clearable placeholder="状态">
+          <el-option label="待处理" value="open" />
+          <el-option label="处理中" value="in_progress" />
+          <el-option label="已关闭" value="closed" />
+        </el-select>
+      </div>
+      <el-table :data="filteredLowQualityReviews" size="small" height="260">
+        <el-table-column prop="knowledge_base" label="知识库" width="130" />
+        <el-table-column prop="question" label="Question" min-width="180" />
+        <el-table-column prop="answer" label="Answer" min-width="220" />
+        <el-table-column label="Citations" min-width="160">
+          <template #default="{ row }">
+            {{ row.citations?.length ? row.citations.join(', ') : 'none' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="reason" label="Reason" width="140" />
+        <el-table-column prop="owner" label="Owner" width="120" />
+        <el-table-column label="Status" width="110">
+          <template #default="{ row }">
+            <el-tag :type="reviewStatusType(row.status)">
+              {{ reviewStatusLabel(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+    </section>
+
     <section class="ops-section">
       <div class="section-title">
         <h2>知识资产生命周期</h2>
@@ -381,11 +448,105 @@ const dashboardLoading = ref(false)
 const { user } = useStore()
 
 const metrics = ref([
-  { label: '知识新鲜度', value: '86%', trend: 7.4 },
-  { label: '冲突待处理', value: '12', trend: -18.2 },
-  { label: '问答命中率', value: '78.4%', trend: 5.1 },
-  { label: '错误预算', value: '72%', trend: 2.6 },
+  { label: '知识命中率', value: '82.4%', trend: 6.8 },
+  { label: '低质回答率', value: '4.7%', trend: -1.6 },
+  { label: '未命中问题数', value: '37', trend: -8.1 },
+  { label: '待处理反馈数', value: '12', trend: -18.2 },
+  { label: '过期知识数', value: '9', trend: -11.4 },
 ])
+
+const knowledgeHealth = ref([
+  {
+    knowledge_base_id: 'kb-cs',
+    name: '客服政策库',
+    owner: 'CS Ops',
+    knowledge_hit_rate: '84.6%',
+    low_quality_answer_rate: '3.8%',
+    unanswered_question_count: 14,
+    pending_feedback_count: 5,
+    stale_knowledge_count: 2,
+    status: 'healthy',
+  },
+  {
+    knowledge_base_id: 'kb-legal',
+    name: '法务条款库',
+    owner: 'Legal',
+    knowledge_hit_rate: '79.2%',
+    low_quality_answer_rate: '5.1%',
+    unanswered_question_count: 9,
+    pending_feedback_count: 3,
+    stale_knowledge_count: 1,
+    status: 'watch',
+  },
+  {
+    knowledge_base_id: 'kb-mfg',
+    name: '制造 SOP 库',
+    owner: 'MFG',
+    knowledge_hit_rate: '73.5%',
+    low_quality_answer_rate: '6.4%',
+    unanswered_question_count: 14,
+    pending_feedback_count: 4,
+    stale_knowledge_count: 6,
+    status: 'risk',
+  },
+])
+
+const lowQualityFilters = ref({
+  knowledge_base_id: '',
+  reason: '',
+  status: '',
+})
+
+const lowQualityReviews = ref([
+  {
+    id: 'fb-1027',
+    knowledge_base_id: 'kb-cs',
+    knowledge_base: '客服政策库',
+    question: '解析失败后应该如何处理？',
+    answer: '文档状态会标记为 failed，但未说明负责人和 SLA。',
+    citations: ['01-import-governance.md#2'],
+    reason: '缺少负责人和 SLA',
+    owner: 'knowledge-ops',
+    status: 'open',
+  },
+  {
+    id: 'fb-1031',
+    knowledge_base_id: 'kb-mfg',
+    knowledge_base: '制造 SOP 库',
+    question: '设备异常如何升级？',
+    answer: '建议联系班组长，但未返回有效引用。',
+    citations: [],
+    reason: '引用缺失',
+    owner: 'mfg-ops',
+    status: 'in_progress',
+  },
+  {
+    id: 'fb-0988',
+    knowledge_base_id: 'kb-legal',
+    knowledge_base: '法务条款库',
+    question: 'NDA 模板何时需要更新？',
+    answer: '返回了旧版模板条款。',
+    citations: ['legal-nda.md#4'],
+    reason: '知识过期',
+    owner: 'legal-ops',
+    status: 'closed',
+  },
+])
+
+const lowQualityReasons = computed(() =>
+  Array.from(new Set(lowQualityReviews.value.map((review) => review.reason))),
+)
+
+const filteredLowQualityReviews = computed(() =>
+  lowQualityReviews.value.filter((review) => {
+    const filters = lowQualityFilters.value
+    return (
+      (!filters.knowledge_base_id || review.knowledge_base_id === filters.knowledge_base_id) &&
+      (!filters.reason || review.reason === filters.reason) &&
+      (!filters.status || review.status === filters.status)
+    )
+  }),
+)
 
 const lifecycle = ref([
   { name: '接入', desc: '文件、网页、数据库、业务系统接入', progress: 92 },
@@ -530,6 +691,8 @@ const palette = ref(['#14b8a6', '#3370ff', '#f97316', '#7c3aed', '#111827', '#f5
 
 function applyDashboard(data: any) {
   metrics.value = data.metrics || metrics.value
+  knowledgeHealth.value = data.knowledge_health || knowledgeHealth.value
+  lowQualityReviews.value = data.low_quality_reviews || lowQualityReviews.value
   lifecycle.value = data.lifecycle || lifecycle.value
   freshness.value = data.freshness || freshness.value
   conflicts.value = data.conflicts || conflicts.value
@@ -555,6 +718,30 @@ function applyDashboard(data: any) {
   piiRules.value = data.pii_policy?.rules || piiRules.value
   citationChain.value = data.citation_chain || citationChain.value
   palette.value = data.visual_system?.palette || palette.value
+}
+
+function healthStatusType(status: string) {
+  if (status === 'healthy') return 'success'
+  if (status === 'risk') return 'danger'
+  return 'warning'
+}
+
+function healthStatusLabel(status: string) {
+  if (status === 'healthy') return '健康'
+  if (status === 'risk') return '风险'
+  return '关注'
+}
+
+function reviewStatusType(status: string) {
+  if (status === 'closed') return 'success'
+  if (status === 'in_progress') return 'warning'
+  return 'danger'
+}
+
+function reviewStatusLabel(status: string) {
+  if (status === 'closed') return '已关闭'
+  if (status === 'in_progress') return '处理中'
+  return '待处理'
 }
 
 onMounted(() => {
@@ -618,8 +805,24 @@ onMounted(() => {
 }
 
 .metric-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   margin: 16px 0;
+}
+
+.health-dashboard,
+.low-quality-section {
+  margin-bottom: 16px;
+}
+
+.review-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+
+  .el-select {
+    width: 180px;
+  }
 }
 
 .metric-card {

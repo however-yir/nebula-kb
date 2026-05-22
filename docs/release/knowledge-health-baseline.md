@@ -41,6 +41,7 @@ PYTHONPATH=apps DJANGO_SETTINGS_MODULE=nebula.settings.test python3 apps/manage.
 ## 截图资产
 
 - `docs/assets/screenshots/admin-dashboard.svg`
+- `docs/assets/screenshots/knowledge-health-dashboard.svg`
 - `docs/assets/screenshots/knowledge-base-list.svg`
 - `docs/assets/screenshots/document-ingestion.svg`
 - `docs/assets/screenshots/qa-feedback.svg`

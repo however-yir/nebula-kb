@@ -71,6 +71,8 @@ class Answer:
     answer: str
     hits: List[SearchHit]
     citations: List[str]
+    tenant_id: str = ""
+    knowledge_base_id: str = ""
     fallback_reason: Optional[str] = None
 
 
@@ -78,13 +80,33 @@ class Answer:
 class FeedbackRecord:
     id: str
     tenant_id: str
+    knowledge_base_id: str
     question: str
     answer: str
+    citations: List[str]
     rating: int
     reason: str
     status: str = "open"
     owner: Optional[str] = None
+    governance_task_id: Optional[str] = None
     created_at: datetime = field(default_factory=_now)
+    closed_at: Optional[datetime] = None
+
+
+@dataclass
+class GovernanceTask:
+    id: str
+    tenant_id: str
+    knowledge_base_id: str
+    feedback_id: str
+    question: str
+    answer: str
+    citations: List[str]
+    reason: str
+    owner: str
+    status: str = "open"
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
     closed_at: Optional[datetime] = None
 
 
@@ -97,6 +119,7 @@ class KnowledgeAssetPlatform:
         self.index: Dict[str, List[Chunk]] = {}
         self.answers: List[Answer] = []
         self.feedback: List[FeedbackRecord] = []
+        self.governance_tasks: List[GovernanceTask] = []
 
     def create_knowledge_base(
         self,
@@ -187,6 +210,8 @@ class KnowledgeAssetPlatform:
                 answer="未找到可靠知识。该问题已进入未命中问题池，等待运营人员补充或更新知识。",
                 hits=[],
                 citations=[],
+                tenant_id=tenant_id,
+                knowledge_base_id=knowledge_base_id,
                 fallback_reason="empty_result",
             )
             self.answers.append(answer)
@@ -199,6 +224,8 @@ class KnowledgeAssetPlatform:
             answer=answer_text,
             hits=hits,
             citations=[hit.citation for hit in hits],
+            tenant_id=tenant_id,
+            knowledge_base_id=knowledge_base_id,
         )
         self.answers.append(answer)
         return answer
@@ -234,26 +261,60 @@ class KnowledgeAssetPlatform:
         answer: str,
         rating: int,
         reason: str,
+        knowledge_base_id: Optional[str] = None,
+        citations: Optional[List[str]] = None,
+        owner: str = "knowledge-ops",
     ) -> FeedbackRecord:
         if not 1 <= rating <= 5:
             raise ValueError("rating must be between 1 and 5")
+        answer_context = self._find_answer_context(tenant_id, question)
+        feedback_knowledge_base_id = (
+            knowledge_base_id
+            or (answer_context.knowledge_base_id if answer_context else None)
+            or self._default_knowledge_base_id_for_tenant(tenant_id)
+        )
+        feedback_citations = list(
+            citations if citations is not None else (answer_context.citations if answer_context else [])
+        )
         record = FeedbackRecord(
             id=f"fb-{uuid4().hex[:8]}",
             tenant_id=tenant_id,
+            knowledge_base_id=feedback_knowledge_base_id,
             question=question,
             answer=answer,
+            citations=feedback_citations,
             rating=rating,
             reason=reason,
         )
         self.feedback.append(record)
+        if rating <= 2:
+            task = self._create_governance_task(record, owner)
+            record.governance_task_id = task.id
         return record
 
-    def low_quality_answers(self, tenant_id: str) -> List[FeedbackRecord]:
-        return [
+    def low_quality_answers(
+        self,
+        tenant_id: str,
+        knowledge_base_id: Optional[str] = None,
+        reason: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> List[FeedbackRecord]:
+        records = [
             record
             for record in self.feedback
             if record.tenant_id == tenant_id and record.rating <= 2
         ]
+        if knowledge_base_id:
+            records = [record for record in records if record.knowledge_base_id == knowledge_base_id]
+        if reason:
+            records = [record for record in records if reason in record.reason]
+        if status:
+            records = [
+                record
+                for record in records
+                if record.status == status or self._task_status(record.governance_task_id) == status
+            ]
+        return records
 
     def close_feedback(self, tenant_id: str, feedback_id: str, owner: str) -> FeedbackRecord:
         for record in self.feedback:
@@ -261,8 +322,46 @@ class KnowledgeAssetPlatform:
                 record.status = "closed"
                 record.owner = owner
                 record.closed_at = _now()
+                if record.governance_task_id:
+                    self.update_governance_task(
+                        tenant_id,
+                        record.governance_task_id,
+                        status="closed",
+                        owner=owner,
+                    )
                 return record
         raise KeyError(feedback_id)
+
+    def list_governance_tasks(
+        self,
+        tenant_id: str,
+        knowledge_base_id: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> List[GovernanceTask]:
+        tasks = [task for task in self.governance_tasks if task.tenant_id == tenant_id]
+        if knowledge_base_id:
+            tasks = [task for task in tasks if task.knowledge_base_id == knowledge_base_id]
+        if status:
+            tasks = [task for task in tasks if task.status == status]
+        return tasks
+
+    def update_governance_task(
+        self,
+        tenant_id: str,
+        task_id: str,
+        status: str,
+        owner: Optional[str] = None,
+    ) -> GovernanceTask:
+        for task in self.governance_tasks:
+            if task.tenant_id == tenant_id and task.id == task_id:
+                task.status = status
+                if owner:
+                    task.owner = owner
+                task.updated_at = _now()
+                if status == "closed":
+                    task.closed_at = task.closed_at or task.updated_at
+                return task
+        raise KeyError(task_id)
 
     def metrics(self, tenant_id: str) -> Dict[str, object]:
         tenant_answers = [
@@ -275,23 +374,52 @@ class KnowledgeAssetPlatform:
         tenant_feedback = [record for record in self.feedback if record.tenant_id == tenant_id]
         low_quality = [record for record in tenant_feedback if record.rating <= 2]
         open_feedback = [record for record in tenant_feedback if record.status != "closed"]
+        unanswered_questions = [answer.question for answer in tenant_answers if answer.fallback_reason]
+        stale_knowledge = self._stale_knowledge_for_tenant(tenant_id)
 
         return {
             "knowledge_hit_rate": round(hit_answers / total_answers, 4) if total_answers else 0,
             "low_quality_answer_rate": round(len(low_quality) / len(tenant_feedback), 4)
             if tenant_feedback
             else 0,
-            "unanswered_questions": [
-                answer.question for answer in tenant_answers if answer.fallback_reason
-            ],
+            "unanswered_question_count": len(unanswered_questions),
+            "pending_feedback_count": len(open_feedback),
+            "stale_knowledge_count": len(stale_knowledge),
+            "unanswered_questions": unanswered_questions,
             "hot_knowledge": self._hot_knowledge_for_tenant(tenant_id),
-            "stale_knowledge": self._stale_knowledge_for_tenant(tenant_id),
+            "stale_knowledge": stale_knowledge,
+            "governance_tasks": [
+                {
+                    "id": task.id,
+                    "knowledge_base_id": task.knowledge_base_id,
+                    "question": task.question,
+                    "reason": task.reason,
+                    "owner": task.owner,
+                    "status": task.status,
+                }
+                for task in self.list_governance_tasks(tenant_id)
+            ],
             "feedback_closure_status": {
                 "total": len(tenant_feedback),
                 "open": len(open_feedback),
                 "closed": len(tenant_feedback) - len(open_feedback),
             },
         }
+
+    def metrics_by_knowledge_base(self, tenant_id: str) -> List[Dict[str, object]]:
+        rows: List[Dict[str, object]] = []
+        for kb in self.knowledge_bases.values():
+            if kb.tenant_id != tenant_id:
+                continue
+            rows.append(
+                {
+                    "knowledge_base_id": kb.id,
+                    "name": kb.name,
+                    "owner": kb.owner,
+                    **self._metrics_for_knowledge_base(tenant_id, kb.id),
+                }
+            )
+        return rows
 
     def _mark_parse_failed(self, document: DocumentRecord, reason: str) -> DocumentRecord:
         document.status = "failed"
@@ -352,10 +480,75 @@ class KnowledgeAssetPlatform:
         return document
 
     def _answer_belongs_to_tenant(self, answer: Answer, tenant_id: str) -> bool:
+        if answer.tenant_id:
+            return answer.tenant_id == tenant_id
         if not answer.hits:
             return True
         document = self.documents.get(answer.hits[0].document_id)
         return bool(document and document.tenant_id == tenant_id)
+
+    def _create_governance_task(self, record: FeedbackRecord, owner: str) -> GovernanceTask:
+        task = GovernanceTask(
+            id=f"task-{uuid4().hex[:8]}",
+            tenant_id=record.tenant_id,
+            knowledge_base_id=record.knowledge_base_id,
+            feedback_id=record.id,
+            question=record.question,
+            answer=record.answer,
+            citations=list(record.citations),
+            reason=record.reason,
+            owner=owner,
+        )
+        self.governance_tasks.append(task)
+        return task
+
+    def _find_answer_context(self, tenant_id: str, question: str) -> Optional[Answer]:
+        for answer in reversed(self.answers):
+            if answer.tenant_id == tenant_id and answer.question == question:
+                return answer
+        return None
+
+    def _default_knowledge_base_id_for_tenant(self, tenant_id: str) -> str:
+        for kb in self.knowledge_bases.values():
+            if kb.tenant_id == tenant_id:
+                return kb.id
+        raise KeyError(f"tenant has no knowledge base: {tenant_id}")
+
+    def _task_status(self, task_id: Optional[str]) -> Optional[str]:
+        if not task_id:
+            return None
+        for task in self.governance_tasks:
+            if task.id == task_id:
+                return task.status
+        return None
+
+    def _metrics_for_knowledge_base(self, tenant_id: str, knowledge_base_id: str) -> Dict[str, object]:
+        answers = [
+            answer
+            for answer in self.answers
+            if answer.tenant_id == tenant_id and answer.knowledge_base_id == knowledge_base_id
+        ]
+        feedback = [
+            record
+            for record in self.feedback
+            if record.tenant_id == tenant_id and record.knowledge_base_id == knowledge_base_id
+        ]
+        stale = [
+            document.filename
+            for document in self.documents.values()
+            if document.tenant_id == tenant_id
+            and document.knowledge_base_id == knowledge_base_id
+            and document.status == "failed"
+        ]
+        hit_answers = len([answer for answer in answers if answer.citations])
+        low_quality = [record for record in feedback if record.rating <= 2]
+        return {
+            "knowledge_hit_rate": round(hit_answers / len(answers), 4) if answers else 0,
+            "low_quality_answer_rate": round(len(low_quality) / len(feedback), 4) if feedback else 0,
+            "unanswered_question_count": len([answer for answer in answers if answer.fallback_reason]),
+            "pending_feedback_count": len([record for record in feedback if record.status != "closed"]),
+            "stale_knowledge_count": len(stale),
+        }
 
     def _hot_knowledge_for_tenant(self, tenant_id: str) -> List[Dict[str, object]]:
         rows: List[Dict[str, object]] = []

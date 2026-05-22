@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">NebulaKB Knowledge Health Dashboard</title>
+  <desc id="desc">按知识库展示知识命中率、低质回答率、未命中问题、待处理反馈和过期知识。</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="#f4f6f8"/>
+  <rect x="0" y="0" width="1280" height="76" fill="#111827"/>
+  <text x="40" y="48" fill="#ffffff" font-family="PingFang SC, Arial, sans-serif" font-size="28" font-weight="700">NebulaKB</text>
+  <text x="190" y="48" fill="#a7f3d0" font-family="PingFang SC, Arial, sans-serif" font-size="16">Knowledge Health Dashboard</text>
+  <rect x="1010" y="22" width="170" height="34" rx="6" fill="#ffffff" fill-opacity="0.12"/>
+  <text x="1034" y="45" fill="#ffffff" font-family="PingFang SC, Arial, sans-serif" font-size="14">知识运营后台</text>
+
+  <text x="54" y="128" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="30" font-weight="800">知识健康总览</text>
+  <text x="54" y="156" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="15">从命中、质量、反馈、过期知识到治理任务，按知识库维度闭环。</text>
+
+  <g filter="url(#shadow)">
+    <rect x="54" y="190" width="216" height="112" rx="8" fill="#ffffff"/>
+    <text x="78" y="226" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="14">知识命中率</text>
+    <text x="78" y="270" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="36" font-weight="800">82.4%</text>
+    <text x="182" y="270" fill="#059669" font-family="PingFang SC, Arial, sans-serif" font-size="14">+6.8%</text>
+
+    <rect x="294" y="190" width="216" height="112" rx="8" fill="#ffffff"/>
+    <text x="318" y="226" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="14">低质回答率</text>
+    <text x="318" y="270" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="36" font-weight="800">4.7%</text>
+    <text x="410" y="270" fill="#059669" font-family="PingFang SC, Arial, sans-serif" font-size="14">-1.6%</text>
+
+    <rect x="534" y="190" width="216" height="112" rx="8" fill="#ffffff"/>
+    <text x="558" y="226" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="14">未命中问题数</text>
+    <text x="558" y="270" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="36" font-weight="800">37</text>
+    <text x="620" y="270" fill="#059669" font-family="PingFang SC, Arial, sans-serif" font-size="14">-8.1%</text>
+
+    <rect x="774" y="190" width="216" height="112" rx="8" fill="#ffffff"/>
+    <text x="798" y="226" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="14">待处理反馈数</text>
+    <text x="798" y="270" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="36" font-weight="800">12</text>
+    <text x="858" y="270" fill="#059669" font-family="PingFang SC, Arial, sans-serif" font-size="14">-18.2%</text>
+
+    <rect x="1014" y="190" width="216" height="112" rx="8" fill="#ffffff"/>
+    <text x="1038" y="226" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="14">过期知识数</text>
+    <text x="1038" y="270" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="36" font-weight="800">9</text>
+    <text x="1098" y="270" fill="#059669" font-family="PingFang SC, Arial, sans-serif" font-size="14">-11.4%</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="54" y="334" width="780" height="300" rx="8" fill="#ffffff"/>
+    <text x="82" y="376" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="18" font-weight="800">按知识库维度</text>
+    <text x="82" y="420" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">知识库</text>
+    <text x="274" y="420" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">命中率</text>
+    <text x="390" y="420" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">低质率</text>
+    <text x="506" y="420" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">未命中</text>
+    <text x="620" y="420" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">反馈</text>
+    <text x="720" y="420" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">状态</text>
+    <line x1="82" y1="438" x2="806" y2="438" stroke="#e5e7eb"/>
+
+    <text x="82" y="482" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15" font-weight="700">客服政策库</text>
+    <text x="274" y="482" fill="#059669" font-family="PingFang SC, Arial, sans-serif" font-size="15">84.6%</text>
+    <text x="390" y="482" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">3.8%</text>
+    <text x="506" y="482" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">14</text>
+    <text x="620" y="482" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">5</text>
+    <rect x="720" y="460" width="68" height="28" rx="6" fill="#dcfce7"/>
+    <text x="742" y="480" fill="#166534" font-family="PingFang SC, Arial, sans-serif" font-size="13">健康</text>
+
+    <text x="82" y="538" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15" font-weight="700">法务条款库</text>
+    <text x="274" y="538" fill="#b45309" font-family="PingFang SC, Arial, sans-serif" font-size="15">79.2%</text>
+    <text x="390" y="538" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">5.1%</text>
+    <text x="506" y="538" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">9</text>
+    <text x="620" y="538" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">3</text>
+    <rect x="720" y="516" width="68" height="28" rx="6" fill="#fef3c7"/>
+    <text x="742" y="536" fill="#92400e" font-family="PingFang SC, Arial, sans-serif" font-size="13">关注</text>
+
+    <text x="82" y="594" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15" font-weight="700">制造 SOP 库</text>
+    <text x="274" y="594" fill="#dc2626" font-family="PingFang SC, Arial, sans-serif" font-size="15">73.5%</text>
+    <text x="390" y="594" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">6.4%</text>
+    <text x="506" y="594" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">14</text>
+    <text x="620" y="594" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15">4</text>
+    <rect x="720" y="572" width="68" height="28" rx="6" fill="#fee2e2"/>
+    <text x="742" y="592" fill="#991b1b" font-family="PingFang SC, Arial, sans-serif" font-size="13">风险</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="866" y="334" width="364" height="300" rx="8" fill="#ffffff"/>
+    <text x="894" y="376" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="18" font-weight="800">低质答案回看</text>
+    <rect x="894" y="408" width="112" height="30" rx="6" fill="#eff6ff"/>
+    <text x="914" y="428" fill="#1d4ed8" font-family="PingFang SC, Arial, sans-serif" font-size="13">客服政策库</text>
+    <rect x="1018" y="408" width="88" height="30" rx="6" fill="#fef3c7"/>
+    <text x="1038" y="428" fill="#92400e" font-family="PingFang SC, Arial, sans-serif" font-size="13">引用缺失</text>
+    <rect x="1118" y="408" width="72" height="30" rx="6" fill="#fee2e2"/>
+    <text x="1138" y="428" fill="#991b1b" font-family="PingFang SC, Arial, sans-serif" font-size="13">待处理</text>
+
+    <text x="894" y="478" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15" font-weight="700">解析失败后应该如何处理？</text>
+    <text x="894" y="506" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">reason: 缺少负责人和 SLA</text>
+    <text x="894" y="532" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">owner: knowledge-ops · status: open</text>
+    <line x1="894" y1="556" x2="1198" y2="556" stroke="#e5e7eb"/>
+    <text x="894" y="592" fill="#0f172a" font-family="PingFang SC, Arial, sans-serif" font-size="15" font-weight="700">设备异常如何升级？</text>
+    <text x="894" y="620" fill="#64748b" font-family="PingFang SC, Arial, sans-serif" font-size="13">reason: 引用缺失 · owner: mfg-ops</text>
+  </g>
+</svg>

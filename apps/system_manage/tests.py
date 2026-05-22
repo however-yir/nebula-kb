@@ -9,6 +9,10 @@ class KnowledgeOpsDashboardSerializerTests(SimpleTestCase):
 
         expected_keys = {
             "metrics",
+            "knowledge_health",
+            "feedback_governance_tasks",
+            "low_quality_reviews",
+            "missed_question_clusters",
             "lifecycle",
             "freshness",
             "conflicts",
@@ -44,3 +48,6 @@ class KnowledgeOpsDashboardSerializerTests(SimpleTestCase):
         assert expected_keys.issubset(dashboard.keys())
         assert dashboard["tenant_isolation"]["enabled"] is True
         assert dashboard["workflow_gray_release"]["percent"] == 20
+        assert dashboard["metrics"][0]["label"] == "知识命中率"
+        assert dashboard["knowledge_health"][0]["knowledge_base_id"] == "kb-cs"
+        assert dashboard["low_quality_reviews"][0]["status"] == "open"
