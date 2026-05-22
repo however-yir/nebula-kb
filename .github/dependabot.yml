@@ -17,3 +17,13 @@ updates:
     target-branch: "main"
     ignore:
       - dependency-name: "js-cookie"
+
+  - package-ecosystem: "npm"
+    directory: "/engines/yourrag/web"
+    schedule:
+      interval: "weekly"
+      timezone: "Asia/Shanghai"
+      day: "friday"
+    target-branch: "main"
+    ignore:
+      - dependency-name: "js-cookie"
