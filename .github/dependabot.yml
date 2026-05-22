@@ -7,3 +7,13 @@ updates:
       timezone: "Asia/Shanghai"
       day: "friday"
     target-branch: "main"
+
+  - package-ecosystem: "npm"
+    directory: "/ui"
+    schedule:
+      interval: "weekly"
+      timezone: "Asia/Shanghai"
+      day: "friday"
+    target-branch: "main"
+    ignore:
+      - dependency-name: "js-cookie"
