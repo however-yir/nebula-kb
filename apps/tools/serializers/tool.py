@@ -43,6 +43,7 @@ from system_manage.models import AuthTargetType, WorkspaceUserResourcePermission
 from system_manage.models.resource_mapping import ResourceMapping
 from system_manage.serializers.resource_mapping_serializers import ResourceMappingSerializer
 from system_manage.serializers.user_resource_permission import UserResourcePermissionSerializer
+from tools.harness import ToolHarnessService
 from tools.models import Tool, ToolScope, ToolFolder, ToolType, ToolRecord
 from tools.models.tool_workflow import ToolWorkflow
 from trigger.models import TriggerTask, Trigger
@@ -474,12 +475,20 @@ class ToolSerializer(serializers.Serializer):
 
         def test_connection(self):
             self.is_valid(raise_exception=True)
-            # 校验代码是否包括禁止的关键字
-            ToolExecutor().validate_mcp_transport(self.data.get('code', ''))
 
-            # 校验mcp json
-            validate_mcp_config(json.loads(self.data.get('code')))
-            return True
+            def connect(code):
+                # 校验代码是否包括禁止的关键字
+                ToolExecutor().validate_mcp_transport(code)
+
+                # 校验mcp json
+                validate_mcp_config(json.loads(code))
+                return True
+
+            return ToolHarnessService().test_connection(
+                workspace_id=self.data.get('workspace_id'),
+                code=self.data.get('code', ''),
+                connect=connect,
+            ).to_dict()
 
     class Debug(serializers.Serializer):
         user_id = serializers.UUIDField(required=True, label=_('user id'))

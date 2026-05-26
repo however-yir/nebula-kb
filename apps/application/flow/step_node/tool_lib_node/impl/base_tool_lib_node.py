@@ -12,7 +12,6 @@ import io
 import json
 import mimetypes
 import time
-import traceback
 from typing import Dict
 
 import uuid_utils.compat as uuid
@@ -25,13 +24,12 @@ from application.flow.i_step_node import NodeResult
 from application.flow.step_node.tool_lib_node.i_tool_lib_node import IToolLibNode
 from common.database_model_manage.database_model_manage import DatabaseModelManage
 from common.exception.app_exception import AppApiException
-from common.utils.logger import maxkb_logger
 from common.utils.rsa_util import rsa_long_decrypt
 from common.utils.tool_code import ToolExecutor
 from knowledge.models import FileSourceType
-from knowledge.models.knowledge_action import State
 from oss.serializers.file import FileSerializer
-from tools.models import Tool, ToolRecord, ToolTaskTypeChoices
+from tools.harness import ToolHarnessService
+from tools.models import Tool, ToolTaskTypeChoices
 
 function_executor = ToolExecutor()
 
@@ -272,32 +270,18 @@ class BaseToolLibNodeNode(IToolLibNode):
                 source_id = self.workflow_manage.params.get('application_id')
                 source_type = ToolTaskTypeChoices.APPLICATION.value
 
-            ToolRecord(
-                id=task_record_id,
-                workspace_id=tool_lib.workspace_id,
-                tool_id=tool_lib.id,
+            result, _observation = ToolHarnessService().execute_tool(
+                tool=tool_lib,
+                params=filtered_args,
+                execute=lambda: function_executor.exec_code(tool_lib.code, all_params),
                 source_type=source_type,
                 source_id=source_id,
-                meta={'input': filtered_args, 'output': {}},
-                state=State.STARTED
-            ).save()
-
-            result = function_executor.exec_code(tool_lib.code, all_params)
-            result_dict = _get_result_detail(result)
-            QuerySet(ToolRecord).filter(id=task_record_id).update(
-                state=State.SUCCESS,
-                run_time=time.time() - start_time,
-                meta={'input': filtered_args, 'output': result_dict}
+                record_id=task_record_id,
+                output_serializer=_get_result_detail,
             )
-
             return result
-        except Exception as e:
-            maxkb_logger.error(f"Tool execution error: {traceback.format_exc()}")
-            QuerySet(ToolRecord).filter(id=task_record_id).update(
-                state=State.FAILURE,
-                run_time=time.time() - start_time,
-                meta={'input': filtered_args, 'output': 'Error: ' + str(e)}
-            )
+        finally:
+            self.context['run_time'] = time.time() - start_time
 
     def upload_knowledge_file(self, file):
         knowledge_id = self.workflow_params.get('knowledge_id')

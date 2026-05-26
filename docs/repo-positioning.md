@@ -10,8 +10,8 @@ NebulaKB 是知识资产生命周期平台，负责让知识资产持续变好 �
 |---|---|---|---|---|---|
 | 主语言 | Python/Django | Java/Spring Boot | Java/Spring Boot | Python/FastAPI | Go/Python/Node/Java/C# |
 | 核心用户 | 知识运营、内容治理、业务管理员 | 后端工程师、AI 平台工程师、架构负责人 | 面试官、招聘方、学习者 | 研发团队、技术管理者 | 架构师、面试官 |
-| 关键链路 | 知识入库→治理→检索→反馈→运营 | RAG→租户隔离→异步入库→鉴权审计→可观测 | 意图路由→ToolCall→SSE→卡片 | 任务协议→执行→审计→报告 | 多语言服务→K8s→AI 接入 |
-| 不做的事 | 不提供企业级 JWT/RBAC 后端引擎 | 不做知识运营后台 UI | 不做通用 Agent 框架 | 不自研 Agent 运行时 | 不做单语言微服务框架 |
+| 关键链路 | 知识入库→治理→检索→反馈→运营；轻量 Tool Harness | RAG→租户隔离→异步入库→鉴权审计→可观测 | 意图路由→ToolCall→SSE→卡片 | 任务协议→执行→审计→报告 | 多语言服务→K8s→AI 接入 |
+| 不做的事 | 不提供企业级 JWT/RBAC 后端引擎；不做工程执行沙箱 | 不做知识运营后台 UI | 不做通用 Agent 框架 | 不自研 Agent 运行时 | 不做单语言微服务框架 |
 
 ## 与同系列项目的边界
 
@@ -22,6 +22,12 @@ NebulaKB 管"知识好不好"，knowledgeops-agent 管"后端稳不稳"。
 NebulaKB 面向知识运营人员，提供文档入库、解析状态、检索命中、人工评分、低质答案回看的运营后台。knowledgeops-agent 面向后端工程师，提供 Spring AI RAG 引擎、租户隔离、JWT/RBAC、异步入库队列、可观测栈和回归评测。
 
 两者可以组合：NebulaKB 做知识运营前台，knowledgeops-agent 做 RAG 后端引擎。但当前阶段各自独立闭环更有展示价值 —— NebulaKB 用 Django 管理知识资产生命周期，knowledgeops-agent 用 Spring AI 证明企业级 Java RAG 工程能力。
+
+### vs forgepilot-studio
+
+forgepilot-studio 面向工程任务执行治理，关注任务协议、执行沙箱、审计报告和研发团队协作。NebulaKB 只提供轻量 Tool Harness：对工具连接、工具执行和工作流工具节点做权限复用、参数脱敏、耗时和错误 observation 标准化。
+
+因此 NebulaKB 可以展示工具/连接器治理能力，但不做完整 Agent Harness，也不承诺隔离工程命令、仓库修改、CI 修复或自动交付任务。
 
 ### vs local-ai-hub
 
@@ -43,6 +49,7 @@ tianji-ai-agent 是业务 Agent 工程案例，围绕课程咨询/推荐/购买�
 
 - 不做通用聊天助手 —— 那是 ChatGPT、Claude 等产品的事
 - 不做企业级鉴权和多租户后端 —— 那是 knowledgeops-agent 的事
+- 不做工程执行沙箱 —— NebulaKB 的 Harness 只治理工具执行边界
 - 不做 Agent 任务编排和执行沙箱 —— 那是 forgepilot-studio 的事
 - 不做多语言微服务治理和 K8s 部署样板 —— 那是 however-microservices-lab 的事
 - 不做单一业务的 Agent 流程演示 —— 那是 tianji-ai-agent 的事

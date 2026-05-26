@@ -16,6 +16,7 @@ from application.flow.i_step_node import NodeResult
 from application.flow.step_node.tool_node.i_tool_node import IToolNode
 from common.utils.tool_code import ToolExecutor
 from lzkb.const import CONFIG
+from tools.harness import ToolHarnessService
 
 function_executor = ToolExecutor()
 
@@ -110,6 +111,7 @@ class BaseToolNodeNode(IToolNode):
     def save_context(self, details, workflow_manage):
         self.context['result'] = details.get('result')
         self.context['exception_message'] = details.get('err_message')
+        self.context['harness_observation'] = details.get('harness_observation')
         if self.node_params.get('is_result', False):
             self.answer_text = str(details.get('result'))
 
@@ -117,8 +119,13 @@ class BaseToolNodeNode(IToolNode):
         params = {field.get('name'): convert_value(field.get('name'), field.get('value'), field.get('type'),
                                                    field.get('is_required'), field.get('source'), self)
                   for field in input_field_list}
-        result = function_executor.exec_code(code, params)
-        self.context['params'] = params
+        result, observation = ToolHarnessService().execute_workflow_tool_node(
+            workspace_id=kwargs.get('workspace_id'),
+            params=params,
+            execute=lambda: function_executor.exec_code(code, params),
+        )
+        self.context['params'] = observation.to_meta().get('input')
+        self.context['harness_observation'] = observation.to_dict()
         return NodeResult({'result': result}, {}, _write_context=write_context)
 
     def get_details(self, index: int, **kwargs):
@@ -127,6 +134,7 @@ class BaseToolNodeNode(IToolNode):
             "index": index,
             "result": self.context.get('result'),
             "params": self.context.get('params'),
+            "harness_observation": self.context.get('harness_observation'),
             'run_time': self.context.get('run_time'),
             'type': self.node.type,
             'status': self.status,
