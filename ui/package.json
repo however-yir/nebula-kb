@@ -87,7 +87,7 @@
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2",
     "vue-tsc": "^2.2.8",
-    "vitest": "^3.0.0",
+    "vitest": "^4.1.0",
     "@vue/test-utils": "^2.4.0",
     "jsdom": "^26.0.0"
   }
