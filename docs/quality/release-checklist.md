@@ -14,6 +14,7 @@
 
 ```bash
 bash scripts/quality-gate.sh completion
+bash scripts/quality-gate.sh lifecycle-demo
 bash scripts/quality-gate.sh smoke
 bash scripts/quality-gate.sh api
 bash scripts/quality-gate.sh auth
@@ -23,6 +24,7 @@ COVERAGE_FAIL_UNDER=50 bash scripts/quality-gate.sh coverage
 
 - [ ] smoke 通过。
 - [ ] completion roadmap 完整性检查通过。
+- [ ] lifecycle demo 回归通过。
 - [ ] API regression 通过。
 - [ ] auth/token 回归通过。
 - [ ] permission/越权回归通过。

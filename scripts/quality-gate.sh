@@ -72,6 +72,7 @@ Gates:
   frontend-typecheck Frontend TypeScript type check
   frontend-test      Frontend vitest tests
   completion         Functional completion roadmap integrity check
+  lifecycle-demo     Knowledge asset lifecycle demo regression
   release            Run the fixed release gate set
   all                Run smoke, unit, integration, api, auth, permission, coverage, frontend gates
 
@@ -178,8 +179,25 @@ run_completion() {
   grep -q 'functional-completion-roadmap.md' "${checklist}"
 }
 
+run_lifecycle_demo() {
+  echo "==> lifecycle-demo"
+  local output
+  output="$(mktemp)"
+
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_lifecycle.py > "${output}")
+  grep -q 'NebulaKB demo: knowledge asset lifecycle' "${output}"
+  grep -q 'status=indexed' "${output}"
+  grep -q 'Fallback: empty_result' "${output}"
+  grep -q '"knowledge_hit_rate": 0.75' "${output}"
+  grep -q '"low_quality_answer_rate": 1.0' "${output}"
+  grep -q 'Knowledge-base health dashboard' "${output}"
+  grep -q '"status": "closed"' "${output}"
+  rm -f "${output}"
+}
+
 run_release() {
   run_completion
+  run_lifecycle_demo
   run_smoke
   run_api
   run_auth
@@ -232,6 +250,9 @@ for gate in "$@"; do
     completion)
       run_completion
       ;;
+    lifecycle-demo)
+      run_lifecycle_demo
+      ;;
     release)
       run_release
       ;;
@@ -247,6 +268,7 @@ for gate in "$@"; do
       run_frontend_typecheck
       run_frontend_test
       run_completion
+      run_lifecycle_demo
       ;;
     *)
       echo "Unknown gate: ${gate}" >&2
