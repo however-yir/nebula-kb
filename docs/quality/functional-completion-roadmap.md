@@ -28,6 +28,7 @@
 | Batch 4 | 已完成 | 002、005、006、007、008、009、021、022、023、024 | `README.md`、`README_CN.md`、`.env.example`、`docs/ops/operability.md`、`scripts/quality-gate.sh local-readiness-docs` |
 | Batch 5 | 已完成 | 026、035、039、051、052、054、055、061、062、067、071、078、082、083、088、089、091、092、094、095、099、100 | `apps/knowledge/services/asset_lifecycle_demo.py`、`apps/knowledge/tests.py`、`scripts/demo_lifecycle.py`、`scripts/quality-gate.sh lifecycle-demo` |
 | Batch 6 | 已完成 | 101、102、109、121、131、132、135、138、141、144、146、149、150 | `apps/application/services/application_workflow_demo.py`、`apps/application/tests.py`、`scripts/demo_application_workflow.py`、`scripts/quality-gate.sh application-workflow-demo` |
+| Batch 7 | 已完成 | 161、162、163、168、171、173、174、175、176、181、184、188、189、191、193、196、197、198、201、211、212、213、214、215、216、217、218 | `apps/system_manage/services/platform_governance_demo.py`、`apps/system_manage/tests.py`、`scripts/demo_platform_governance.py`、`scripts/quality-gate.sh platform-governance-demo` |
 
 ## 300 项功能补齐清单
 

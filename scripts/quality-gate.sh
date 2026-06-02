@@ -76,6 +76,7 @@ Gates:
   completion         Functional completion roadmap integrity check
   lifecycle-demo     Knowledge asset lifecycle demo regression
   application-workflow-demo Feedback, dashboard, application, and workflow demo regression
+  platform-governance-demo Model/tool/trigger/permission/audit demo regression
   local-readiness-docs Local startup/configuration documentation drift check
   release            Run the fixed release gate set
   all                Run smoke, unit, integration, api, auth, permission, coverage, frontend, docs gates
@@ -234,6 +235,35 @@ run_application_workflow_demo() {
   rm -f "${output}"
 }
 
+run_platform_governance_demo() {
+  echo "==> platform-governance-demo"
+  local output
+  output="$(mktemp)"
+
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_platform_governance.py > "${output}")
+  grep -q 'NebulaKB demo: platform governance' "${output}"
+  grep -q 'Model provider onboarded:' "${output}"
+  grep -q 'Model connection: ok' "${output}"
+  grep -q 'Embedding test dimension:' "${output}"
+  grep -q 'Default model:' "${output}"
+  grep -q 'is_default=True' "${output}"
+  grep -q 'Tool debug: success' "${output}"
+  grep -q 'Tool permissions:' "${output}"
+  grep -q 'Tool schema: input=' "${output}"
+  grep -q 'Trigger enabled: True' "${output}"
+  grep -q 'Trigger target validated:' "${output}"
+  grep -q 'Trigger run count: 1' "${output}"
+  grep -q 'Permission matrix:' "${output}"
+  grep -q 'Resource authorization:' "${output}"
+  grep -q 'Workspace isolation blocked: true' "${output}"
+  grep -q 'User disabled:' "${output}"
+  grep -q 'SSO configured: oidc, enabled=True' "${output}"
+  grep -q 'Audit summary:' "${output}"
+  grep -Fq '"api_key": "********"' "${output}"
+  grep -Fq '"token": "********"' "${output}"
+  rm -f "${output}"
+}
+
 run_local_readiness_docs() {
   echo "==> local-readiness-docs"
   local readme="${ROOT_DIR}/README.md"
@@ -265,6 +295,7 @@ run_release() {
   run_completion
   run_lifecycle_demo
   run_application_workflow_demo
+  run_platform_governance_demo
   run_local_readiness_docs
   run_smoke
   run_api
@@ -324,6 +355,9 @@ for gate in "$@"; do
     application-workflow-demo)
       run_application_workflow_demo
       ;;
+    platform-governance-demo)
+      run_platform_governance_demo
+      ;;
     local-readiness-docs)
       run_local_readiness_docs
       ;;
@@ -344,6 +378,7 @@ for gate in "$@"; do
       run_completion
       run_lifecycle_demo
       run_application_workflow_demo
+      run_platform_governance_demo
       run_local_readiness_docs
       ;;
     *)
