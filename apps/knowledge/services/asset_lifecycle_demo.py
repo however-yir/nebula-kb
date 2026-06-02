@@ -367,6 +367,32 @@ class KnowledgeAssetPlatform:
             record.governance_task_id = task.id
         return record
 
+    def vote_answer(
+        self,
+        tenant_id: str,
+        knowledge_base_id: str,
+        question: str,
+        answer: str,
+        vote: str,
+        citations: Optional[List[str]] = None,
+        reason: str = "",
+        owner: str = "knowledge-ops",
+    ) -> FeedbackRecord:
+        if vote not in {"thumbs_up", "thumbs_down"}:
+            raise ValueError("vote must be thumbs_up or thumbs_down")
+        rating = 5 if vote == "thumbs_up" else 1
+        feedback_reason = reason or ("positive feedback" if vote == "thumbs_up" else "negative feedback")
+        return self.submit_feedback(
+            tenant_id=tenant_id,
+            knowledge_base_id=knowledge_base_id,
+            question=question,
+            answer=answer,
+            citations=citations or [],
+            rating=rating,
+            reason=feedback_reason,
+            owner=owner,
+        )
+
     def low_quality_answers(
         self,
         tenant_id: str,
@@ -496,6 +522,23 @@ class KnowledgeAssetPlatform:
                 }
             )
         return rows
+
+    def operations_dashboard_first_screen(self, tenant_id: str) -> Dict[str, object]:
+        metrics = self.metrics(tenant_id)
+        knowledge_bases = self.metrics_by_knowledge_base(tenant_id)
+        return {
+            "summary_cards": {
+                "knowledge_hit_rate": metrics["knowledge_hit_rate"],
+                "low_quality_answer_rate": metrics["low_quality_answer_rate"],
+                "pending_feedback_count": metrics["pending_feedback_count"],
+                "unanswered_question_count": metrics["unanswered_question_count"],
+            },
+            "queues": {
+                "unanswered_questions": metrics["unanswered_questions"][:5],
+                "governance_tasks": metrics["governance_tasks"][:5],
+            },
+            "knowledge_bases": knowledge_bases,
+        }
 
     def knowledge_base_health(self, tenant_id: str, knowledge_base_id: str) -> Dict[str, object]:
         kb = self._require_kb_access(tenant_id, knowledge_base_id)

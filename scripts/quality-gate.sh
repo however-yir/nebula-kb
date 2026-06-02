@@ -75,6 +75,7 @@ Gates:
   frontend-test      Frontend vitest tests
   completion         Functional completion roadmap integrity check
   lifecycle-demo     Knowledge asset lifecycle demo regression
+  application-workflow-demo Feedback, dashboard, application, and workflow demo regression
   local-readiness-docs Local startup/configuration documentation drift check
   release            Run the fixed release gate set
   all                Run smoke, unit, integration, api, auth, permission, coverage, frontend, docs gates
@@ -208,6 +209,31 @@ run_lifecycle_demo() {
   rm -f "${output}"
 }
 
+run_application_workflow_demo() {
+  echo "==> application-workflow-demo"
+  local output
+  output="$(mktemp)"
+
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_application_workflow.py > "${output}")
+  grep -q 'NebulaKB demo: feedback, dashboard, application workflow' "${output}"
+  grep -q 'Thumbs up feedback: rating=5' "${output}"
+  grep -q 'Thumbs down feedback: rating=1' "${output}"
+  grep -q 'Governance task:' "${output}"
+  grep -q 'Operations dashboard first screen:' "${output}"
+  grep -q '"summary_cards"' "${output}"
+  grep -q 'Application created: simple' "${output}"
+  grep -q 'Application created: workflow' "${output}"
+  grep -q 'Published version: 1' "${output}"
+  grep -q 'API key: nebula_' "${output}"
+  grep -q 'Workflow node docs:' "${output}"
+  grep -q 'Connection validation: ok' "${output}"
+  grep -q 'Condition test: true' "${output}"
+  grep -q 'Workflow debug status: success' "${output}"
+  grep -q 'Run log events:' "${output}"
+  grep -q 'workflow_completed' "${output}"
+  rm -f "${output}"
+}
+
 run_local_readiness_docs() {
   echo "==> local-readiness-docs"
   local readme="${ROOT_DIR}/README.md"
@@ -238,6 +264,7 @@ run_local_readiness_docs() {
 run_release() {
   run_completion
   run_lifecycle_demo
+  run_application_workflow_demo
   run_local_readiness_docs
   run_smoke
   run_api
@@ -294,6 +321,9 @@ for gate in "$@"; do
     lifecycle-demo)
       run_lifecycle_demo
       ;;
+    application-workflow-demo)
+      run_application_workflow_demo
+      ;;
     local-readiness-docs)
       run_local_readiness_docs
       ;;
@@ -313,6 +343,7 @@ for gate in "$@"; do
       run_frontend_test
       run_completion
       run_lifecycle_demo
+      run_application_workflow_demo
       run_local_readiness_docs
       ;;
     *)

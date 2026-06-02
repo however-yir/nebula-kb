@@ -297,6 +297,40 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
         self.assertEqual(closed.status, "closed")
         self.assertEqual(closed.owner, "knowledge-ops")
 
+    def test_thumbs_votes_create_feedback_and_dashboard_first_screen(self):
+        document = self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
+        answer = self.platform.ask(self.tenant_a, self.kb.id, "解析失败后应该如何处理？")
+        thumbs_up = self.platform.vote_answer(
+            self.tenant_a,
+            self.kb.id,
+            "点赞是否可用？",
+            "答案可接受",
+            vote="thumbs_up",
+            citations=[document.chunks[0].citation],
+        )
+        thumbs_down = self.platform.vote_answer(
+            self.tenant_a,
+            self.kb.id,
+            answer.question,
+            answer.answer,
+            vote="thumbs_down",
+            citations=answer.citations,
+            reason="答案缺少负责人和 SLA。",
+            owner="ops-a",
+        )
+
+        self.assertEqual(thumbs_up.rating, 5)
+        self.assertIsNone(thumbs_up.governance_task_id)
+        self.assertEqual(thumbs_down.rating, 1)
+        self.assertIsNotNone(thumbs_down.governance_task_id)
+
+        dashboard = self.platform.operations_dashboard_first_screen(self.tenant_a)
+        self.assertIn("summary_cards", dashboard)
+        self.assertIn("queues", dashboard)
+        self.assertEqual(dashboard["summary_cards"]["pending_feedback_count"], 2)
+        self.assertEqual(dashboard["queues"]["governance_tasks"][0]["owner"], "ops-a")
+        self.assertEqual(dashboard["knowledge_bases"][0]["knowledge_base_id"], self.kb.id)
+
     def test_negative_feedback_creates_governance_task_and_health_metrics(self):
         self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
         answer = self.platform.ask(self.tenant_a, self.kb.id, "解析失败后应该如何处理？")
