@@ -30,6 +30,7 @@
 | Batch 6 | 已完成 | 101、102、109、121、131、132、135、138、141、144、146、149、150 | `apps/application/services/application_workflow_demo.py`、`apps/application/tests.py`、`scripts/demo_application_workflow.py`、`scripts/quality-gate.sh application-workflow-demo` |
 | Batch 7 | 已完成 | 161、162、163、168、171、173、174、175、176、181、184、188、189、191、193、196、197、198、201、211、212、213、214、215、216、217、218 | `apps/system_manage/services/platform_governance_demo.py`、`apps/system_manage/tests.py`、`scripts/demo_platform_governance.py`、`scripts/quality-gate.sh platform-governance-demo` |
 | Batch 8 | 已完成 | 221、222、223、224、225、230、231、234、235、237、251、252、253、254、255、256、257、261、262、267、268、270、281、291 | `apps/common/contracts/api_contract.py`、`docs/api/openapi-v1.json`、`apps/system_manage/services/release_acceptance.py`、`scripts/demo_release_acceptance.py`、`scripts/production-security-check.sh`、`scripts/quality-gate.sh api-security-release` |
+| Batch 9 | 已完成 | 011、012、013、014、015、016、017、025、027、028、029、030、031、032、033、034、036、037、038、040、041、042、043、044、045、046、047、048、049、050、053、056、057、058、059、060、063、064、065、066、068、069、070、072、073、074、075、076、077、079、080、084、085、086、087、090、093、096、097、098 | `apps/knowledge/services/asset_admin_completion.py`、`apps/knowledge/tests.py`、`docs/demo-assets.md`、`scripts/demo_knowledge_admin.py`、`scripts/quality-gate.sh knowledge-admin-demo` |
 
 ## 300 项功能补齐清单
 

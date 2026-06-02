@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 from django.test import SimpleTestCase
 
 from knowledge.models import SearchMode
+from knowledge.services.asset_admin_completion import KnowledgeAssetAdminCompletion
 from knowledge.services.asset_lifecycle_demo import (
     MAX_UPLOAD_BYTES,
     SUPPORTED_UPLOAD_MIME_TYPES,
@@ -449,3 +450,140 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
             [record.id for record in self.platform.low_quality_answers(self.tenant_a, status="closed")],
             [first.id],
         )
+
+
+class KnowledgeAssetAdminCompletionTests(SimpleTestCase):
+    def setUp(self):
+        self.platform = KnowledgeAssetAdminCompletion()
+
+    def test_knowledge_base_templates_metadata_versions_and_demo_assets(self):
+        self.assertIn("Create a knowledge base", self.platform.empty_state_guidance())
+
+        accounts = self.platform.initialize_demo_accounts()
+        manifest = self.platform.demo_asset_manifest()
+        kb = self.platform.import_demo_knowledge_base()
+        copied = self.platform.copy_knowledge_base(kb.id, "Support Copy")
+        archived = self.platform.archive_knowledge_base(copied.id)
+
+        self.assertEqual([account["role"] for account in accounts], ["admin", "operator", "viewer"])
+        self.assertEqual(manifest["version"], "2026.06")
+        self.assertIn("knowledge_base_list", manifest["screenshots"])
+        self.assertEqual(manifest["gif_source"], "docs/assets/screenshots/demo.gif")
+        self.assertEqual(kb.template_id, "support")
+        self.assertEqual(archived.status, "archived")
+        self.assertIn("copied_from", " ".join(copied.history))
+
+        tags = self.platform.update_tags(kb.id, add={"refund"}, remove={"faq"})
+        self.platform.update_owner(kb.id, "lead@nebulakb.local")
+        self.platform.update_description(kb.id, "<p>Support policy</p>")
+        self.platform.set_visibility(kb.id, "private")
+        self.platform.mark_version(kb.id, "baseline")
+        self.platform.favorite(kb.id, "operator")
+        recent = self.platform.record_recent_visit(kb.id, "operator")
+        binding = self.platform.model_binding_check(kb.id)
+        embedding_change = self.platform.change_embedding_model(kb.id, "embedding-v2")
+        note = self.platform.set_operational_note(kb.id, "Review quarterly.")
+
+        self.assertIn("refund", tags)
+        self.assertEqual(kb.owner, "lead@nebulakb.local")
+        self.assertEqual(kb.description_html, "<p>Support policy</p>")
+        self.assertEqual(kb.visibility, "private")
+        self.assertEqual(kb.version, 2)
+        self.assertEqual(recent, ["operator"])
+        self.assertEqual(binding["status"], "ok")
+        self.assertEqual(embedding_change["status"], "requires_reindex")
+        self.assertEqual(note, "Review quarterly.")
+        self.assertGreater(self.platform.capacity_stats(kb.id)["used_bytes"], 0)
+        self.assertEqual(self.platform.delete_risk_summary(kb.id)["documents"], 1)
+        self.assertEqual(self.platform.search_knowledge_bases(query="Support", tag="refund")[0].id, kb.id)
+        self.assertEqual(self.platform.list_knowledge_bases(sort_by="updated_at")[0].id, kb.id)
+
+        package = self.platform.export_knowledge_base(kb.id)
+        imported = self.platform.import_knowledge_base(package, "Imported Support")
+        self.assertEqual(imported.template_id, "support")
+        self.assertEqual(self.platform.bulk_delete_knowledge_bases([imported.id]), [imported.id])
+        self.assertGreater(self.platform.clean_demo_data(), 0)
+
+    def test_document_resume_parse_chunk_and_retrieval_controls(self):
+        kb = self.platform.create_knowledge_base(
+            "Policy",
+            template_id="policy",
+            owner="ops",
+            team="Governance",
+        )
+        document = self.platform.start_resumable_upload(
+            kb.id,
+            "policy.md",
+            total_bytes=100,
+            source="local-upload",
+        )
+        self.platform.append_upload_chunk(document.id, 40)
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            self.platform.complete_upload(document.id, "partial")
+
+        self.platform.append_upload_chunk(document.id, 60)
+        self.platform.complete_upload(
+            document.id,
+            "Refund citation evidence matters. Follow-up context improves confidence. Tiny.",
+        )
+        parsed = self.platform.parse_document(document.id, duration_ms=88)
+        self.platform.bulk_reindex([document.id])
+
+        duplicate = self.platform.start_resumable_upload(kb.id, "policy.md", 12, "local-upload")
+        self.platform.append_upload_chunk(duplicate.id, 12)
+        self.platform.complete_upload(duplicate.id, "Duplicate")
+        cancelled = self.platform.cancel_parse_task(duplicate.id)
+        self.assertTrue(cancelled.cancelled)
+        retried = self.platform.retry_failed_parse(duplicate.id, "Recovered duplicate content.")
+
+        self.assertEqual(parsed.parse_duration_ms, 88)
+        self.assertGreaterEqual(parsed.chunk_count, 3)
+        self.assertEqual(parsed.vector_status, "completed")
+        self.assertEqual(parsed.index_status, "indexed")
+        self.assertTrue(duplicate.duplicate_of)
+        self.assertEqual(retried.retry_count, 1)
+        self.assertIn("upload_started", self.platform.download_parse_log(document.id))
+        self.assertIn(document.id, self.platform.bulk_reparse([document.id]))
+        self.assertIn(document.id, self.platform.bulk_reindex([document.id]))
+        self.assertTrue(self.platform.redirect_after_upload(document.id).endswith("/chunks"))
+
+        chunk_ids = list(self.platform.chunk_quality_scores(document.id))
+        self.assertTrue(self.platform.low_quality_chunks(document.id, threshold=60))
+        edited = self.platform.edit_chunk(
+            chunk_ids[0],
+            "Refund citation evidence matters Follow-up context matters",
+        )
+        split = self.platform.split_chunk(edited.id, "Follow-up")
+        self.platform.batch_update_chunks([edited.id, split.id], quality_score=91)
+        merged = self.platform.merge_chunks(edited.id, split.id)
+        disabled = self.platform.disable_chunk(merged.id)
+
+        self.assertGreater(edited.version, 1)
+        self.assertIn("merged", " ".join(merged.history))
+        self.assertFalse(disabled.enabled)
+        self.assertEqual(self.platform.chunk_versions(merged.id)["version"], merged.version)
+
+        replacement = self.platform.edit_chunk(chunk_ids[1], "Refund citation evidence remains searchable")
+        hits = self.platform.search(
+            "refund citation evidence",
+            [kb.id],
+            mode="hybrid",
+            top_k=2,
+            threshold=0.1,
+            rerank=True,
+        )
+        answer = self.platform.ask_multi_knowledge(
+            "refund citation evidence",
+            [kb.id],
+            context_enabled=True,
+            answer_length="short",
+        )
+        exported = self.platform.export_retrieval_results(hits)
+
+        self.assertEqual(replacement.quality_score, 85)
+        self.assertLessEqual(len(hits), 2)
+        self.assertGreater(hits[0]["score"], 0)
+        self.assertGreater(answer["confidence"], 0)
+        self.assertTrue(answer["context_enabled"])
+        self.assertEqual(answer["answer_length"], "short")
+        self.assertEqual(exported[0]["chunk_id"], hits[0]["chunk_id"])

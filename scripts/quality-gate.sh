@@ -75,6 +75,7 @@ Gates:
   frontend-test      Frontend vitest tests
   completion         Functional completion roadmap integrity check
   lifecycle-demo     Knowledge asset lifecycle demo regression
+  knowledge-admin-demo Knowledge base, document, chunk, retrieval admin completion regression
   application-workflow-demo Feedback, dashboard, application, and workflow demo regression
   platform-governance-demo Model/tool/trigger/permission/audit demo regression
   api-security-release API v1, OpenAPI, security, deployment, and observability release regression
@@ -208,6 +209,59 @@ run_lifecycle_demo() {
   grep -q 'Knowledge-base health dashboard' "${output}"
   grep -q '"health_score":' "${output}"
   grep -q '"status": "closed"' "${output}"
+  rm -f "${output}"
+}
+
+run_knowledge_admin_demo() {
+  echo "==> knowledge-admin-demo"
+  local output
+  local demo_doc="${ROOT_DIR}/docs/demo-assets.md"
+  output="$(mktemp)"
+
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_knowledge_admin.py > "${output}")
+  grep -q 'NebulaKB demo: knowledge admin completion' "${output}"
+  grep -q 'Demo accounts: admin, operator, viewer' "${output}"
+  grep -q 'Demo data version: 2026.06' "${output}"
+  grep -q 'Screenshot paths:' "${output}"
+  grep -q 'GIF source: docs/assets/screenshots/demo.gif' "${output}"
+  grep -q 'Knowledge template: support' "${output}"
+  grep -q 'Knowledge archived: archived' "${output}"
+  grep -q 'Knowledge copied:' "${output}"
+  grep -q 'Bulk delete:' "${output}"
+  grep -q 'Tags:' "${output}"
+  grep -q 'Team and owner:' "${output}"
+  grep -q 'Capacity stats:' "${output}"
+  grep -q 'Visibility: private' "${output}"
+  grep -q 'Version and history:' "${output}"
+  grep -q 'Favorite users:' "${output}"
+  grep -q 'Recent visits:' "${output}"
+  grep -q 'Model binding:' "${output}"
+  grep -q 'Embedding change warning: requires_reindex' "${output}"
+  grep -q 'Operational note:' "${output}"
+  grep -q 'Document redirect:' "${output}"
+  grep -q 'Duplicate document:' "${output}"
+  grep -q 'Parse stats: duration=' "${output}"
+  grep -q 'Vector/index status: completed/indexed' "${output}"
+  grep -q 'Parse log download: upload_started' "${output}"
+  grep -q 'Cancelled parse: True' "${output}"
+  grep -q 'Chunk edited version:' "${output}"
+  grep -q 'Chunk split:' "${output}"
+  grep -q 'Chunk disabled: False' "${output}"
+  grep -q 'Chunk quality scores:' "${output}"
+  grep -q 'Hybrid retrieval hits:' "${output}"
+  grep -q 'Rerank/top-k/threshold: enabled/2/0.1' "${output}"
+  grep -q 'Answer confidence:' "${output}"
+  grep -q 'Context and length: True/short' "${output}"
+  grep -q 'Retrieval export:' "${output}"
+  grep -q 'Demo cleanup count:' "${output}"
+
+  grep -Fq 'python scripts/demo_knowledge_admin.py' "${demo_doc}"
+  grep -Fq 'demo-data/knowledge-sample/manifest.json' "${demo_doc}"
+  grep -Fq '2026.06' "${demo_doc}"
+  grep -Fq 'docs/assets/screenshots/knowledge-base-list.svg' "${demo_doc}"
+  grep -Fq 'docs/assets/screenshots/demo.gif' "${demo_doc}"
+  grep -Fq 'clean_demo_data()' "${demo_doc}"
+  grep -Fq 'bash scripts/quality-gate.sh knowledge-admin-demo' "${demo_doc}"
   rm -f "${output}"
 }
 
@@ -387,6 +441,7 @@ run_local_readiness_docs() {
 run_release() {
   run_completion
   run_lifecycle_demo
+  run_knowledge_admin_demo
   run_application_workflow_demo
   run_platform_governance_demo
   run_api_security_release
@@ -446,6 +501,9 @@ for gate in "$@"; do
     lifecycle-demo)
       run_lifecycle_demo
       ;;
+    knowledge-admin-demo)
+      run_knowledge_admin_demo
+      ;;
     application-workflow-demo)
       run_application_workflow_demo
       ;;
@@ -474,6 +532,7 @@ for gate in "$@"; do
       run_frontend_test
       run_completion
       run_lifecycle_demo
+      run_knowledge_admin_demo
       run_application_workflow_demo
       run_platform_governance_demo
       run_api_security_release
