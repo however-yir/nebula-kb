@@ -71,6 +71,7 @@ Gates:
   frontend-lint      Frontend ESLint check
   frontend-typecheck Frontend TypeScript type check
   frontend-test      Frontend vitest tests
+  completion         Functional completion roadmap integrity check
   release            Run the fixed release gate set
   all                Run smoke, unit, integration, api, auth, permission, coverage, frontend gates
 
@@ -155,7 +156,30 @@ run_frontend_test() {
   (cd "${ROOT_DIR}/ui" && npm test)
 }
 
+run_completion() {
+  echo "==> completion roadmap"
+  local roadmap="${ROOT_DIR}/docs/quality/functional-completion-roadmap.md"
+  local checklist="${ROOT_DIR}/docs/quality/release-checklist.md"
+  local count
+
+  if [[ ! -f "${roadmap}" ]]; then
+    echo "Missing completion roadmap: ${roadmap}" >&2
+    exit 1
+  fi
+
+  count="$(grep -E '^[0-9]{3}\. P[0-2] ' "${roadmap}" | wc -l | tr -d ' ')"
+  if [[ "${count}" != "300" ]]; then
+    echo "Expected 300 completion items, found ${count}." >&2
+    exit 1
+  fi
+
+  grep -q '^001\. P0 ' "${roadmap}"
+  grep -q '^300\. P[0-2] ' "${roadmap}"
+  grep -q 'functional-completion-roadmap.md' "${checklist}"
+}
+
 run_release() {
+  run_completion
   run_smoke
   run_api
   run_auth
@@ -205,6 +229,9 @@ for gate in "$@"; do
     frontend-test)
       run_frontend_test
       ;;
+    completion)
+      run_completion
+      ;;
     release)
       run_release
       ;;
@@ -219,6 +246,7 @@ for gate in "$@"; do
       run_frontend_lint
       run_frontend_typecheck
       run_frontend_test
+      run_completion
       ;;
     *)
       echo "Unknown gate: ${gate}" >&2

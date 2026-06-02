@@ -106,6 +106,35 @@ npm install
 npm run dev
 ```
 
+### 启动成功检查
+
+本地开发默认端口：
+
+| 服务 | 地址 | 成功标准 |
+| --- | --- | --- |
+| 后端 API / 管理端静态入口 | `http://localhost:8080/admin` | 页面可访问，API 请求不返回启动错误 |
+| 聊天端静态入口 | `http://localhost:8080/chat` | 页面可访问，聊天端资源可加载 |
+| 管理前端 Vite | `http://localhost:5173` | Vite dev server 启动成功 |
+| 聊天前端 Vite | `http://localhost:5174` | chat mode dev server 启动成功 |
+
+健康检查：
+
+```bash
+curl -fsS http://localhost:8080/healthz
+curl -fsS http://localhost:8080/readyz
+```
+
+`/healthz` 只验证进程存活；`/readyz` 会验证 PostgreSQL、Redis、模型服务和对象存储等依赖是否可用。发布或演示前应以 `/readyz` 返回成功作为继续操作的条件。
+
+最小演示闭环：
+
+1. 登录管理端并创建知识库。
+2. 上传 `demo-data/knowledge-sample/` 中的示例资料。
+3. 等待解析、切片、向量化完成。
+4. 在检索或问答页面提出一个命中示例资料的问题。
+5. 提交一次点赞或点踩反馈。
+6. 打开知识运营大盘，确认命中、低质答案或待更新知识指标可见。
+
 ## 与上游版本的主要差异
 
 当前 fork 重点差异：

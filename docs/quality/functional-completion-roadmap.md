@@ -17,6 +17,13 @@
 | Beta Ready | 核心功能可被真实团队试用，失败可恢复，指标可解释 | P0 清零，P1 过半 |
 | Production Ready | 权限、安全、备份、监控、CI、回滚和非功能测试满足发布要求 | P0/P1 清零 |
 
+## 执行记录
+
+| 批次 | 状态 | 覆盖条目 | 验收资产 |
+| --- | --- | --- | --- |
+| Batch 0 | 已完成 | 300 项路线图基线、发布清单入口 | 本文档、`docs/quality/release-checklist.md` |
+| Batch 1 | 已完成 | 001、003、004、010、018、019、020、289 | `README.md`、`README_CN.md`、`docs/ops/operability.md`、`scripts/quality-gate.sh completion` |
+
 ## 300 项功能补齐清单
 
 ### A. 启动、安装与首次体验

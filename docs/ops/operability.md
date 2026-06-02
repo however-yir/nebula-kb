@@ -82,6 +82,15 @@ python apps/manage.py check
 
 发布系统只应在 `/readyz` 返回 200 后切流量。
 
+本地验证命令：
+
+```bash
+curl -fsS http://localhost:8080/healthz
+curl -fsS http://localhost:8080/readyz
+```
+
+若 `/healthz` 成功但 `/readyz` 失败，应优先检查 PostgreSQL、Redis、local-model 和 object storage 的连接配置。开发模式下，后端默认监听 `:8080`，管理前端默认监听 `:5173`，聊天前端默认监听 `:5174`。
+
 ## 发布和回滚
 
 构建发布镜像前必须先通过 `.github/workflows/nebulakb-tests.yml`。`build-and-push.yml` 已把测试工作流作为前置依赖。
