@@ -98,6 +98,20 @@ powershell -ExecutionPolicy Bypass -File .\scripts\quick-install-win.ps1
 3. 拉起 PostgreSQL / Redis（可选 Ollama）并自动确保 `pgvector` 扩展；
 4. 执行数据库迁移。
 
+### 首次启动检查清单
+
+首次运行或换机器演示前，按顺序确认：
+
+1. `.env` 已由 `.env.example` 复制，且所有 `CHANGE_ME_*` 值已经替换；`scripts/bootstrap-local.sh` 会阻止占位密码启动。
+2. Python 使用 3.11，虚拟环境已激活，`pip install -e .` 已完成；前端使用 Node 20 并执行过 `npm ci`。
+3. Docker Desktop 正在运行；如使用本地依赖栈，执行 `docker compose --env-file .env -f docker-compose.dev.yml ps` 能看到 `postgres` 和 `redis`。
+4. `5432`、`6379`、`8080`、`5173`、`5174` 未被占用；如被占用，先在 `.env` 调整 `NEBULA_DB_PORT`、`NEBULA_REDIS_PORT` 或前端 dev server 端口。
+5. PostgreSQL 使用 `pgvector/pgvector:pg16`，并能执行 `CREATE EXTENSION IF NOT EXISTS vector;`。
+6. 本地数据目录已明确：开发默认使用 `NEBULA_DATA_DIR=/tmp/nebula`；Docker 演示或长期数据请挂载到持久目录，例如 `~/.nebula-kb`。
+7. 运行 `python apps/manage.py check` 和 `python apps/manage.py migrate` 后再启动 `python main.py dev web`。
+
+常见启动失败排查见 [docs/ops/operability.md#本地启动排查矩阵](docs/ops/operability.md#本地启动排查矩阵)。
+
 ### 前端
 
 ```bash

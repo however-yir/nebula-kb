@@ -73,8 +73,9 @@ Gates:
   frontend-test      Frontend vitest tests
   completion         Functional completion roadmap integrity check
   lifecycle-demo     Knowledge asset lifecycle demo regression
+  local-readiness-docs Local startup/configuration documentation drift check
   release            Run the fixed release gate set
-  all                Run smoke, unit, integration, api, auth, permission, coverage, frontend gates
+  all                Run smoke, unit, integration, api, auth, permission, coverage, frontend, docs gates
 
 Environment:
   PYTHON_BIN              Python executable override
@@ -195,9 +196,37 @@ run_lifecycle_demo() {
   rm -f "${output}"
 }
 
+run_local_readiness_docs() {
+  echo "==> local-readiness-docs"
+  local readme="${ROOT_DIR}/README.md"
+  local readme_cn="${ROOT_DIR}/README_CN.md"
+  local ops="${ROOT_DIR}/docs/ops/operability.md"
+  local env_example="${ROOT_DIR}/.env.example"
+
+  for file in "${readme}" "${readme_cn}" "${ops}" "${env_example}"; do
+    if [[ ! -f "${file}" ]]; then
+      echo "Missing local readiness documentation asset: ${file}" >&2
+      exit 1
+    fi
+  done
+
+  grep -Fq '### 首次启动检查清单' "${readme}"
+  grep -Fq '### 首次启动检查清单' "${readme_cn}"
+  grep -Fq 'docs/ops/operability.md#本地启动排查矩阵' "${readme}"
+  grep -Fq '## 本地启动排查矩阵' "${ops}"
+  grep -Fq '## 本地数据目录与持久化' "${ops}"
+  grep -Fq 'docker compose --env-file .env -f docker-compose.dev.yml ps' "${ops}"
+  grep -Fq 'CREATE EXTENSION IF NOT EXISTS vector;' "${ops}"
+  grep -Fq 'NEBULA_DATA_DIR=/tmp/nebula' "${env_example}"
+  grep -Fq 'Security defaults:' "${env_example}"
+  grep -Fq 'DATABASE_URL=postgresql://' "${env_example}"
+  grep -Fq 'REDIS_URL=redis://' "${env_example}"
+}
+
 run_release() {
   run_completion
   run_lifecycle_demo
+  run_local_readiness_docs
   run_smoke
   run_api
   run_auth
@@ -253,6 +282,9 @@ for gate in "$@"; do
     lifecycle-demo)
       run_lifecycle_demo
       ;;
+    local-readiness-docs)
+      run_local_readiness_docs
+      ;;
     release)
       run_release
       ;;
@@ -269,6 +301,7 @@ for gate in "$@"; do
       run_frontend_test
       run_completion
       run_lifecycle_demo
+      run_local_readiness_docs
       ;;
     *)
       echo "Unknown gate: ${gate}" >&2

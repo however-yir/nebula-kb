@@ -91,6 +91,42 @@ curl -fsS http://localhost:8080/readyz
 
 若 `/healthz` 成功但 `/readyz` 失败，应优先检查 PostgreSQL、Redis、local-model 和 object storage 的连接配置。开发模式下，后端默认监听 `:8080`，管理前端默认监听 `:5173`，聊天前端默认监听 `:5174`。
 
+## 本地启动排查矩阵
+
+首次启动失败时，按依赖顺序排查，不要先改业务代码：
+
+| 症状 | 检查命令 | 处理方式 |
+| --- | --- | --- |
+| `.env` 无法启动或脚本拒绝继续 | `grep -n 'CHANGE_ME_' .env` | 复制 `.env.example` 后替换所有占位密钥；`SECRET_KEY`、数据库密码、Redis 密码每个环境都应唯一 |
+| Docker 依赖未启动 | `docker compose --env-file .env -f docker-compose.dev.yml ps` | 启动 Docker Desktop 后执行 `./scripts/bootstrap-local.sh --start` |
+| PostgreSQL 连接失败 | `docker compose --env-file .env -f docker-compose.dev.yml logs postgres` 和 `pg_isready -h 127.0.0.1 -p "${NEBULA_DB_PORT:-5432}"` | 确认 `NEBULA_DB_HOST`、`NEBULA_DB_PORT`、`NEBULA_DB_USER`、`NEBULA_DB_PASSWORD` 与 `.env` 一致 |
+| Redis 连接失败或 `NOAUTH` | `docker compose --env-file .env -f docker-compose.dev.yml logs redis` 和 `redis-cli -h 127.0.0.1 -p "${NEBULA_REDIS_PORT:-6379}" ping` | 确认 `REDIS_URL` 与 `NEBULA_REDIS_PASSWORD` 同步；带密码时使用 `redis-cli -a "$NEBULA_REDIS_PASSWORD" ping` |
+| pgvector 扩展缺失 | `docker compose --env-file .env -f docker-compose.dev.yml exec -T postgres sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\\dx vector"'` | 执行 `./scripts/bootstrap-local.sh --start`，或手动运行 `CREATE EXTENSION IF NOT EXISTS vector;` |
+| 端口冲突 | `lsof -nP -iTCP:5432 -iTCP:6379 -iTCP:8080 -iTCP:5173 -iTCP:5174 -sTCP:LISTEN` | 停止占用进程，或在 `.env` 中调整 `NEBULA_DB_PORT`、`NEBULA_REDIS_PORT`，前端端口在 Vite 配置或启动参数中调整 |
+| Python 依赖缺失 | `python -V && python -m pip check` | 使用 Python 3.11，重新执行 `python -m venv .venv && source .venv/bin/activate && pip install -U pip && pip install -e .` |
+| 前端依赖缺失 | `node -v && npm -v && npm ls --depth=0` | 使用 Node 20，在 `ui/` 下执行 `npm ci`，再运行 `npm run dev` 或 `npm run chat` |
+| 迁移后仍无法访问 | `python apps/manage.py check && python apps/manage.py migrate --plan` | 先修复 Django check；确认数据库指向本地开发库后再执行迁移 |
+
+## 本地数据目录与持久化
+
+`NEBULA_DATA_DIR` 是新的运行时数据目录入口，`LZKB_DATA_DIR` 和 `MAXKB_DATA_DIR` 仅作为兼容变量保留。开发模板默认使用 `/tmp/nebula`，用于模型缓存、临时文件和日志；长期演示或共享环境应把目录换成可持久化路径。
+
+| 数据 | 默认/入口 | 说明 |
+| --- | --- | --- |
+| 应用运行数据 | `NEBULA_DATA_DIR=/tmp/nebula` | 本地开发可清理；演示环境建议改为 `~/.nebula-kb` 或宿主持久目录 |
+| 日志 | `${NEBULA_DATA_DIR}/logs` | 由运行时创建，排查启动和任务失败时优先查看 |
+| 模型和 tokenizer 缓存 | `HF_HOME`、`TIKTOKEN_CACHE_DIR`、`NEBULA_EMBEDDING_MODEL_PATH` | `.env.example` 默认放在 `/tmp/nebula/model/**` |
+| PostgreSQL 数据 | Docker volume `nebula_postgres_data` | 删除 volume 会丢失本地库；删除前先按备份 runbook 导出 |
+| Redis 数据 | Docker volume `nebula_redis_data` | 本地缓存和任务状态；重建前确认没有未完成任务 |
+| Ollama 模型 | Docker volume `nebula_ollama_data` | 仅在 `--with-ollama` 或 compose profile 启用时使用 |
+
+清理本地数据前，先停止服务并确认备份：
+
+```bash
+docker compose --env-file .env -f docker-compose.dev.yml down
+docker volume ls | grep nebula_
+```
+
 ## 发布和回滚
 
 构建发布镜像前必须先通过 `.github/workflows/nebulakb-tests.yml`。`build-and-push.yml` 已把测试工作流作为前置依赖。

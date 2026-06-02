@@ -25,6 +25,7 @@
 | Batch 1 | 已完成 | 001、003、004、010、018、019、020、289 | `README.md`、`README_CN.md`、`docs/ops/operability.md`、`scripts/quality-gate.sh completion` |
 | Batch 2 | 已完成 | 010、081、105、111、112、113、118、119、121 | `scripts/demo_lifecycle.py`、`scripts/quality-gate.sh lifecycle-demo` |
 | Batch 3 | 已完成 | 246、264、265 | `ui/src/utils/sanitize.ts`、`ui/src/utils/safeHtml.ts`、`ui/src/__tests__/sanitize.test.ts` |
+| Batch 4 | 已完成 | 002、005、006、007、008、009、021、022、023、024 | `README.md`、`README_CN.md`、`.env.example`、`docs/ops/operability.md`、`scripts/quality-gate.sh local-readiness-docs` |
 
 ## 300 项功能补齐清单
 
