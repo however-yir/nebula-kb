@@ -38,6 +38,24 @@ NebulaKB 的可观测重点不是模型调用次数，而是知识资产是否�
 - `trace_id`
 - `status`
 - `error_code`
+- `duration_ms`
+- `slow_query_ms`
+- `slow_retrieval_ms`
+
+`X-Request-ID` 是跨网关、后端、worker 和客户端排查的主关联字段；如果请求未携带，后端由 `common.middleware.tracing.OTelTracingMiddleware` 生成并回写到响应头。
+
+## OpenTelemetry 与追踪
+
+默认追踪边界：
+
+| Span | 关键属性 |
+| --- | --- |
+| HTTP 请求 | `http.method`、`http.url`、`http.status_code`、`correlation_id` |
+| 文档解析 | `tenant_id`、`document_id`、`status`、`duration_ms` |
+| 检索 | `tenant_id`、`knowledge_base_id`、`hit_count`、`slow_retrieval_ms` |
+| 反馈闭环 | `tenant_id`、`feedback_id`、`status`、`duration_ms` |
+
+OpenTelemetry exporter 可按部署环境接入 Collector、Tempo、Jaeger 或云厂商链路系统。没有安装 OpenTelemetry 包时，中间件保持 no-op，但仍生成 `X-Request-ID`。
 
 ## 建议告警
 
@@ -62,7 +80,20 @@ nebula_kb_document_parse_failed_total
 nebula_kb_document_indexed_total
 nebula_kb_feedback_open_total
 nebula_kb_feedback_closed_total
+nebula_kb_request_duration_seconds
+nebula_kb_slow_query_total
+nebula_kb_slow_retrieval_total
+nebula_kb_celery_task_total
+nebula_kb_celery_task_failed_total
 ```
+
+Prometheus 拉取目标：
+
+```text
+GET /metrics
+```
+
+Grafana 基线看板：`deploy/grafana/dashboards/nebula-kb-overview.json`。
 
 ## 健康看板
 
@@ -89,3 +120,11 @@ python3 scripts/demo_lifecycle.py
 - `hot_knowledge`
 - `stale_knowledge`
 - `feedback_closure_status`
+
+发布验收同时运行：
+
+```bash
+bash scripts/quality-gate.sh api-security-release
+```
+
+该 gate 会检查 API v1、OpenAPI、主路径 E2E、安全头、上传 MIME/大小、生产安全检查命令、部署文档、Prometheus、OpenTelemetry、Grafana 和 `X-Request-ID` 基线。

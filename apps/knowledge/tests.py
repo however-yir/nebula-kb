@@ -3,7 +3,11 @@ from unittest.mock import MagicMock, patch
 from django.test import SimpleTestCase
 
 from knowledge.models import SearchMode
-from knowledge.services.asset_lifecycle_demo import MAX_UPLOAD_BYTES, KnowledgeAssetPlatform
+from knowledge.services.asset_lifecycle_demo import (
+    MAX_UPLOAD_BYTES,
+    SUPPORTED_UPLOAD_MIME_TYPES,
+    KnowledgeAssetPlatform,
+)
 from knowledge.vector.base_vector import normalize_for_embedding
 from knowledge.vector.pg_vector import PGVector
 
@@ -177,6 +181,7 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
         self.assertEqual(document.status, "uploaded")
         self.assertEqual(document.tenant_id, self.tenant_a)
         self.assertEqual(document.knowledge_base_id, self.kb.id)
+        self.assertEqual(document.content_type, "text/markdown")
 
     def test_parse_failure_records_error(self):
         document = self.platform.upload_document(
@@ -200,14 +205,26 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
     def test_upload_precheck_rejects_unsupported_format_and_large_file(self):
         unsupported = self.platform.validate_upload("policy.pdf", "content")
         oversized = self.platform.validate_upload("policy.md", "x" * (MAX_UPLOAD_BYTES + 1))
+        bad_mime = self.platform.validate_upload("policy.md", "content", "application/pdf")
 
         self.assertFalse(unsupported.accepted)
         self.assertEqual(unsupported.reason, "unsupported file format: .pdf")
         self.assertFalse(oversized.accepted)
         self.assertIn("file exceeds", oversized.reason)
+        self.assertFalse(bad_mime.accepted)
+        self.assertEqual(bad_mime.reason, "unsupported mime type: application/pdf")
+        self.assertEqual(SUPPORTED_UPLOAD_MIME_TYPES[".md"], {"text/markdown", "text/plain"})
 
         with self.assertRaisesRegex(ValueError, "unsupported file format"):
             self.platform.upload_document(self.tenant_a, self.kb.id, "policy.pdf", "content")
+        with self.assertRaisesRegex(ValueError, "unsupported mime type"):
+            self.platform.upload_document(
+                self.tenant_a,
+                self.kb.id,
+                "policy.md",
+                "content",
+                content_type="application/pdf",
+            )
 
     def test_document_state_machine_chunk_preview_and_citation_location(self):
         document = self.platform.ingest_document(

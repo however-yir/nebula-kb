@@ -4,7 +4,7 @@ from django.test import SimpleTestCase, override_settings
 
 from common.auth.throttle import AnonRateThrottleCustom, UserRateThrottleCustom, KnowledgeSearchThrottle
 from common.middleware.audit import redact_dict, redact_body, AuditLogMiddleware, SENSITIVE_FIELDS
-from common.middleware.security_headers import SecurityHeadersMiddleware
+from common.middleware.security_headers import DEFAULT_CONTENT_SECURITY_POLICY, SecurityHeadersMiddleware
 
 
 class SecretKeyGuardTests(SimpleTestCase):
@@ -86,4 +86,6 @@ class SecurityHeadersTests(SimpleTestCase):
         response = middleware.process_response(request, HttpResponse())
         self.assertEqual(response['X-Content-Type-Options'], 'nosniff')
         self.assertEqual(response['X-Frame-Options'], 'DENY')
+        self.assertEqual(response['Content-Security-Policy'], DEFAULT_CONTENT_SECURITY_POLICY)
+        self.assertIn("object-src 'none'", response['Content-Security-Policy'])
         self.assertIn('Referrer-Policy', response)

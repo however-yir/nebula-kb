@@ -23,6 +23,10 @@ def _tokenize(text: str) -> List[str]:
 
 
 SUPPORTED_UPLOAD_FORMATS = {".md", ".txt"}
+SUPPORTED_UPLOAD_MIME_TYPES = {
+    ".md": {"text/markdown", "text/plain"},
+    ".txt": {"text/plain"},
+}
 MAX_UPLOAD_BYTES = 64 * 1024
 
 
@@ -42,6 +46,7 @@ class UploadCheck:
     reason: Optional[str]
     size_bytes: int
     file_format: str
+    content_type: str = ""
     max_bytes: int = MAX_UPLOAD_BYTES
 
 
@@ -65,6 +70,7 @@ class DocumentRecord:
     filename: str
     content: str
     file_format: str
+    content_type: str
     source: str
     size_bytes: int
     status: str = "uploaded"
@@ -163,7 +169,12 @@ class KnowledgeAssetPlatform:
         self.index.setdefault(kb.id, [])
         return kb
 
-    def validate_upload(self, filename: str, content: str) -> UploadCheck:
+    def validate_upload(
+        self,
+        filename: str,
+        content: str,
+        content_type: Optional[str] = None,
+    ) -> UploadCheck:
         suffix = self._file_format(filename)
         size_bytes = len(content.encode("utf-8"))
         if suffix not in SUPPORTED_UPLOAD_FORMATS:
@@ -173,6 +184,18 @@ class KnowledgeAssetPlatform:
                 reason=f"unsupported file format: {suffix or 'none'}",
                 size_bytes=size_bytes,
                 file_format=suffix,
+                content_type=content_type or "",
+            )
+        allowed_mime_types = SUPPORTED_UPLOAD_MIME_TYPES[suffix]
+        normalized_content_type = (content_type or "").split(";")[0].strip().lower()
+        if normalized_content_type and normalized_content_type not in allowed_mime_types:
+            return UploadCheck(
+                filename=filename,
+                accepted=False,
+                reason=f"unsupported mime type: {normalized_content_type}",
+                size_bytes=size_bytes,
+                file_format=suffix,
+                content_type=normalized_content_type,
             )
         if size_bytes > MAX_UPLOAD_BYTES:
             return UploadCheck(
@@ -181,6 +204,7 @@ class KnowledgeAssetPlatform:
                 reason=f"file exceeds {MAX_UPLOAD_BYTES} bytes",
                 size_bytes=size_bytes,
                 file_format=suffix,
+                content_type=normalized_content_type or sorted(allowed_mime_types)[0],
             )
         return UploadCheck(
             filename=filename,
@@ -188,6 +212,7 @@ class KnowledgeAssetPlatform:
             reason=None,
             size_bytes=size_bytes,
             file_format=suffix,
+            content_type=normalized_content_type or sorted(allowed_mime_types)[0],
         )
 
     def upload_document(
@@ -196,9 +221,10 @@ class KnowledgeAssetPlatform:
         knowledge_base_id: str,
         filename: str,
         content: str,
+        content_type: Optional[str] = None,
     ) -> DocumentRecord:
         self._require_kb_access(tenant_id, knowledge_base_id)
-        upload_check = self.validate_upload(filename, content)
+        upload_check = self.validate_upload(filename, content, content_type)
         if not upload_check.accepted:
             raise ValueError(upload_check.reason or "upload rejected")
         document = DocumentRecord(
@@ -208,6 +234,7 @@ class KnowledgeAssetPlatform:
             filename=filename,
             content=content,
             file_format=upload_check.file_format,
+            content_type=upload_check.content_type,
             source=f"local-upload:{filename}",
             size_bytes=upload_check.size_bytes,
             status_history=["waiting", "uploading", "uploaded"],

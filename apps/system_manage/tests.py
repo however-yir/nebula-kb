@@ -1,6 +1,7 @@
 from django.test import SimpleTestCase
 
 from system_manage.services.platform_governance_demo import PlatformGovernanceDemo, redact_payload
+from system_manage.services.release_acceptance import ReleaseAcceptanceDemo
 from system_manage.serializers.knowledge_ops import KnowledgeOpsDashboardSerializer
 
 
@@ -159,3 +160,23 @@ class PlatformGovernanceDemoTests(SimpleTestCase):
         self.assertEqual(self.platform.audit_events[-1].payload["nested"]["password"], "********")
         self.assertEqual(self.platform.audit_events[-1].payload["safe"], "visible")
         self.assertEqual(redact_payload({"token": "abc"})["token"], "********")
+
+
+class ReleaseAcceptanceDemoTests(SimpleTestCase):
+    def test_api_security_deployment_observability_and_e2e_snapshot(self):
+        snapshot = ReleaseAcceptanceDemo().snapshot()
+
+        self.assertEqual(snapshot.api["api_v1_prefix"], "/api/v1")
+        self.assertEqual(snapshot.api["openapi_version"], "3.1.0")
+        self.assertIn("bearer", snapshot.api["auth_schemes"])
+        self.assertEqual(snapshot.e2e["document_status"], "indexed")
+        self.assertGreaterEqual(snapshot.e2e["citation_count"], 1)
+        self.assertEqual(snapshot.e2e["feedback_rating"], 1)
+        self.assertTrue(snapshot.permission["workspace_isolation_blocked"])
+        self.assertIn("Content-Security-Policy", snapshot.security["headers"])
+        self.assertEqual(
+            snapshot.security["production_check_command"],
+            "scripts/production-security-check.sh",
+        )
+        self.assertIn("docs/enterprise/deployment-guide.md", snapshot.deployment["docs"])
+        self.assertEqual(snapshot.observability["request_id_header"], "X-Request-ID")

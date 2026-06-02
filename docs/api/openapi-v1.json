@@ -1,0 +1,373 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NebulaKB Public API",
+    "version": "v1",
+    "description": "Stable public API for knowledge-base ingestion, retrieval, feedback, application publishing, and permission grants."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "auth.login",
+        "summary": "Issue a bearer token for a user session.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessEnvelope"
+          },
+          "401": {
+            "$ref": "#/components/responses/ErrorEnvelope"
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge-bases": {
+      "post": {
+        "operationId": "knowledge_base.create",
+        "summary": "Create a knowledge base in the caller workspace.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessEnvelope"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorEnvelope"
+          }
+        }
+      },
+      "get": {
+        "operationId": "knowledge_base.list",
+        "summary": "List knowledge bases with stable pagination.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/current_page"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/order_by"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PageEnvelope"
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge-bases/{knowledge_base_id}/documents": {
+      "post": {
+        "operationId": "document.upload",
+        "summary": "Upload a document after MIME and size validation.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/knowledge_base_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessEnvelope"
+          },
+          "413": {
+            "$ref": "#/components/responses/ErrorEnvelope"
+          },
+          "415": {
+            "$ref": "#/components/responses/ErrorEnvelope"
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge-bases/{knowledge_base_id}/ask": {
+      "post": {
+        "operationId": "question.ask",
+        "summary": "Ask a question with retrieval, score, citation, and fallback metadata.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/knowledge_base_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessEnvelope"
+          }
+        }
+      }
+    },
+    "/api/v1/feedback": {
+      "post": {
+        "operationId": "feedback.submit",
+        "summary": "Submit thumbs-up, thumbs-down, or typed feedback.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessEnvelope"
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{application_id}/versions": {
+      "post": {
+        "operationId": "application.publish",
+        "summary": "Publish an application version.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/application_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessEnvelope"
+          }
+        }
+      }
+    },
+    "/api/v1/permissions/resources": {
+      "post": {
+        "operationId": "permission.resource_grant",
+        "summary": "Grant resource-scoped permissions.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SuccessEnvelope"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorEnvelope"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Send Authorization: Bearer <token>."
+      },
+      "ApplicationApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Scoped application API key for published app calls."
+      }
+    },
+    "parameters": {
+      "current_page": {
+        "name": "current_page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      "page_size": {
+        "name": "page_size",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 20
+        }
+      },
+      "order_by": {
+        "name": "order_by",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "description": "Use -field_name for descending sort."
+      },
+      "knowledge_base_id": {
+        "name": "knowledge_base_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "application_id": {
+        "name": "application_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "Envelope": {
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {}
+        }
+      },
+      "Page": {
+        "type": "object",
+        "required": [
+          "total",
+          "records",
+          "current",
+          "size"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "records": {
+            "type": "array",
+            "items": {}
+          },
+          "current": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        }
+      },
+      "DocumentUploadRequest": {
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "responses": {
+      "SuccessEnvelope": {
+        "description": "Successful response envelope.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Envelope"
+            }
+          }
+        }
+      },
+      "PageEnvelope": {
+        "description": "Paginated response envelope.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Envelope"
+                }
+              ],
+              "properties": {
+                "data": {
+                  "$ref": "#/components/schemas/Page"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ErrorEnvelope": {
+        "description": "Error response envelope with stable code/message/data fields.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Envelope"
+            }
+          }
+        }
+      }
+    }
+  }
+}

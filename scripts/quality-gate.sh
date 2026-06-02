@@ -77,6 +77,7 @@ Gates:
   lifecycle-demo     Knowledge asset lifecycle demo regression
   application-workflow-demo Feedback, dashboard, application, and workflow demo regression
   platform-governance-demo Model/tool/trigger/permission/audit demo regression
+  api-security-release API v1, OpenAPI, security, deployment, and observability release regression
   local-readiness-docs Local startup/configuration documentation drift check
   release            Run the fixed release gate set
   all                Run smoke, unit, integration, api, auth, permission, coverage, frontend, docs gates
@@ -264,6 +265,98 @@ run_platform_governance_demo() {
   rm -f "${output}"
 }
 
+run_api_security_release() {
+  echo "==> api-security-release"
+  local output
+  local security_output
+  local api_doc="${ROOT_DIR}/docs/api/api-contract.md"
+  local openapi="${ROOT_DIR}/docs/api/openapi-v1.json"
+  local deployment_doc="${ROOT_DIR}/docs/enterprise/deployment-guide.md"
+  local ops_doc="${ROOT_DIR}/docs/ops/operability.md"
+  local observability_doc="${ROOT_DIR}/docs/observability.md"
+  local production_check="${ROOT_DIR}/scripts/production-security-check.sh"
+
+  for file in "${api_doc}" "${openapi}" "${deployment_doc}" "${ops_doc}" "${observability_doc}" "${production_check}"; do
+    if [[ ! -f "${file}" ]]; then
+      echo "Missing API/security release asset: ${file}" >&2
+      exit 1
+    fi
+  done
+
+  output="$(mktemp)"
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_release_acceptance.py > "${output}")
+  grep -q 'NebulaKB demo: API, security, deployment, observability release acceptance' "${output}"
+  grep -q 'API v1 prefix: /api/v1' "${output}"
+  grep -q 'OpenAPI version: 3.1.0' "${output}"
+  grep -q 'Auth schemes:' "${output}"
+  grep -q 'Pagination fields: total, records, current, size' "${output}"
+  grep -q 'Error code ranges:' "${output}"
+  grep -q 'E2E path: login -> create_knowledge_base -> upload_document -> parse_document -> ask_with_retrieval -> submit_feedback' "${output}"
+  grep -q 'Login flow: token-issued' "${output}"
+  grep -q 'Document parse status: indexed' "${output}"
+  grep -q 'Retrieval service test: citations=' "${output}"
+  grep -q 'Feedback service test: rating=1' "${output}"
+  grep -q 'Permission service test: workspace isolation blocked=true' "${output}"
+  grep -q 'Security headers:' "${output}"
+  grep -q 'Content-Security-Policy' "${output}"
+  grep -q 'Upload MIME policy:' "${output}"
+  grep -q 'Upload size limit: 65536 bytes' "${output}"
+  grep -q 'Production security check command: scripts/production-security-check.sh' "${output}"
+  grep -q 'Deployment docs: docs/enterprise/deployment-guide.md' "${output}"
+  grep -q 'Observability: OpenTelemetry' "${output}"
+
+  ROOT_DIR="${ROOT_DIR}" "${PYTHON}" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+root = Path(os.environ["ROOT_DIR"])
+spec = json.loads((root / "docs/api/openapi-v1.json").read_text(encoding="utf-8"))
+assert spec["openapi"] == "3.1.0"
+assert spec["info"]["version"] == "v1"
+assert "BearerAuth" in spec["components"]["securitySchemes"]
+assert "ApplicationApiKey" in spec["components"]["securitySchemes"]
+required_paths = {
+    "/api/v1/auth/login",
+    "/api/v1/knowledge-bases",
+    "/api/v1/knowledge-bases/{knowledge_base_id}/documents",
+    "/api/v1/knowledge-bases/{knowledge_base_id}/ask",
+    "/api/v1/feedback",
+    "/api/v1/applications/{application_id}/versions",
+    "/api/v1/permissions/resources",
+}
+assert required_paths.issubset(spec["paths"].keys())
+PY
+
+  grep -Fq 'Authorization: Bearer <token>' "${api_doc}"
+  grep -Fq 'X-API-Key: <application_api_key>' "${api_doc}"
+  grep -Fq 'current_page' "${api_doc}"
+  grep -Fq 'page_size' "${api_doc}"
+  grep -Fq 'docs/api/openapi-v1.json' "${api_doc}"
+  grep -Fq 'scripts/quality-gate.sh api-security-release' "${api_doc}"
+  grep -Fq 'Content-Security-Policy' "${deployment_doc}"
+  grep -Fq 'scripts/production-security-check.sh' "${deployment_doc}"
+  grep -Fq 'unsupported MIME' "${deployment_doc}"
+  grep -Fq 'NEBULA_ENVIRONMENT=prod scripts/production-security-check.sh' "${ops_doc}"
+  grep -Fq 'nebula_kb_answer_total' "${observability_doc}"
+  grep -Fq 'OpenTelemetry' "${observability_doc}"
+  grep -Fq 'Grafana' "${observability_doc}"
+  grep -Fq 'X-Request-ID' "${observability_doc}"
+
+  security_output="$(mktemp)"
+  env \
+    NEBULA_ENVIRONMENT=prod \
+    SECRET_KEY=prod-secret-key-for-ci-only \
+    ALLOWED_HOSTS=nebulakb.example.com \
+    DATABASE_URL=postgresql://nebula:secure@postgres:5432/nebula \
+    REDIS_URL=redis://:secure@redis:6379/0 \
+    DEBUG=false \
+    bash "${production_check}" > "${security_output}"
+  grep -q 'NebulaKB production security check' "${security_output}"
+  grep -q 'status=passed' "${security_output}"
+  rm -f "${output}" "${security_output}"
+}
+
 run_local_readiness_docs() {
   echo "==> local-readiness-docs"
   local readme="${ROOT_DIR}/README.md"
@@ -296,6 +389,7 @@ run_release() {
   run_lifecycle_demo
   run_application_workflow_demo
   run_platform_governance_demo
+  run_api_security_release
   run_local_readiness_docs
   run_smoke
   run_api
@@ -358,6 +452,9 @@ for gate in "$@"; do
     platform-governance-demo)
       run_platform_governance_demo
       ;;
+    api-security-release)
+      run_api_security_release
+      ;;
     local-readiness-docs)
       run_local_readiness_docs
       ;;
@@ -379,6 +476,7 @@ for gate in "$@"; do
       run_lifecycle_demo
       run_application_workflow_demo
       run_platform_governance_demo
+      run_api_security_release
       run_local_readiness_docs
       ;;
     *)

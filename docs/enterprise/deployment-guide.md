@@ -104,6 +104,50 @@ client_max_body_size 100m;
 proxy_read_timeout 300s;
 ```
 
+## 安全响应头与上传限制
+
+后端默认通过 `common.middleware.security_headers.SecurityHeadersMiddleware` 写入：
+
+| Header | 默认值 |
+| --- | --- |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
+| `Content-Security-Policy` | `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'` 等基础策略 |
+
+聊天嵌入页若启用 iframe 白名单，会由专用中间件设置更细的 `frame-ancestors`，安全头中间件不会覆盖已有 CSP。
+
+文档上传必须同时校验扩展名、MIME 和大小。当前发布验收基线：
+
+| 后缀 | 允许 MIME |
+| --- | --- |
+| `.md` | `text/markdown`、`text/plain` |
+| `.txt` | `text/plain` |
+
+默认最大文件大小为 `65536` bytes。生产环境反向代理的 `client_max_body_size` 可以更高，但应用层仍必须拒绝不在白名单内的 MIME（unsupported MIME）或超限文件。
+
+## 生产安全检查命令
+
+上线前执行：
+
+```bash
+NEBULA_ENVIRONMENT=prod \
+SECRET_KEY="${SECRET_KEY}" \
+ALLOWED_HOSTS="nebulakb.example.com" \
+DATABASE_URL="${DATABASE_URL}" \
+REDIS_URL="${REDIS_URL}" \
+scripts/production-security-check.sh
+```
+
+该命令会阻断：
+
+- `SECRET_KEY`、数据库、Redis、`ALLOWED_HOSTS` 缺失。
+- 仍保留 `CHANGE_ME` 或 `django-insecure` 占位值。
+- 生产环境 `DEBUG=true`。
+
+非生产环境执行会输出 `status=skipped non-production`，用于验证脚本存在但不阻断本地开发。
+
 ## SSO 交付
 
 一期 SSO 按以下边界交付：
@@ -117,6 +161,7 @@ proxy_read_timeout 300s;
 上线前必须完成：
 
 - 使用非默认数据库和 Redis 密码。
+- 执行 `scripts/production-security-check.sh` 并确认 `status=passed`。
 - 执行数据库迁移并确认成功。
 - 创建平台管理员并修改默认密码。
 - 创建至少一个工作空间和工作空间管理员。

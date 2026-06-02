@@ -131,6 +131,14 @@ docker volume ls | grep nebula_
 
 构建发布镜像前必须先通过 `.github/workflows/nebulakb-tests.yml`。`build-and-push.yml` 已把测试工作流作为前置依赖。
 
+生产切流前先运行安全基线：
+
+```bash
+NEBULA_ENVIRONMENT=prod scripts/production-security-check.sh
+```
+
+该命令会检查 `SECRET_KEY`、`ALLOWED_HOSTS`、数据库、Redis 和 `DEBUG`，禁止占位密钥进入生产。
+
 发布后健康检查：
 
 ```bash
