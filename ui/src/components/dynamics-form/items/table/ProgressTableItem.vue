@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { renderSafeExpression } from '@/utils/safe-expression'
+import { safeHtml } from '@/utils/sanitize'
 const props = defineProps<{
   /**
    *表单渲染Item column
@@ -46,9 +47,9 @@ const value_field = computed(() => {
 const value_html = (view_card_item: any) => {
   if (view_card_item.type === 'eval') {
     rowRef.value = props.row
-    return renderSafeExpression(view_card_item.value_field, props.row)
+    return safeHtml(String(renderSafeExpression(view_card_item.value_field, props.row) ?? ''))
   } else {
-    return props.row[view_card_item.value_field]
+    return safeHtml(String(props.row[view_card_item.value_field] ?? ''))
   }
 }
 

@@ -190,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import {set, groupBy, create, cloneDeep} from 'lodash'
+import { set, unset, cloneDeep } from 'lodash'
 import NodeContainer from '@/workflow/common/NodeContainer.vue'
 import {ref, computed, onMounted, onActivated} from 'vue'
 import NodeCascader from '@/workflow/common/NodeCascader.vue'
@@ -241,8 +241,7 @@ function handleFileUpload(type: string, isEnabled: boolean) {
       set(props.nodeModel.properties.node_data, listKey, [])
     }
   } else {
-    // eslint-disable-next-line vue/no-mutating-props
-    delete props.nodeModel.properties.node_data[listKey]
+    unset(props.nodeModel.properties.node_data, listKey)
   }
 }
 
@@ -322,8 +321,7 @@ const update_field = () => {
           handleFileUpload('video', fileUploadSetting.video)
         } else {
           ;['document_list', 'image_list', 'audio_list', 'video_list'].forEach((list) => {
-            // eslint-disable-next-line vue/no-mutating-props
-            delete props.nodeModel.properties.node_data[list]
+            unset(props.nodeModel.properties.node_data, list)
           })
         }
         set(props.nodeModel.properties, 'status', ok.data.id ? 200 : 500)

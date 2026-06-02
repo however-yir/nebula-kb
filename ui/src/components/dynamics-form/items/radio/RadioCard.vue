@@ -13,7 +13,7 @@
               modelValue == item[valueField] ? 'active' : '',
             ]"
             @click="inputDisabled ? () => {} : selected(item[valueField])"
-            :innerHTML="item[textField] ? item[textField] : '\u200D'"
+            :innerHTML="safeHtml(String(item[textField] ? item[textField] : '\u200D'))"
           >
           </el-card>
         </el-col>
@@ -25,6 +25,7 @@
 import { computed, ref, inject } from 'vue'
 import type { FormField } from '@/components/dynamics-form/type'
 import { useFormDisabled, formItemContextKey } from 'element-plus'
+import { safeHtml } from '@/utils/sanitize'
 
 const inputDisabled = useFormDisabled()
 

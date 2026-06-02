@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount, inject } from 'vue'
+import { safeHtml } from '@/utils/sanitize'
 const chatUserProfile = inject('chatUserProfile') as any
 const htmlRef = ref<HTMLIFrameElement>()
 const props = withDefaults(
@@ -107,7 +108,7 @@ observer.observe(document.body);
 `
 }
 
-const fSource = computed(() => createIframeHtml(props.source))
+const fSource = computed(() => createIframeHtml(safeHtml(props.source)))
 
 function onMessage(e: MessageEvent) {
   if (e.data?.instanceId !== instanceId) return

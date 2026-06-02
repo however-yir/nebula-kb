@@ -13,6 +13,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { safeHtml } from '@/utils/sanitize'
 // 每个实例生成唯一 id，防止多个 iframe 消息串扰
 const instanceId = Math.random().toString(36).slice(2)
 
@@ -62,7 +63,7 @@ observer.observe(document.body);
 </html>
 `
 }
-const fSource = computed(() => createIframeHtml(props.source))
+const fSource = computed(() => createIframeHtml(safeHtml(props.source)))
 
 const props = withDefaults(
   defineProps<{

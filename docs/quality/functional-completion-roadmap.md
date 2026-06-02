@@ -24,6 +24,7 @@
 | Batch 0 | 已完成 | 300 项路线图基线、发布清单入口 | 本文档、`docs/quality/release-checklist.md` |
 | Batch 1 | 已完成 | 001、003、004、010、018、019、020、289 | `README.md`、`README_CN.md`、`docs/ops/operability.md`、`scripts/quality-gate.sh completion` |
 | Batch 2 | 已完成 | 010、081、105、111、112、113、118、119、121 | `scripts/demo_lifecycle.py`、`scripts/quality-gate.sh lifecycle-demo` |
+| Batch 3 | 已完成 | 246、264、265 | `ui/src/utils/sanitize.ts`、`ui/src/utils/safeHtml.ts`、`ui/src/__tests__/sanitize.test.ts` |
 
 ## 300 项功能补齐清单
 
