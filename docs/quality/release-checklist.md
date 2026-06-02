@@ -8,6 +8,7 @@
 - [ ] `.env.example`、`config_example.yml` 与新增配置保持一致。
 - [ ] 没有提交真实密码、API Key、token、数据库连接串。
 - [ ] 依赖变更已通过依赖审计或记录风险豁免。
+- [ ] 功能完成度变更已对照 `docs/quality/functional-completion-roadmap.md` 标记范围与验收方式。
 
 ## 2. 固定质量门禁
 
