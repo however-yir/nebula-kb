@@ -79,6 +79,7 @@ Gates:
   application-workflow-demo Feedback, dashboard, application, and workflow demo regression
   application-experience-demo Feedback, dashboard, app template, and workflow node P1 regression
   platform-governance-demo Model/tool/trigger/permission/audit demo regression
+  platform-advanced-demo Advanced model/tool/trigger/user/SSO/API governance regression
   api-security-release API v1, OpenAPI, security, deployment, and observability release regression
   local-readiness-docs Local startup/configuration documentation drift check
   release            Run the fixed release gate set
@@ -368,6 +369,53 @@ run_platform_governance_demo() {
   rm -f "${output}"
 }
 
+run_platform_advanced_demo() {
+  echo "==> platform-advanced-demo"
+  local output
+  local doc="${ROOT_DIR}/docs/platform-advanced-governance.md"
+  output="$(mktemp)"
+
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_platform_advanced.py > "${output}")
+  grep -q 'NebulaKB demo: platform advanced completion' "${output}"
+  grep -q 'Reranker test:' "${output}"
+  grep -q 'Voice model test:' "${output}"
+  grep -q 'Image model test:' "${output}"
+  grep -q 'Model preset:' "${output}"
+  grep -q 'Model fallback:' "${output}"
+  grep -q 'Model cost:' "${output}"
+  grep -q 'Tool category: retrieval' "${output}"
+  grep -q 'Tool execution log:' "${output}"
+  grep -q 'Tool timeout/retry/market:' "${output}"
+  grep -q 'Scheduled trigger enabled: True' "${output}"
+  grep -q 'Event trigger type: event' "${output}"
+  grep -q 'Trigger preview:' "${output}"
+  grep -q 'Trigger retry:' "${output}"
+  grep -q 'Trigger statistics:' "${output}"
+  grep -q 'Bulk users:' "${output}"
+  grep -q 'User groups:' "${output}"
+  grep -q 'Role templates:' "${output}"
+  grep -q 'Login logs:' "${output}"
+  grep -q 'Account anomaly: account requires review' "${output}"
+  grep -q 'SSO tests:' "${output}"
+  grep -q 'Callback copy:' "${output}"
+  grep -q 'SSO enabled/default/error/mapping:' "${output}"
+  grep -q 'Audit filter/export:' "${output}"
+  grep -q 'API rate limits:' "${output}"
+  grep -q 'API curl examples:' "${output}"
+  grep -q 'API frontend example:' "${output}"
+  grep -q 'API compatibility:' "${output}"
+  grep -q 'Model/tool/trigger tests: passed' "${output}"
+
+  grep -Fq 'bash scripts/quality-gate.sh platform-advanced-demo' "${doc}"
+  grep -Fq 'Reranker, voice, image' "${doc}"
+  grep -Fq 'Tool category' "${doc}"
+  grep -Fq 'Scheduled trigger' "${doc}"
+  grep -Fq 'OIDC, SAML, LDAP, and CAS' "${doc}"
+  grep -Fq 'API rate limit policy' "${doc}"
+  grep -Fq 'PlatformAdvancedCompletion' "${doc}"
+  rm -f "${output}"
+}
+
 run_api_security_release() {
   echo "==> api-security-release"
   local output
@@ -494,6 +542,7 @@ run_release() {
   run_application_workflow_demo
   run_application_experience_demo
   run_platform_governance_demo
+  run_platform_advanced_demo
   run_api_security_release
   run_local_readiness_docs
   run_smoke
@@ -563,6 +612,9 @@ for gate in "$@"; do
     platform-governance-demo)
       run_platform_governance_demo
       ;;
+    platform-advanced-demo)
+      run_platform_advanced_demo
+      ;;
     api-security-release)
       run_api_security_release
       ;;
@@ -589,6 +641,7 @@ for gate in "$@"; do
       run_application_workflow_demo
       run_application_experience_demo
       run_platform_governance_demo
+      run_platform_advanced_demo
       run_api_security_release
       run_local_readiness_docs
       ;;

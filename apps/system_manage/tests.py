@@ -1,5 +1,6 @@
 from django.test import SimpleTestCase
 
+from system_manage.services.platform_advanced_completion import PlatformAdvancedCompletion
 from system_manage.services.platform_governance_demo import PlatformGovernanceDemo, redact_payload
 from system_manage.services.release_acceptance import ReleaseAcceptanceDemo
 from system_manage.serializers.knowledge_ops import KnowledgeOpsDashboardSerializer
@@ -180,3 +181,85 @@ class ReleaseAcceptanceDemoTests(SimpleTestCase):
         )
         self.assertIn("docs/enterprise/deployment-guide.md", snapshot.deployment["docs"])
         self.assertEqual(snapshot.observability["request_id_header"], "X-Request-ID")
+
+
+class PlatformAdvancedCompletionTests(SimpleTestCase):
+    def setUp(self):
+        self.platform = PlatformAdvancedCompletion()
+
+    def test_model_tool_trigger_user_sso_audit_and_api_guidance(self):
+        reranker = self.platform.register_model("rerank-demo", "reranker")
+        voice = self.platform.register_model("voice-demo", "voice")
+        image = self.platform.register_model("image-demo", "image")
+        fallback = self.platform.register_model("fallback-llm", "llm")
+
+        self.assertEqual(self.platform.test_model(reranker.id)["status"], "ok")
+        self.assertEqual(self.platform.test_model(voice.id)["sample_rate"], 16000)
+        self.assertEqual(self.platform.test_model(image.id)["width"], 512)
+        self.assertEqual(self.platform.set_model_preset(fallback.id, {"temperature": 0.2})["temperature"], 0.2)
+        self.assertEqual(
+            self.platform.configure_model_fallback(fallback.id, reranker.id)["status"],
+            "configured",
+        )
+        self.assertGreater(self.platform.record_model_cost(fallback.id, 1000, 500)["cost_usd"], 0)
+
+        tool = self.platform.create_tool(
+            "policy-search",
+            category="retrieval",
+            timeout_ms=3000,
+            retry_limit=1,
+            market_description="Internal retrieval tool market entry",
+        )
+        run = self.platform.execute_tool(tool.id, {"query": "refund"}, fail_once=True)
+        self.assertEqual(tool.category, "retrieval")
+        self.assertEqual(run["attempts"], 2)
+        self.assertEqual(self.platform.tool_execution_logs(tool.id)[0]["status"], "success")
+        self.assertIn("market", tool.market_description)
+
+        scheduled = self.platform.create_trigger("daily-sync", "scheduled", {"cron": "0 9 * * *"})
+        event = self.platform.create_trigger("feedback-created", "event", {"event": "feedback.created"})
+        self.platform.set_trigger_enabled(scheduled.id, True)
+        self.platform.record_trigger_run(scheduled.id, "failed")
+        retry = self.platform.retry_trigger_failure(scheduled.id)
+        self.platform.record_trigger_run(event.id, "success")
+        self.assertTrue(scheduled.enabled)
+        self.assertEqual(event.trigger_type, "event")
+        self.assertEqual(self.platform.preview_trigger_params(scheduled.id)["cron"], "0 9 * * *")
+        self.assertEqual(retry["status"], "success")
+        self.assertEqual(self.platform.trigger_statistics(scheduled.id), {"total": 2, "success": 1, "failed": 1})
+
+        users = self.platform.bulk_import_users(
+            [
+                {"email": "admin@example.com", "group": "platform", "role_template": "admin"},
+                {"email": "ops@example.com", "group": "ops", "role_template": "operator"},
+            ]
+        )
+        self.platform.record_login("ops@example.com", "failed", "10.0.0.1")
+        self.platform.record_login("ops@example.com", "failed", "10.0.0.1")
+        self.assertEqual(len(users), 2)
+        self.assertEqual(self.platform.user_groups()["ops"], ["ops@example.com"])
+        self.assertIn("audit_export", self.platform.role_templates()["admin"])
+        self.assertEqual(self.platform.account_anomaly_hint("ops@example.com"), "account requires review")
+
+        for provider in ["oidc", "saml", "ldap", "cas"]:
+            self.platform.configure_sso(
+                provider,
+                f"https://nebulakb.example.com/sso/{provider}/callback",
+                "email -> user.email",
+                enabled=True,
+            )
+            self.assertEqual(self.platform.test_sso(provider)["status"], "ok")
+        self.assertIn("/oidc/callback", self.platform.copy_callback_url("oidc"))
+        self.assertFalse(self.platform.set_sso_enabled("cas", False))
+        self.assertEqual(self.platform.default_login_method("oidc"), "oidc")
+        self.assertEqual(self.platform.record_sso_error("oidc", "invalid nonce"), ["invalid nonce"])
+        self.assertEqual(self.platform.user_mapping_rule("oidc"), "email -> user.email")
+
+        self.assertEqual(len(self.platform.filter_audit("tool.executed")), 1)
+        self.assertEqual(self.platform.export_audit()["format"], "jsonl")
+
+        api = self.platform.api_guidance()
+        self.assertEqual(api["rate_limits"]["user"], "300/min")
+        self.assertIn("curl", api["curl_examples"][0])
+        self.assertIn("fetch", api["frontend_example"])
+        self.assertIn("stable", api["compatibility"])
