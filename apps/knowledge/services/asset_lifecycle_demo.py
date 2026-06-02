@@ -22,6 +22,10 @@ def _tokenize(text: str) -> List[str]:
     return [token for token in tokens if len(token.strip()) > 1]
 
 
+SUPPORTED_UPLOAD_FORMATS = {".md", ".txt"}
+MAX_UPLOAD_BYTES = 64 * 1024
+
+
 @dataclass
 class KnowledgeBase:
     id: str
@@ -32,12 +36,23 @@ class KnowledgeBase:
 
 
 @dataclass
+class UploadCheck:
+    filename: str
+    accepted: bool
+    reason: Optional[str]
+    size_bytes: int
+    file_format: str
+    max_bytes: int = MAX_UPLOAD_BYTES
+
+
+@dataclass
 class Chunk:
     id: str
     document_id: str
     text: str
     heading: str
     citation: str
+    source_locator: str
     indexed_at: Optional[datetime] = None
     hits: int = 0
 
@@ -49,9 +64,15 @@ class DocumentRecord:
     knowledge_base_id: str
     filename: str
     content: str
+    file_format: str
+    source: str
+    size_bytes: int
     status: str = "uploaded"
+    upload_progress: int = 100
     error: Optional[str] = None
+    failure_summary: Optional[str] = None
     chunks: List[Chunk] = field(default_factory=list)
+    status_history: List[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=_now)
     updated_at: datetime = field(default_factory=_now)
 
@@ -60,9 +81,11 @@ class DocumentRecord:
 class SearchHit:
     chunk_id: str
     document_id: str
-    score: int
+    score: float
     excerpt: str
     citation: str
+    retrieval_mode: str = "keyword"
+    source_locator: str = ""
 
 
 @dataclass
@@ -73,6 +96,8 @@ class Answer:
     citations: List[str]
     tenant_id: str = ""
     knowledge_base_id: str = ""
+    stream_state: str = "completed"
+    stream_events: List[str] = field(default_factory=list)
     fallback_reason: Optional[str] = None
 
 
@@ -138,6 +163,33 @@ class KnowledgeAssetPlatform:
         self.index.setdefault(kb.id, [])
         return kb
 
+    def validate_upload(self, filename: str, content: str) -> UploadCheck:
+        suffix = self._file_format(filename)
+        size_bytes = len(content.encode("utf-8"))
+        if suffix not in SUPPORTED_UPLOAD_FORMATS:
+            return UploadCheck(
+                filename=filename,
+                accepted=False,
+                reason=f"unsupported file format: {suffix or 'none'}",
+                size_bytes=size_bytes,
+                file_format=suffix,
+            )
+        if size_bytes > MAX_UPLOAD_BYTES:
+            return UploadCheck(
+                filename=filename,
+                accepted=False,
+                reason=f"file exceeds {MAX_UPLOAD_BYTES} bytes",
+                size_bytes=size_bytes,
+                file_format=suffix,
+            )
+        return UploadCheck(
+            filename=filename,
+            accepted=True,
+            reason=None,
+            size_bytes=size_bytes,
+            file_format=suffix,
+        )
+
     def upload_document(
         self,
         tenant_id: str,
@@ -146,18 +198,26 @@ class KnowledgeAssetPlatform:
         content: str,
     ) -> DocumentRecord:
         self._require_kb_access(tenant_id, knowledge_base_id)
+        upload_check = self.validate_upload(filename, content)
+        if not upload_check.accepted:
+            raise ValueError(upload_check.reason or "upload rejected")
         document = DocumentRecord(
             id=f"doc-{uuid4().hex[:8]}",
             tenant_id=tenant_id,
             knowledge_base_id=knowledge_base_id,
             filename=filename,
             content=content,
+            file_format=upload_check.file_format,
+            source=f"local-upload:{filename}",
+            size_bytes=upload_check.size_bytes,
+            status_history=["waiting", "uploading", "uploaded"],
         )
         self.documents[document.id] = document
         return document
 
     def parse_document(self, tenant_id: str, document_id: str) -> DocumentRecord:
         document = self._require_document_access(tenant_id, document_id)
+        self._transition(document, "parsing")
         document.updated_at = _now()
 
         if not document.content.strip():
@@ -166,8 +226,9 @@ class KnowledgeAssetPlatform:
             return self._mark_parse_failed(document, "parser could not extract text layer")
 
         document.chunks = self._chunk_document(document)
-        document.status = "parsed"
+        self._transition(document, "parsed")
         document.error = None
+        document.failure_summary = None
         return document
 
     def index_document(self, tenant_id: str, document_id: str) -> DocumentRecord:
@@ -176,6 +237,7 @@ class KnowledgeAssetPlatform:
         if document.status != "parsed":
             raise ValueError(f"document must be parsed before indexing, got {document.status}")
 
+        self._transition(document, "indexing")
         existing = [
             chunk
             for chunk in self.index[document.knowledge_base_id]
@@ -184,7 +246,7 @@ class KnowledgeAssetPlatform:
         for chunk in document.chunks:
             chunk.indexed_at = _now()
         self.index[document.knowledge_base_id] = existing + document.chunks
-        document.status = "indexed"
+        self._transition(document, "indexed")
         document.updated_at = _now()
         return document
 
@@ -212,6 +274,7 @@ class KnowledgeAssetPlatform:
                 citations=[],
                 tenant_id=tenant_id,
                 knowledge_base_id=knowledge_base_id,
+                stream_events=["retrieval_started", "fallback_returned", "completed"],
                 fallback_reason="empty_result",
             )
             self.answers.append(answer)
@@ -226,12 +289,21 @@ class KnowledgeAssetPlatform:
             citations=[hit.citation for hit in hits],
             tenant_id=tenant_id,
             knowledge_base_id=knowledge_base_id,
+            stream_events=["retrieval_started", "citations_attached", "completed"],
         )
         self.answers.append(answer)
         return answer
 
-    def search(self, tenant_id: str, knowledge_base_id: str, question: str) -> List[SearchHit]:
+    def search(
+        self,
+        tenant_id: str,
+        knowledge_base_id: str,
+        question: str,
+        mode: str = "keyword",
+    ) -> List[SearchHit]:
         self._require_kb_access(tenant_id, knowledge_base_id)
+        if mode not in {"keyword", "vector"}:
+            raise ValueError("mode must be keyword or vector")
         question_terms = set(_tokenize(question))
         if not question_terms:
             return []
@@ -239,8 +311,9 @@ class KnowledgeAssetPlatform:
         scored: List[SearchHit] = []
         for chunk in self.index.get(knowledge_base_id, []):
             chunk_terms = set(_tokenize(chunk.text + " " + chunk.heading))
-            score = len(question_terms & chunk_terms)
-            if score >= 2:
+            overlap = len(question_terms & chunk_terms)
+            score = self._score_hit(overlap, len(question_terms), mode)
+            if score > 0:
                 chunk.hits += 1
                 scored.append(
                     SearchHit(
@@ -249,6 +322,8 @@ class KnowledgeAssetPlatform:
                         score=score,
                         excerpt=self._excerpt(chunk.text),
                         citation=chunk.citation,
+                        retrieval_mode=mode,
+                        source_locator=chunk.source_locator,
                     )
                 )
         scored.sort(key=lambda hit: (-hit.score, hit.citation))
@@ -416,14 +491,77 @@ class KnowledgeAssetPlatform:
                     "knowledge_base_id": kb.id,
                     "name": kb.name,
                     "owner": kb.owner,
+                    "health_score": self.knowledge_base_health(tenant_id, kb.id)["health_score"],
                     **self._metrics_for_knowledge_base(tenant_id, kb.id),
                 }
             )
         return rows
 
+    def knowledge_base_health(self, tenant_id: str, knowledge_base_id: str) -> Dict[str, object]:
+        kb = self._require_kb_access(tenant_id, knowledge_base_id)
+        documents = [
+            document
+            for document in self.documents.values()
+            if document.tenant_id == tenant_id and document.knowledge_base_id == knowledge_base_id
+        ]
+        indexed = [document for document in documents if document.status == "indexed"]
+        failed = [document for document in documents if document.status == "failed"]
+        metrics = self._metrics_for_knowledge_base(tenant_id, knowledge_base_id)
+        penalty = (
+            len(failed) * 20
+            + int(metrics["pending_feedback_count"]) * 15
+            + int(metrics["unanswered_question_count"]) * 10
+        )
+        score = max(0, min(100, 100 - penalty))
+        return {
+            "knowledge_base_id": kb.id,
+            "name": kb.name,
+            "owner": kb.owner,
+            "health_score": score,
+            "document_count": len(documents),
+            "indexed_document_count": len(indexed),
+            "failed_document_count": len(failed),
+            "pending_feedback_count": metrics["pending_feedback_count"],
+            "unanswered_question_count": metrics["unanswered_question_count"],
+        }
+
+    def chunk_preview(
+        self,
+        tenant_id: str,
+        document_id: str,
+        limit: int = 3,
+    ) -> List[Dict[str, object]]:
+        document = self._require_document_access(tenant_id, document_id)
+        return [
+            {
+                "chunk_id": chunk.id,
+                "heading": chunk.heading,
+                "excerpt": self._excerpt(chunk.text, size=80),
+                "citation": chunk.citation,
+                "source_locator": chunk.source_locator,
+            }
+            for chunk in document.chunks[:limit]
+        ]
+
+    def locate_citation(self, tenant_id: str, citation: str) -> Dict[str, str]:
+        for document in self.documents.values():
+            if document.tenant_id != tenant_id:
+                continue
+            for chunk in document.chunks:
+                if chunk.citation == citation:
+                    return {
+                        "document_id": document.id,
+                        "filename": document.filename,
+                        "chunk_id": chunk.id,
+                        "heading": chunk.heading,
+                        "source_locator": chunk.source_locator,
+                    }
+        raise KeyError(citation)
+
     def _mark_parse_failed(self, document: DocumentRecord, reason: str) -> DocumentRecord:
-        document.status = "failed"
+        self._transition(document, "failed")
         document.error = reason
+        document.failure_summary = f"{document.filename}: {reason}"
         document.chunks = []
         return document
 
@@ -461,7 +599,26 @@ class KnowledgeAssetPlatform:
             text=text,
             heading=heading,
             citation=f"{document.filename}#{offset + 1}",
+            source_locator=f"{document.filename} > {heading} > chunk {offset + 1}",
         )
+
+    def _transition(self, document: DocumentRecord, status: str) -> None:
+        document.status = status
+        if not document.status_history or document.status_history[-1] != status:
+            document.status_history.append(status)
+        document.updated_at = _now()
+
+    def _file_format(self, filename: str) -> str:
+        if "." not in filename:
+            return ""
+        return "." + filename.rsplit(".", 1)[1].lower()
+
+    def _score_hit(self, overlap: int, question_term_count: int, mode: str) -> float:
+        if overlap < 2:
+            return 0
+        if mode == "keyword":
+            return float(overlap)
+        return round(overlap / max(question_term_count, 1), 4)
 
     def _require_kb_access(self, tenant_id: str, knowledge_base_id: str) -> KnowledgeBase:
         kb = self.knowledge_bases.get(knowledge_base_id)

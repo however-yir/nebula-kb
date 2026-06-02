@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from django.test import SimpleTestCase
 
 from knowledge.models import SearchMode
-from knowledge.services.asset_lifecycle_demo import KnowledgeAssetPlatform
+from knowledge.services.asset_lifecycle_demo import MAX_UPLOAD_BYTES, KnowledgeAssetPlatform
 from knowledge.vector.base_vector import normalize_for_embedding
 from knowledge.vector.pg_vector import PGVector
 
@@ -197,6 +197,40 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
         self.assertGreaterEqual(len(document.chunks), 2)
         self.assertTrue(all(chunk.indexed_at is not None for chunk in document.chunks))
 
+    def test_upload_precheck_rejects_unsupported_format_and_large_file(self):
+        unsupported = self.platform.validate_upload("policy.pdf", "content")
+        oversized = self.platform.validate_upload("policy.md", "x" * (MAX_UPLOAD_BYTES + 1))
+
+        self.assertFalse(unsupported.accepted)
+        self.assertEqual(unsupported.reason, "unsupported file format: .pdf")
+        self.assertFalse(oversized.accepted)
+        self.assertIn("file exceeds", oversized.reason)
+
+        with self.assertRaisesRegex(ValueError, "unsupported file format"):
+            self.platform.upload_document(self.tenant_a, self.kb.id, "policy.pdf", "content")
+
+    def test_document_state_machine_chunk_preview_and_citation_location(self):
+        document = self.platform.ingest_document(
+            self.tenant_a, self.kb.id, "import-sop.md", self.content
+        )
+
+        self.assertEqual(document.upload_progress, 100)
+        self.assertEqual(document.file_format, ".md")
+        self.assertEqual(document.source, "local-upload:import-sop.md")
+        self.assertEqual(
+            document.status_history,
+            ["waiting", "uploading", "uploaded", "parsing", "parsed", "indexing", "indexed"],
+        )
+
+        preview = self.platform.chunk_preview(self.tenant_a, document.id, limit=1)
+        self.assertEqual(len(preview), 1)
+        self.assertTrue(preview[0]["citation"].startswith("import-sop.md#"))
+        self.assertIn("import-sop.md", preview[0]["source_locator"])
+
+        locator = self.platform.locate_citation(self.tenant_a, preview[0]["citation"])
+        self.assertEqual(locator["document_id"], document.id)
+        self.assertEqual(locator["source_locator"], preview[0]["source_locator"])
+
     def test_permission_isolation_between_tenants(self):
         self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
 
@@ -213,6 +247,26 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
         self.assertGreaterEqual(len(answer.citations), 1)
         self.assertTrue(answer.citations[0].startswith("import-sop.md#"))
         self.assertIn("根据知识库引用", answer.answer)
+        self.assertEqual(answer.knowledge_base_id, self.kb.id)
+        self.assertEqual(answer.stream_state, "completed")
+        self.assertIn("citations_attached", answer.stream_events)
+
+    def test_keyword_and_vector_search_return_scores_and_source_locators(self):
+        self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
+
+        keyword_hits = self.platform.search(
+            self.tenant_a, self.kb.id, "解析失败后应该如何处理？", mode="keyword"
+        )
+        vector_hits = self.platform.search(
+            self.tenant_a, self.kb.id, "解析失败后应该如何处理？", mode="vector"
+        )
+
+        self.assertGreaterEqual(keyword_hits[0].score, 2)
+        self.assertEqual(keyword_hits[0].retrieval_mode, "keyword")
+        self.assertIn("import-sop.md", keyword_hits[0].source_locator)
+        self.assertGreater(vector_hits[0].score, 0)
+        self.assertLessEqual(vector_hits[0].score, 1)
+        self.assertEqual(vector_hits[0].retrieval_mode, "vector")
 
     def test_empty_result_has_fallback(self):
         self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
@@ -222,6 +276,8 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
         self.assertEqual(answer.fallback_reason, "empty_result")
         self.assertEqual(answer.citations, [])
         self.assertIn("未找到可靠知识", answer.answer)
+        self.assertEqual(answer.stream_state, "completed")
+        self.assertIn("fallback_returned", answer.stream_events)
 
     def test_feedback_record_and_low_quality_review(self):
         feedback = self.platform.submit_feedback(
@@ -277,7 +333,31 @@ class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
 
         by_kb = self.platform.metrics_by_knowledge_base(self.tenant_a)
         self.assertEqual(by_kb[0]["knowledge_base_id"], self.kb.id)
+        self.assertLess(by_kb[0]["health_score"], 100)
         self.assertEqual(by_kb[0]["pending_feedback_count"], 1)
+
+    def test_knowledge_base_health_tracks_failed_docs_feedback_and_unanswered_questions(self):
+        self.platform.ingest_document(self.tenant_a, self.kb.id, "import-sop.md", self.content)
+        failed = self.platform.ingest_document(self.tenant_a, self.kb.id, "broken.txt", "[PARSE_ERROR]")
+        self.platform.ask(self.tenant_a, self.kb.id, "火星基地餐饮报销规则是什么？")
+        self.platform.submit_feedback(
+            tenant_id=self.tenant_a,
+            knowledge_base_id=self.kb.id,
+            question="解析失败后应该如何处理？",
+            answer="缺少引用",
+            citations=[],
+            rating=2,
+            reason="引用缺失",
+        )
+
+        health = self.platform.knowledge_base_health(self.tenant_a, self.kb.id)
+        self.assertEqual(failed.failure_summary, "broken.txt: parser could not extract text layer")
+        self.assertEqual(health["document_count"], 2)
+        self.assertEqual(health["indexed_document_count"], 1)
+        self.assertEqual(health["failed_document_count"], 1)
+        self.assertEqual(health["pending_feedback_count"], 1)
+        self.assertEqual(health["unanswered_question_count"], 1)
+        self.assertEqual(health["health_score"], 55)
 
     def test_low_quality_answers_supports_knowledge_reason_and_status_filters(self):
         other_kb = self.platform.create_knowledge_base(

@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   PYTHON="${PYTHON_BIN}"
+elif [[ -x "${ROOT_DIR}/.venv/bin/python" ]]; then
+  PYTHON="${ROOT_DIR}/.venv/bin/python"
 elif command -v python >/dev/null 2>&1; then
   PYTHON="python"
 elif command -v python3 >/dev/null 2>&1; then
@@ -188,10 +190,20 @@ run_lifecycle_demo() {
   (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_lifecycle.py > "${output}")
   grep -q 'NebulaKB demo: knowledge asset lifecycle' "${output}"
   grep -q 'status=indexed' "${output}"
+  grep -q 'Upload progress: 100%' "${output}"
+  grep -q 'Status path: waiting -> uploading -> uploaded -> parsing -> parsed -> indexing -> indexed' "${output}"
+  grep -q 'Chunk preview:' "${output}"
+  grep -q 'Keyword hit:' "${output}"
+  grep -q 'Vector hit:' "${output}"
+  grep -q 'Score:' "${output}"
+  grep -q 'Citation locator:' "${output}"
+  grep -q 'Source locator:' "${output}"
+  grep -q 'Stream state: completed' "${output}"
   grep -q 'Fallback: empty_result' "${output}"
   grep -q '"knowledge_hit_rate": 0.75' "${output}"
   grep -q '"low_quality_answer_rate": 1.0' "${output}"
   grep -q 'Knowledge-base health dashboard' "${output}"
+  grep -q '"health_score":' "${output}"
   grep -q '"status": "closed"' "${output}"
   rm -f "${output}"
 }
