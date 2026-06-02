@@ -77,6 +77,7 @@ Gates:
   lifecycle-demo     Knowledge asset lifecycle demo regression
   knowledge-admin-demo Knowledge base, document, chunk, retrieval admin completion regression
   application-workflow-demo Feedback, dashboard, application, and workflow demo regression
+  application-experience-demo Feedback, dashboard, app template, and workflow node P1 regression
   platform-governance-demo Model/tool/trigger/permission/audit demo regression
   api-security-release API v1, OpenAPI, security, deployment, and observability release regression
   local-readiness-docs Local startup/configuration documentation drift check
@@ -290,6 +291,54 @@ run_application_workflow_demo() {
   rm -f "${output}"
 }
 
+run_application_experience_demo() {
+  echo "==> application-experience-demo"
+  local output
+  local doc="${ROOT_DIR}/docs/application-experience.md"
+  output="$(mktemp)"
+
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_application_experience.py > "${output}")
+  grep -q 'NebulaKB demo: application experience completion' "${output}"
+  grep -q 'Feedback reason categories:' "${output}"
+  grep -q 'Handwritten feedback:' "${output}"
+  grep -q 'Feedback assignment/status/note:' "${output}"
+  grep -q 'Feedback trend:' "${output}"
+  grep -q 'Dashboard filters:' "${output}"
+  grep -q 'Average retrieval/generation latency:' "${output}"
+  grep -q 'Token usage:' "${output}"
+  grep -q 'Top questions:' "${output}"
+  grep -q 'Knowledge health trend:' "${output}"
+  grep -q 'Metric tooltips:' "${output}"
+  grep -q 'Dashboard empty state:' "${output}"
+  grep -q 'Anomaly highlights:' "${output}"
+  grep -q 'Chart export:' "${output}"
+  grep -q 'Daily report export:' "${output}"
+  grep -q 'Application template: review' "${output}"
+  grep -q 'Application copy:' "${output}"
+  grep -q 'Application rollback version: 1' "${output}"
+  grep -q 'Application access count: 12' "${output}"
+  grep -q 'Embed config:' "${output}"
+  grep -q 'Share permissions:' "${output}"
+  grep -q 'Node catalog count: 10' "${output}"
+  grep -q 'Node search: retrieval' "${output}"
+  grep -q 'Node snap:' "${output}"
+  grep -q 'Loop boundary hint:' "${output}"
+  grep -q 'Node IO preview:' "${output}"
+  grep -q 'Single node debug: success' "${output}"
+  grep -q 'Node acceptance:' "${output}"
+  grep -q 'knowledge_write' "${output}"
+  grep -q 'reranker' "${output}"
+  grep -q 'reply' "${output}"
+
+  grep -Fq 'bash scripts/quality-gate.sh application-experience-demo' "${doc}"
+  grep -Fq 'Feedback reason categories' "${doc}"
+  grep -Fq 'Application template creation' "${doc}"
+  grep -Fq 'Workflow node search' "${doc}"
+  grep -Fq 'knowledge-write' "${doc}"
+  grep -Fq 'ApplicationExperienceCompletion' "${doc}"
+  rm -f "${output}"
+}
+
 run_platform_governance_demo() {
   echo "==> platform-governance-demo"
   local output
@@ -443,6 +492,7 @@ run_release() {
   run_lifecycle_demo
   run_knowledge_admin_demo
   run_application_workflow_demo
+  run_application_experience_demo
   run_platform_governance_demo
   run_api_security_release
   run_local_readiness_docs
@@ -507,6 +557,9 @@ for gate in "$@"; do
     application-workflow-demo)
       run_application_workflow_demo
       ;;
+    application-experience-demo)
+      run_application_experience_demo
+      ;;
     platform-governance-demo)
       run_platform_governance_demo
       ;;
@@ -534,6 +587,7 @@ for gate in "$@"; do
       run_lifecycle_demo
       run_knowledge_admin_demo
       run_application_workflow_demo
+      run_application_experience_demo
       run_platform_governance_demo
       run_api_security_release
       run_local_readiness_docs

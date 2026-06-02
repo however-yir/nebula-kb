@@ -16,6 +16,7 @@
 bash scripts/quality-gate.sh completion
 bash scripts/quality-gate.sh lifecycle-demo
 bash scripts/quality-gate.sh knowledge-admin-demo
+bash scripts/quality-gate.sh application-experience-demo
 bash scripts/quality-gate.sh api-security-release
 bash scripts/quality-gate.sh smoke
 bash scripts/quality-gate.sh api
@@ -28,6 +29,7 @@ COVERAGE_FAIL_UNDER=50 bash scripts/quality-gate.sh coverage
 - [ ] completion roadmap 完整性检查通过。
 - [ ] lifecycle demo 回归通过。
 - [ ] knowledge admin demo 回归通过。
+- [ ] application experience demo 回归通过。
 - [ ] API v1、OpenAPI、安全头、上传限制、部署和可观测发布验收通过。
 - [ ] API regression 通过。
 - [ ] auth/token 回归通过。
