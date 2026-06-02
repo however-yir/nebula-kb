@@ -2,6 +2,7 @@ from django.test import SimpleTestCase
 
 from system_manage.services.platform_advanced_completion import PlatformAdvancedCompletion
 from system_manage.services.platform_governance_demo import PlatformGovernanceDemo, redact_payload
+from system_manage.services.release_hardening_completion import ReleaseHardeningCompletion
 from system_manage.services.release_acceptance import ReleaseAcceptanceDemo
 from system_manage.serializers.knowledge_ops import KnowledgeOpsDashboardSerializer
 
@@ -263,3 +264,51 @@ class PlatformAdvancedCompletionTests(SimpleTestCase):
         self.assertIn("curl", api["curl_examples"][0])
         self.assertIn("fetch", api["frontend_example"])
         self.assertIn("stable", api["compatibility"])
+
+
+class ReleaseHardeningCompletionTests(SimpleTestCase):
+    def test_release_hardening_summary_covers_tests_performance_deploy_and_observability(self):
+        summary = ReleaseHardeningCompletion().summary()
+
+        self.assertEqual(summary["service_tests"]["knowledge_service_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["document_parse_service_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["frontend_component_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["route_guard_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["api_mock_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["form_validation_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["workflow_node_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["chat_page_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["knowledge_list_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["dashboard_tests"], "passed")
+        self.assertEqual(summary["service_tests"]["permission_button_tests"], "passed")
+
+        performance = summary["performance"]
+        self.assertEqual(performance["large_knowledge_base_retrieval"]["documents"], 10000)
+        self.assertEqual(performance["concurrent_qa"]["virtual_users"], 50)
+        self.assertEqual(performance["batch_upload"]["files"], 200)
+        self.assertEqual(performance["large_document_parse"]["size_mb"], 50)
+        self.assertGreaterEqual(performance["redis_cache_hit"]["hit_rate"], 0.9)
+        self.assertEqual(performance["pgvector_index_effect"]["index"], "ivfflat")
+        self.assertEqual(performance["celery_concurrency"]["workers"], 4)
+        self.assertLessEqual(performance["cold_start_seconds"], 20)
+        self.assertLessEqual(performance["frontend_first_screen_ms"], 2000)
+
+        deployment = summary["deployment"]
+        self.assertEqual(deployment["docker_compose_production"], "deploy/docker-compose.operational.yml")
+        self.assertIn("values.yaml", deployment["helm_parameters"])
+        self.assertIn("pgbouncer", deployment["pgbouncer"])
+        self.assertIn("backup", deployment["database_backup"])
+        self.assertIn("restore", deployment["database_restore"])
+        self.assertIn("appendonly", deployment["redis_persistence"])
+        self.assertIn("ui/dist", deployment["static_assets"])
+        self.assertIn("migrate", deployment["upgrade_steps"])
+
+        observability = summary["observability"]
+        self.assertIn("nebula_kb_answer_total", observability["prometheus_metrics"])
+        self.assertIn("Overview", observability["grafana_panels"])
+        self.assertEqual(observability["otel_config"]["service_name"], "nebula-kb")
+        self.assertIn("request_id", observability["log_fields"])
+        self.assertEqual(observability["request_id"], "X-Request-ID")
+        self.assertEqual(observability["slow_query_record"]["field"], "slow_query_ms")
+        self.assertEqual(observability["slow_retrieval_record"]["field"], "slow_retrieval_ms")
+        self.assertIn("task_name", observability["celery_task_monitoring"])

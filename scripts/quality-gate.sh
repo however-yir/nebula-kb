@@ -81,6 +81,7 @@ Gates:
   platform-governance-demo Model/tool/trigger/permission/audit demo regression
   platform-advanced-demo Advanced model/tool/trigger/user/SSO/API governance regression
   api-security-release API v1, OpenAPI, security, deployment, and observability release regression
+  release-hardening-demo Test, performance, deployment, and observability hardening regression
   local-readiness-docs Local startup/configuration documentation drift check
   release            Run the fixed release gate set
   all                Run smoke, unit, integration, api, auth, permission, coverage, frontend, docs gates
@@ -508,6 +509,57 @@ PY
   rm -f "${output}" "${security_output}"
 }
 
+run_release_hardening_demo() {
+  echo "==> release-hardening-demo"
+  local output
+  local doc="${ROOT_DIR}/docs/release-hardening.md"
+  output="$(mktemp)"
+
+  (cd "${ROOT_DIR}" && "${PYTHON}" scripts/demo_release_hardening.py > "${output}")
+  grep -q 'NebulaKB demo: release hardening completion' "${output}"
+  grep -q 'Service test matrix:' "${output}"
+  grep -q 'knowledge_service_tests' "${output}"
+  grep -q 'frontend_component_tests' "${output}"
+  grep -q 'permission_button_tests' "${output}"
+  grep -q 'Performance baselines:' "${output}"
+  grep -q 'large_knowledge_base_retrieval' "${output}"
+  grep -q 'concurrent_qa' "${output}"
+  grep -q 'batch_upload' "${output}"
+  grep -q 'large_document_parse' "${output}"
+  grep -q 'redis_cache_hit' "${output}"
+  grep -q 'pgvector_index_effect' "${output}"
+  grep -q 'celery_concurrency' "${output}"
+  grep -q 'cold_start_seconds' "${output}"
+  grep -q 'frontend_first_screen_ms' "${output}"
+  grep -q 'Docker Compose production:' "${output}"
+  grep -q 'Helm parameters:' "${output}"
+  grep -q 'PgBouncer docs:' "${output}"
+  grep -q 'Database backup/restore:' "${output}"
+  grep -q 'Redis persistence:' "${output}"
+  grep -q 'Static assets:' "${output}"
+  grep -q 'Upgrade steps:' "${output}"
+  grep -q 'Prometheus metrics:' "${output}"
+  grep -q 'Grafana panels:' "${output}"
+  grep -q 'OpenTelemetry config:' "${output}"
+  grep -q 'Log fields:' "${output}"
+  grep -q 'Request id tracking: X-Request-ID' "${output}"
+  grep -q 'Slow query record:' "${output}"
+  grep -q 'Slow retrieval record:' "${output}"
+  grep -q 'Celery task monitoring:' "${output}"
+
+  grep -Fq 'bash scripts/quality-gate.sh release-hardening-demo' "${doc}"
+  grep -Fq 'Frontend component tests' "${doc}"
+  grep -Fq 'Large knowledge-base retrieval' "${doc}"
+  grep -Fq 'Docker Compose production example' "${doc}"
+  grep -Fq 'Helm parameters' "${doc}"
+  grep -Fq 'Redis persistence' "${doc}"
+  grep -Fq 'Prometheus metrics' "${doc}"
+  grep -Fq 'OpenTelemetry config' "${doc}"
+  grep -Fq 'X-Request-ID' "${doc}"
+  grep -Fq 'Celery task monitoring' "${doc}"
+  rm -f "${output}"
+}
+
 run_local_readiness_docs() {
   echo "==> local-readiness-docs"
   local readme="${ROOT_DIR}/README.md"
@@ -544,6 +596,7 @@ run_release() {
   run_platform_governance_demo
   run_platform_advanced_demo
   run_api_security_release
+  run_release_hardening_demo
   run_local_readiness_docs
   run_smoke
   run_api
@@ -618,6 +671,9 @@ for gate in "$@"; do
     api-security-release)
       run_api_security_release
       ;;
+    release-hardening-demo)
+      run_release_hardening_demo
+      ;;
     local-readiness-docs)
       run_local_readiness_docs
       ;;
@@ -643,6 +699,7 @@ for gate in "$@"; do
       run_platform_governance_demo
       run_platform_advanced_demo
       run_api_security_release
+      run_release_hardening_demo
       run_local_readiness_docs
       ;;
     *)

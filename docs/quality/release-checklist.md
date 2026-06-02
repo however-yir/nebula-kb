@@ -19,6 +19,7 @@ bash scripts/quality-gate.sh knowledge-admin-demo
 bash scripts/quality-gate.sh application-experience-demo
 bash scripts/quality-gate.sh platform-advanced-demo
 bash scripts/quality-gate.sh api-security-release
+bash scripts/quality-gate.sh release-hardening-demo
 bash scripts/quality-gate.sh smoke
 bash scripts/quality-gate.sh api
 bash scripts/quality-gate.sh auth
@@ -33,6 +34,7 @@ COVERAGE_FAIL_UNDER=50 bash scripts/quality-gate.sh coverage
 - [ ] application experience demo 回归通过。
 - [ ] platform advanced demo 回归通过。
 - [ ] API v1、OpenAPI、安全头、上传限制、部署和可观测发布验收通过。
+- [ ] release hardening demo 回归通过。
 - [ ] API regression 通过。
 - [ ] auth/token 回归通过。
 - [ ] permission/越权回归通过。
