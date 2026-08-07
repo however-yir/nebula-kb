@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from common import forms
 from common.forms import BaseForm
 from lzkb.const import CONFIG
+from local_model.auth import get_local_model_headers
 from models_provider.base_model_provider import BaseModelCredential
 
 
@@ -25,7 +26,8 @@ class LocalRerankerCredential(BaseForm, BaseModelCredential):
         prefix = CONFIG.get_admin_path()
         res = requests.post(
             f'{CONFIG.get("LOCAL_MODEL_PROTOCOL")}://{bind}{prefix}/api/model/validate',
-            json={'model_name': model_name, 'model_type': model_type, 'model_credential': model_credential})
+            json={'model_name': model_name, 'model_type': model_type, 'model_credential': model_credential},
+            headers=get_local_model_headers())
         result = res.json()
         if result.get('code', 500) == 200:
             return result.get('data')

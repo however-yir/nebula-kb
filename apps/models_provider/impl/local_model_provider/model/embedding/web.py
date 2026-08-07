@@ -14,6 +14,7 @@ from anthropic import BaseModel
 from langchain_core.embeddings import Embeddings
 
 from lzkb.const import CONFIG
+from local_model.auth import get_local_model_headers
 from models_provider.base_model_provider import LZKBBaseModel
 
 
@@ -36,7 +37,7 @@ class LocalEmbedding(LZKBBaseModel, BaseModel, Embeddings):
         prefix = CONFIG.get_admin_path()
         res = requests.post(
             f'{CONFIG.get("LOCAL_MODEL_PROTOCOL")}://{bind}{prefix}/api/model/{self.model_id}/embed_query',
-            {'text': text})
+            {'text': text}, headers=get_local_model_headers())
         result = res.json()
         if result.get('code', 500) == 200:
             return result.get('data')
@@ -47,7 +48,7 @@ class LocalEmbedding(LZKBBaseModel, BaseModel, Embeddings):
         prefix = CONFIG.get_admin_path()
         res = requests.post(
             f'{CONFIG.get("LOCAL_MODEL_PROTOCOL")}://{bind}/{prefix}/api/model/{self.model_id}/embed_documents',
-            {'texts': texts})
+            {'texts': texts}, headers=get_local_model_headers())
         result = res.json()
         if result.get('code', 500) == 200:
             return result.get('data')

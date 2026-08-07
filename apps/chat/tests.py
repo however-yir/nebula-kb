@@ -6,6 +6,23 @@ from django.urls import resolve
 from lzkb.const import CONFIG
 
 
+class ChatEmbedSerializerTests(SimpleTestCase):
+    @patch("chat.serializers.chat_embed_serializers.DatabaseModelManage.get_model", return_value=None)
+    @patch("chat.serializers.chat_embed_serializers.QuerySet")
+    def test_invalid_token_renders_unauthenticated_embed(self, queryset, _get_model):
+        queryset.return_value.filter.return_value.first.return_value = None
+
+        from chat.serializers.chat_embed_serializers import ChatEmbedSerializer
+
+        response = ChatEmbedSerializer(data={
+            "protocol": "http",
+            "host": "localhost",
+            "token": "missing-token",
+        }).get_embed()
+
+        self.assertEqual(response.status_code, 200)
+
+
 class ChatRouteSmokeTests(SimpleTestCase):
     @classmethod
     def setUpClass(cls):

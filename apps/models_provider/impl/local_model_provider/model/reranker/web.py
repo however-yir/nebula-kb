@@ -14,6 +14,7 @@ from langchain_core.callbacks import Callbacks
 from langchain_core.documents import Document, BaseDocumentCompressor
 
 from lzkb.const import CONFIG
+from local_model.auth import get_local_model_headers
 from models_provider.base_model_provider import LZKBBaseModel
 
 
@@ -43,7 +44,8 @@ class LocalReranker(LZKBBaseModel, BaseModel, BaseDocumentCompressor):
         res = requests.post(
             f'{CONFIG.get("LOCAL_MODEL_PROTOCOL")}://{bind}{prefix}/api/model/{self.model_id}/compress_documents',
             json={'documents': [{'page_content': document.page_content, 'metadata': document.metadata} for document in
-                                documents], 'query': query}, headers={'Content-Type': 'application/json'})
+                                documents], 'query': query},
+            headers=get_local_model_headers({'Content-Type': 'application/json'}))
         result = res.json()
         if result.get('code', 500) == 200:
             return [Document(page_content=document.get('page_content'), metadata=document.get('metadata')) for document

@@ -37,6 +37,7 @@ class ChatEmbedSerializer(serializers.Serializer):
         file.close()
         application_access_token = QuerySet(ApplicationAccessToken).filter(
             access_token=self.data.get('token')).first()
+        application = application_access_token.application if application_access_token is not None else None
         is_draggable = 'false'
         show_guide = 'true'
         float_icon = (
@@ -46,13 +47,14 @@ class ChatEmbedSerializer(serializers.Serializer):
         is_license_valid = DatabaseModelManage.get_model('license_is_valid')
         X_PACK_LICENSE_IS_VALID = is_license_valid() if is_license_valid is not None else False
         # 获取接入的query参数
-        query = self.get_query_api_input(application_access_token.application, params)
+        query = self.get_query_api_input(application, params) if application is not None else ''
         float_location = {"x": {"type": "right", "value": 0}, "y": {"type": "bottom", "value": 30}}
         header_font_color = "rgb(100, 106, 115)"
         application_setting_model = DatabaseModelManage.get_model('application_setting')
         if application_setting_model is not None and X_PACK_LICENSE_IS_VALID:
             application_setting = QuerySet(application_setting_model).filter(
-                application_id=application_access_token.application_id).first()
+                application_id=application_access_token.application_id).first() \
+                if application_access_token is not None else None
             if application_setting is not None:
                 is_draggable = 'true' if application_setting.draggable else 'false'
                 if application_setting.float_icon is not None and len(application_setting.float_icon) > 0:
@@ -74,8 +76,10 @@ class ChatEmbedSerializer(serializers.Serializer):
                 {'is_auth': is_auth, 'protocol': self.data.get('protocol'), 'host': self.data.get('host'),
                  'token': self.data.get('token'),
                  'white_list_str': ",".join(
-                     application_access_token.white_list if application_access_token.white_list is not None else []),
-                 'white_active': 'true' if application_access_token.white_active else 'false',
+                     application_access_token.white_list if application_access_token is not None and
+                     application_access_token.white_list is not None else []),
+                 'white_active': 'true' if application_access_token is not None and
+                 application_access_token.white_active else 'false',
                  'is_draggable': is_draggable,
                  'float_icon': float_icon,
                  'prefix': CONFIG.get_chat_path(),

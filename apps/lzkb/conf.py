@@ -53,6 +53,7 @@ class Config(dict):
         'LOCAL_MODEL_PORT': '11636',
         'LOCAL_MODEL_PROTOCOL': "http",
         'LOCAL_MODEL_HOST_WORKER': 1,
+        'LOCAL_MODEL_AUTH_TOKEN': '',
         'OLLAMA_BASE_URL': 'http://127.0.0.1:11434',
         'HTTP_LISTEN_PORT': 8080,
         'SCHEDULER_HTTP_PORT': 6060,
