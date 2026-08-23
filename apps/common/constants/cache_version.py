@@ -9,6 +9,13 @@
 from enum import Enum
 
 
+def _application_api_key_cache_key(secret_key, use_get_data):
+    # 写入/读取/删除统一使用不带 Bearer 前缀的 secret_key 作为缓存键
+    if isinstance(secret_key, str) and secret_key.startswith('Bearer '):
+        return secret_key[7:]
+    return secret_key
+
+
 class Cache_Version(Enum):
     # 令牌
     TOKEN = "TOKEN", lambda token: token
@@ -35,7 +42,7 @@ class Cache_Version(Enum):
     CHAT_VARIABLE = "CHAT_VARIABLE", lambda key: key
 
     # 应用API KEY
-    APPLICATION_API_KEY = "APPLICATION_API_KEY", lambda secret_key, use_get_data: secret_key
+    APPLICATION_API_KEY = "APPLICATION_API_KEY", _application_api_key_cache_key
 
     CHAT_USER_TOKEN = "CHAT_USER_TOKEN", lambda token: token
 

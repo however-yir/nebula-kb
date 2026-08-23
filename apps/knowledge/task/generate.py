@@ -69,7 +69,9 @@ def generate_related_by_knowledge_id(knowledge_id, model_id, model_params_settin
         try:
             generate_related_by_document_id.delay(document.id, model_id, model_params_setting, prompt, state_list)
         except Exception as e:
-            pass
+            maxkb_logger.error(
+                _('Generate related problems failed: {document_id} {error} {traceback}').format(
+                    document_id=document.id, error=str(e), traceback=traceback.format_exc()))
 
 
 @celery_app.task(base=QueueOnce, once={'keys': ['document_id']},

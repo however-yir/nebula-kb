@@ -87,9 +87,11 @@ class ApplicationKeySerializer(serializers.Serializer):
             if with_valid:
                 self.is_valid(raise_exception=True)
             api_key_id = self.data.get("api_key_id")
-            application_id = self.data.get('application_id')
+            application_id = self.data.get("application_id")
             application_api_key = QuerySet(ApplicationApiKey).filter(id=api_key_id,
                                                                      application_id=application_id).first()
+            if application_api_key is None:
+                raise AppApiException(500, _('APIKey does not exist'))
             del_application_api_key(application_api_key.secret_key)
             application_api_key.delete()
 

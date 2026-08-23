@@ -47,6 +47,9 @@ class VoteSerializer(serializers.Serializer):
     chat_record_id = serializers.UUIDField(required=True,
                                            label=_("Conversation record id"))
 
+    chat_user_id = serializers.CharField(required=False, allow_blank=True, allow_null=True,
+                                         label=_("Conversation user id"))
+
     @transaction.atomic
     def vote(self, instance: Dict, with_valid=True):
         if with_valid:
@@ -58,8 +61,13 @@ class VoteSerializer(serializers.Serializer):
                                   gettext(
                                       "Voting on the current session minutes, please do not send repeated requests"))
         try:
-            chat_record_details_model = QuerySet(ChatRecord).get(id=self.data.get('chat_record_id'),
-                                                                 chat_id=self.data.get('chat_id'))
+            chat_record_query_set = QuerySet(ChatRecord).filter(id=self.data.get('chat_record_id'),
+                                                                chat_id=self.data.get('chat_id'))
+            # 校验会话归属, 避免越权操作其他用户的会话记录
+            chat_user_id = self.data.get('chat_user_id')
+            if chat_user_id:
+                chat_record_query_set = chat_record_query_set.filter(chat__chat_user_id=chat_user_id)
+            chat_record_details_model = chat_record_query_set.first()
             if chat_record_details_model is None:
                 raise AppApiException(500, gettext("Non-existent conversation chat_record_id"))
             vote_status = instance.get("vote_status")

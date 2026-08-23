@@ -106,7 +106,7 @@ class Config(dict):
     }
 
     def get_debug(self) -> bool:
-        value = self.get('DEBUG') if 'DEBUG' in self else True
+        value = self.get('DEBUG') if 'DEBUG' in self else False
         if isinstance(value, str):
             return value.lower() in {'1', 'true', 'yes', 'on'}
         return bool(value)
@@ -371,7 +371,7 @@ class ConfigManager:
                 os.path.join('config', f'{env}.yml'),
                 os.path.join('config', f'{env}.yaml'),
             ])
-        candidates.extend(['config.yaml', 'config.yml', 'config_example.yml'])
+        candidates.extend(['config.yaml', 'config.yml'])
         for i in candidates:
             if not os.path.isfile(os.path.join(self.root_path, i)):
                 continue

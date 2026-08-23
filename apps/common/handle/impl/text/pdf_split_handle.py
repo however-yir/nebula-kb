@@ -331,9 +331,17 @@ class PdfSplitHandle(BaseSplitHandle):
             # 获取临时文件的路径
             temp_file_path = temp_file.name
 
-        pdf_document = fitz.open(temp_file_path)
+        pdf_document = None
         try:
+            pdf_document = fitz.open(temp_file_path)
             return self.handle_pdf_content(file, pdf_document)
         except BaseException as e:
             traceback.print_exception(e)
             return f'{e}'
+        finally:
+            if pdf_document is not None:
+                pdf_document.close()
+            try:
+                os.remove(temp_file_path)
+            except OSError:
+                pass

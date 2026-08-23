@@ -19,6 +19,8 @@ from common.utils.cache_util import get_cache
            version=Cache_Version.APPLICATION_API_KEY.get_version())
 def get_application_api_key(secret_key, use_get_data):
     application_api_key = QuerySet(ApplicationApiKey).filter(secret_key=secret_key[7:]).first()
+    if application_api_key is None:
+        return {'allow_cross_domain': False, 'cross_domain_list': []}
     return {'allow_cross_domain': application_api_key.allow_cross_domain,
             'cross_domain_list': application_api_key.cross_domain_list}
 

@@ -113,7 +113,9 @@ def embedding_by_knowledge(knowledge_id, model_id):
             try:
                 embedding_by_document.delay(document.id, model_id)
             except Exception as e:
-                pass
+                maxkb_logger.error(
+                    _('Vectorized document failed: {document_id} {error} {traceback}').format(
+                        document_id=document.id, error=str(e), traceback=traceback.format_exc()))
     except Exception as e:
         maxkb_logger.error(
             _('Vectorized knowledge: {knowledge_id} error {error} {traceback}'.format(knowledge_id=knowledge_id,

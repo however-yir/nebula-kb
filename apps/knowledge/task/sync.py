@@ -63,4 +63,5 @@ def sync_web_document(knowledge_id, source_url_list: List[str], selector: str):
             result = Fork(base_fork_url=source_url, selector_list=selector.split(' ')).fork()
             handler(source_url, selector, result)
         except Exception as e:
-            pass
+            maxkb_logger.error(_('Sync web document failed: {source_url} {error} {traceback}').format(
+                source_url=source_url, error=str(e), traceback=traceback.format_exc()))

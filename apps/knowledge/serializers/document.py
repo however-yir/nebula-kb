@@ -511,11 +511,14 @@ class DocumentSerializers(serializers.Serializer):
                     " ") if 'selector' in document.meta and document.meta.get('selector') is not None else []
                 result = Fork(source_url, selector_list).fork()
                 if result.status == 200:
+                    # 删除段落前先获取段落id列表, 用于清理问题及关联关系
+                    paragraph_id_list = list(QuerySet(model=Paragraph).filter(document_id=document_id)
+                                             .values_list('id', flat=True))
                     # 删除段落
                     QuerySet(model=Paragraph).filter(document_id=document_id).delete()
                     # 删除问题
+                    delete_problems_and_mappings(paragraph_id_list)
                     QuerySet(model=ProblemParagraphMapping).filter(document_id=document_id).delete()
-                    delete_problems_and_mappings([document_id])
                     # 删除向量库
                     delete_embedding_by_document(document_id)
                     paragraphs = get_split_model('web.md').parse(result.content)

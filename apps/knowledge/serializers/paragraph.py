@@ -188,8 +188,9 @@ class ParagraphSerializers(serializers.Serializer):
 
                 create_problem_list = list(filter(lambda row: row.get('id') is None, instance.get('problem_list')))
 
-                # 问题集合
-                problem_list = QuerySet(Problem).filter(paragraph_id=self.data.get("paragraph_id"))
+                # 问题集合(问题与段落通过 problem_paragraph_mapping 关联, Problem 本身没有段落/文档字段)
+                problem_list = QuerySet(Problem).filter(id__in=QuerySet(ProblemParagraphMapping).filter(
+                    paragraph_id=self.data.get("paragraph_id")).values_list('problem_id', flat=True))
 
                 # 校验前端 携带过来的id
                 for update_problem in update_problem_list:
@@ -199,19 +200,31 @@ class ParagraphSerializers(serializers.Serializer):
                 delete_problem_list = list(filter(
                     lambda row: not [str(update_row.get('id')) for update_row in update_problem_list].__contains__(
                         str(row.id)), problem_list)) if len(update_problem_list) > 0 else []
-                # 删除问题
-                QuerySet(Problem).filter(id__in=[row.id for row in delete_problem_list]).delete() if len(
-                    delete_problem_list) > 0 else None
-                # 插入新的问题
-                QuerySet(Problem).bulk_create([
-                    Problem(
-                        id=uuid.uuid7(),
-                        content=p.get('content'),
-                        paragraph_id=self.data.get('paragraph_id'),
-                        knowledge_id=self.data.get('knowledge_id'),
-                        document_id=self.data.get('document_id')
-                    ) for p in create_problem_list
-                ]) if len(create_problem_list) else None
+                # 删除问题: 先删除本段落的关联关系, 再清理不再被任何段落关联的问题
+                if len(delete_problem_list) > 0:
+                    delete_problem_id_list = [row.id for row in delete_problem_list]
+                    QuerySet(ProblemParagraphMapping).filter(
+                        paragraph_id=self.data.get("paragraph_id"),
+                        problem_id__in=delete_problem_id_list).delete()
+                    remaining_problem_id_set = set(QuerySet(ProblemParagraphMapping).filter(
+                        problem_id__in=delete_problem_id_list).values_list('problem_id', flat=True))
+                    QuerySet(Problem).filter(id__in=[problem_id for problem_id in delete_problem_id_list
+                                                     if problem_id not in remaining_problem_id_set]).delete()
+                # 插入新的问题并建立与段落的关联
+                if len(create_problem_list):
+                    problem_model_list = [Problem(id=uuid.uuid7(),
+                                                  content=p.get('content'),
+                                                  knowledge_id=self.data.get('knowledge_id'))
+                                          for p in create_problem_list]
+                    QuerySet(Problem).bulk_create(problem_model_list)
+                    QuerySet(ProblemParagraphMapping).bulk_create([
+                        ProblemParagraphMapping(
+                            id=uuid.uuid7(),
+                            problem_id=problem_model.id,
+                            document_id=self.data.get('document_id'),
+                            paragraph_id=self.data.get('paragraph_id'),
+                            knowledge_id=self.data.get('knowledge_id')
+                        ) for problem_model in problem_model_list])
 
                 # 修改问题集合
                 QuerySet(Problem).bulk_update([

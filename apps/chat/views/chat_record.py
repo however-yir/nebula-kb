@@ -37,7 +37,8 @@ class VoteView(APIView):
     def put(self, request: Request, chat_id: str, chat_record_id: str):
         return result.success(VoteSerializer(
             data={'chat_id': chat_id,
-                  'chat_record_id': chat_record_id
+                  'chat_record_id': chat_record_id,
+                  'chat_user_id': getattr(request.auth, 'chat_user_id', None)
                   }).vote(request.data))
 
 

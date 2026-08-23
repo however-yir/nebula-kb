@@ -139,6 +139,14 @@ class FileSerializer(serializers.Serializer):
                 start = int(range_match.group(1))
                 end = int(range_match.group(2)) if range_match.group(2) else file_size - 1
 
+                # 起始位置超出文件大小, 返回 416
+                if start >= file_size:
+                    response = HttpResponse(status=416, content_type=content_type)
+                    response['Content-Range'] = f'bytes */{file_size}'
+                    response['Accept-Ranges'] = 'bytes'
+                    response['Content-Disposition'] = f'inline; filename={encoded_filename}'
+                    return response
+
                 # 确保范围合法
                 end = min(end, file_size - 1)
                 length = end - start + 1

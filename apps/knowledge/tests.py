@@ -1,8 +1,10 @@
 from unittest.mock import MagicMock, patch
 
+from django.core.exceptions import FieldError
+from django.db.models import QuerySet
 from django.test import SimpleTestCase
 
-from knowledge.models import SearchMode
+from knowledge.models import Problem, ProblemParagraphMapping, SearchMode
 from knowledge.services.asset_admin_completion import KnowledgeAssetAdminCompletion
 from knowledge.services.asset_lifecycle_demo import (
     MAX_UPLOAD_BYTES,
@@ -10,7 +12,7 @@ from knowledge.services.asset_lifecycle_demo import (
     KnowledgeAssetPlatform,
 )
 from knowledge.vector.base_vector import normalize_for_embedding
-from knowledge.vector.pg_vector import PGVector
+from knowledge.vector.pg_vector import PGVector, invalidate_retrieval_cache
 
 
 class FakeEmbedding:
@@ -143,6 +145,129 @@ class KnowledgeRetrievalTests(SimpleTestCase):
             FakeEmbedding(),
         )
         self.assertEqual(result, [])
+
+
+class RetrievalCacheKeyTests(SimpleTestCase):
+    """H1: 检索缓存键必须覆盖全部检索范围维度, 且对完整向量做哈希"""
+
+    def _base_kwargs(self):
+        return dict(
+            knowledge_id_list=["k-1"],
+            document_id_list=None,
+            exclude_document_id_list=None,
+            exclude_paragraph_list=None,
+            is_active=True,
+            top_n=5,
+            similarity=0.6,
+            search_mode=SearchMode.embedding,
+        )
+
+    def test_cache_key_includes_scope_dimensions(self):
+        base = self._base_kwargs()
+        key = PGVector._get_cache_key(query_embedding=[0.1, 0.2, 0.3], **base)
+        for changed in (
+            {"document_id_list": ["d-1"]},
+            {"exclude_document_id_list": ["d-2"]},
+            {"exclude_paragraph_list": ["p-1"]},
+            {"is_active": False},
+        ):
+            with self.subTest(**changed):
+                self.assertNotEqual(key, PGVector._get_cache_key(query_embedding=[0.1, 0.2, 0.3],
+                                                                 **{**base, **changed}))
+
+    def test_cache_key_hashes_full_embedding(self):
+        base = self._base_kwargs()
+        # 前 5 维相同但后续维度不同的向量必须产生不同的键
+        self.assertNotEqual(
+            PGVector._get_cache_key(query_embedding=[0.1, 0.2, 0.3, 0.4, 0.5], **base),
+            PGVector._get_cache_key(query_embedding=[0.1, 0.2, 0.3, 0.4, 0.9], **base),
+        )
+
+    def test_cache_key_carries_knowledge_dimension_for_invalidation(self):
+        key = PGVector._get_cache_key(
+            query_embedding=[0.1],
+            knowledge_id_list=["k-2", "k-1"],
+            document_id_list=None,
+            exclude_document_id_list=None,
+            exclude_paragraph_list=None,
+            is_active=True,
+            top_n=5,
+            similarity=0.6,
+            search_mode=SearchMode.embedding,
+        )
+        self.assertTrue(key.startswith(f"{PGVector.RETRIEVAL_CACHE_PREFIX}:kb=k-1,k-2:"))
+
+    def test_invalidate_retrieval_cache_skips_non_redis_backends(self):
+        # LocMemCache 等后端没有原生 client, 失效应静默跳过而不是抛错
+        invalidate_retrieval_cache(["k-1"])
+
+    def test_invalidate_retrieval_cache_deletes_only_matching_knowledge_keys(self):
+        class StubRedisClient:
+            def __init__(self, keys):
+                self.keys = list(keys)
+                self.deleted = []
+
+            def scan_iter(self, match=None, count=None):
+                import fnmatch
+                return (k for k in self.keys
+                        if fnmatch.fnmatch(k.decode() if isinstance(k, bytes) else k, match))
+
+            def delete(self, *keys):
+                self.deleted.extend(keys)
+
+        stub = StubRedisClient([
+            ':1:nebula:retrieval:kb=k-1:aaaa',            # hit
+            ':1:nebula:retrieval:kb=k-1,k-2:bbbb',        # hit (multi knowledge)
+            ':1:nebula:retrieval:kb=k-3:cccc',            # miss
+            ':1:WORKSPACE:LIST:unrelated',                # miss
+            b':1:nebula:retrieval:kb=k-2:dddd',           # miss (bytes key)
+        ])
+        with patch('django.core.cache.cache') as cache_mock:
+            cache_mock.client.get_client.return_value = stub
+            invalidate_retrieval_cache(['k-1'])
+        self.assertEqual(stub.deleted, [':1:nebula:retrieval:kb=k-1:aaaa',
+                                        ':1:nebula:retrieval:kb=k-1,k-2:bbbb'])
+
+
+class ParagraphEditProblemTests(SimpleTestCase):
+    """H2: 段落编辑 problem_list 必须走 problem_paragraph_mapping, Problem 模型没有段落/文档字段"""
+
+    def test_problem_model_has_no_paragraph_or_document_field(self):
+        field_names = {field.name for field in Problem._meta.get_fields()}
+        self.assertNotIn("paragraph_id", field_names)
+        self.assertNotIn("document_id", field_names)
+        self.assertIn("paragraph", {field.name for field in ProblemParagraphMapping._meta.get_fields()})
+        self.assertIn("problem", {field.name for field in ProblemParagraphMapping._meta.get_fields()})
+
+    def test_query_problem_via_mapping_does_not_raise_field_error(self):
+        # 旧实现 QuerySet(Problem).filter(paragraph_id=...) 直接抛 FieldError
+        paragraph_id = "00000000-0000-0000-0000-000000000000"
+        with self.assertRaises(FieldError):
+            QuerySet(Problem).filter(paragraph_id=paragraph_id)
+        try:
+            QuerySet(Problem).filter(id__in=QuerySet(ProblemParagraphMapping).filter(
+                paragraph_id=paragraph_id).values_list("problem_id", flat=True))
+        except FieldError:
+            self.fail("querying problems via mapping raised FieldError")
+
+    def test_problem_creation_rejects_mapping_only_kwargs(self):
+        import uuid_utils.compat as uuid
+
+        knowledge_id = uuid.uuid7()
+        problem = Problem(id=uuid.uuid7(), content="q", knowledge_id=knowledge_id)
+        self.assertIsNotNone(problem.id)
+        # 段落/文档归属只能记录在 ProblemParagraphMapping 上
+        with self.assertRaises(TypeError):
+            Problem(id=uuid.uuid7(), content="q", knowledge_id=knowledge_id,
+                    paragraph_id="p", document_id="d")
+
+    def test_mapping_creation_carries_problem_document_paragraph(self):
+        import uuid_utils.compat as uuid
+
+        mapping = ProblemParagraphMapping(
+            id=uuid.uuid7(), problem_id=uuid.uuid7(), document_id=uuid.uuid7(),
+            paragraph_id=uuid.uuid7(), knowledge_id=uuid.uuid7())
+        self.assertIsNotNone(mapping.id)
 
 
 class KnowledgeAssetLifecycleDemoTests(SimpleTestCase):
