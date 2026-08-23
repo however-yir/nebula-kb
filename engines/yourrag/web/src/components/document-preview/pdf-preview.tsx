@@ -83,7 +83,7 @@ const PdfPreview = ({
             <Spin />
           </div>
         }
-        workerSrc="/pdfjs-dist/pdf.worker.min.js"
+        workerSrc="/pdfjs-dist/pdf.worker.mjs"
         errorMessage={<FileError>{error}</FileError>}
       >
         {(pdfDocument) => {
