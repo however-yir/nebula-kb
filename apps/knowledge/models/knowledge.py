@@ -314,7 +314,7 @@ class Embedding(models.Model):
     source_id = models.CharField(max_length=128, verbose_name="资源id", db_index=True)
     source_type = models.CharField(verbose_name='资源类型', max_length=5, choices=SourceType.choices,
                                    default=SourceType.PROBLEM, db_index=True)
-    is_active = models.BooleanField(verbose_name="是否可用", max_length=1, default=True)
+    is_active = models.BooleanField(verbose_name="是否可用", default=True)
     knowledge = models.ForeignKey(Knowledge, on_delete=models.DO_NOTHING, verbose_name="文档关联", db_constraint=False)
     document = models.ForeignKey(Document, on_delete=models.DO_NOTHING, verbose_name="文档关联", db_constraint=False)
     paragraph = models.ForeignKey(Paragraph, on_delete=models.DO_NOTHING, verbose_name="段落关联", db_constraint=False)

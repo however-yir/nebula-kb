@@ -178,9 +178,12 @@ class PGVector(BaseVectorStore):
         QuerySet(Embedding).filter(paragraph_id=paragraph_id).update(**instance)
         invalidate_retrieval_cache(knowledge_ids)
 
-    def update_by_paragraph_ids(self, paragraph_id: str, instance: Dict):
-        knowledge_ids = self._get_knowledge_ids_by_paragraph_ids(paragraph_id)
-        QuerySet(Embedding).filter(paragraph_id__in=paragraph_id).update(**instance)
+    def update_by_paragraph_ids(self, paragraph_ids, instance: Dict):
+        if not paragraph_ids:
+            return
+        paragraph_ids = list(paragraph_ids)
+        knowledge_ids = self._get_knowledge_ids_by_paragraph_ids(paragraph_ids)
+        QuerySet(Embedding).filter(paragraph_id__in=paragraph_ids).update(**instance)
         invalidate_retrieval_cache(knowledge_ids)
 
     def delete_by_knowledge_id(self, knowledge_id: str):

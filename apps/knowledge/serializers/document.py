@@ -1251,13 +1251,19 @@ class DocumentSerializers(serializers.Serializer):
             if with_valid:
                 BatchSerializer(data=instance).is_valid(model=Document, raise_exception=True)
                 self.is_valid(raise_exception=True)
-            document_id_list = instance.get("id_list")
+            document_id_list = list(instance.get("id_list") or [])
+            if not document_id_list:
+                return True
             source_file_ids = [doc['meta'].get('source_file_id') for doc in
-                               Document.objects.filter(id__in=document_id_list).values("meta")]
+                               Document.objects.filter(id__in=document_id_list).values("meta")
+                               if doc['meta'].get('source_file_id')]
             QuerySet(File).filter(id__in=source_file_ids).delete()
+            QuerySet(File).filter(source_id__in=document_id_list,
+                                  source_type=FileSourceType.DOCUMENT).delete()
             QuerySet(Document).filter(id__in=document_id_list).delete()
             QuerySet(DocumentTag).filter(document_id__in=document_id_list).delete()
-            paragraph_ids = QuerySet(Paragraph).filter(document_id__in=document_id_list).values_list("id", flat=True)
+            paragraph_ids = list(QuerySet(Paragraph).filter(document_id__in=document_id_list)
+                                 .values_list("id", flat=True))
             # 删除问题关系
             delete_problems_and_mappings(paragraph_ids)
             # 删除段落
