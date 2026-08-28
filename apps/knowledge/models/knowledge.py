@@ -430,4 +430,4 @@ class File(AppModelMixin):
 def on_delete_file(sender, instance, **kwargs):
     exist = QuerySet(File).filter(loid=instance.loid).exclude(id=instance.id).exists()
     if not exist:
-        select_one(f'SELECT lo_unlink({instance.loid})', [])
+        select_one('SELECT lo_unlink(%s::oid)', [instance.loid])

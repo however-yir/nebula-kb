@@ -24,7 +24,7 @@
             />
             <h4
               class="ellipsis-1 break-all"
-              v-html="highlightedStepName(nodeModel.properties.stepName)"
+              v-html="safeHtml(highlightedStepName(nodeModel.properties.stepName))"
             ></h4>
           </div>
 
@@ -209,6 +209,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { set } from 'lodash'
 import { iconComponent } from '../icons/utils'
 import { copyClick } from '@/utils/clipboard'
+import { safeHtml } from '@/utils/safeHtml'
 import { WorkflowType, WorkflowKind } from '@/enums/application'
 import { MsgError, MsgConfirm } from '@/utils/message'
 import type { FormInstance } from 'element-plus'

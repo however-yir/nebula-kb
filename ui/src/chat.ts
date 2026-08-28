@@ -61,18 +61,6 @@ config({
                 source: ['src', 'type'],
                 input: ['class', 'disabled', 'type', 'checked'],
                 sup: ['data-title'],
-                iframe: [
-                  'class',
-                  'width',
-                  'height',
-                  'src',
-                  'title',
-                  'border',
-                  'frameborder',
-                  'framespacing',
-                  'allow',
-                  'allowfullscreen',
-                ],
               }),
               onTagAttr: (tag: string, name: any, value: any) => {
                 if (tag === 'video') {

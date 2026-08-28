@@ -24,7 +24,10 @@ from common.utils.logger import maxkb_logger
 from lzkb.const import BASE_DIR, CONFIG
 from lzkb.const import PROJECT_DIR
 
-_enable_sandbox = bool(int(CONFIG.get('SANDBOX', 0)))
+_enable_sandbox = bool(int(CONFIG.get('SANDBOX', 1)))
+if not _enable_sandbox:
+    import logging
+    logging.getLogger('maxkb').warning('SANDBOX is disabled — tool code runs with full host permissions. Do NOT use in production.')
 _run_user = 'sandbox' if _enable_sandbox else getpass.getuser()
 _sandbox_path = CONFIG.get("SANDBOX_HOME", '/opt/maxkb-app/sandbox') if _enable_sandbox else os.path.join(PROJECT_DIR, 'data', 'sandbox')
 _sandbox_python_sys_path = CONFIG.get_sandbox_python_package_paths().split(',')
