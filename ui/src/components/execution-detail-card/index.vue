@@ -1349,7 +1349,6 @@ import {arraySort} from '@/utils/array'
 import ExecutionDetailCard from '@/components/execution-detail-card/index.vue'
 import MdRenderer from '@/components/markdown/MdRenderer.vue'
 import {t} from '@/locales'
-import {safeHtml} from '@/utils/safeHtml'
 
 const props = defineProps({
   data: {
